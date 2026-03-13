@@ -1,0 +1,47 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">after()</h1>
+    <p class="description">
+      <code>after()</code> je Mocha hook, který se spustí <strong>jednou po všech testech</strong> v daném <code>describe()</code> bloku. V Cypressu se používá
+      spíš výjimečně – typicky pro úklid globálního stavu nebo testovacích dat po celé sadě testů.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>after(fn)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít after()</h2>
+    <ul>
+      <li>Když chceš něco spustit <strong>jen jednou po všech testech</strong> ve skupině.</li>
+      <li>Typicky: úklid testovacích dat, odhlášení, zavření speciálních zdrojů (pokud je používáš).</li>
+      <li>Ne: reset stavu mezi testy – to patří do <code>afterEach()</code> nebo spíš do čistého <code>beforeEach()</code> setupu.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklad – úklid po sadě testů</h2>
+    <pre><code>describe('Import kontaktů', () => {
+  before(() => {
+    cy.tokenAuth('/contacts/import');
+  });
+
+  it('naimportuje CSV soubor', () => {
+    // ...
+  });
+
+  it('zobrazí historii importů', () => {
+    // ...
+  });
+
+  after(() => {
+    // Příklad: smazání dočasných importovaných dat
+    // (pseudo-kód podle konkrétního API)
+    // cy.request('DELETE', '/api/contacts?tag=temp-import');
+  });
+});</code></pre>
+  </section>
+</section>
+

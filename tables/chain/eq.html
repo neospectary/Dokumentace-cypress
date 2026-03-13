@@ -1,0 +1,98 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">.eq()</h1>
+    <p class="description">
+      Výběr elementu na konkrétním indexu z kolekce. Vrací element na zadané pozici (0-based index). Užitečné pro výběr konkrétního elementu podle pozice.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.eq(index)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('li').eq(0).click()                   // První element (index 0)
+cy.get('li').eq(2).click()                   // Třetí element (index 2)
+cy.get('button').eq(1).should('be.visible')  // Druhý element</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.eq(0)                                     // Chyba, nelze řetězit z 'cy'
+cy.window().eq(0)                            // Chyba, window není kolekce
+cy.get('li').eq()                            // Chyba, chybí index</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">index (Number)</h3>
+    <p class="description">
+      Index elementu v kolekci (0-based). První element má index 0, druhý má index 1, atd. Negativní indexy se počítají od konce (-1 = poslední, -2 = předposlední, atd.).
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s elementem na zadaném indexu. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('li').eq(0).click()  // první element
+cy.get('li').eq(2).click()  // třetí element
+cy.get('button').eq(1).should('be.visible')</code></pre>
+
+    <h3 class="h3">Práce s tabulkou</h3>
+    <pre><code>cy.get('table tbody tr')
+  .eq(3)  // čtvrtý řádek
+  .find('td')
+  .eq(1)  // druhá buňka
+  .should('contain', 'Hodnota')</code></pre>
+
+    <h3 class="h3">Negativní index</h3>
+    <pre><code>cy.get('li').eq(-1)  // poslední element
+cy.get('li').eq(-2)  // předposlední element</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">0-based index</h3>
+    <p class="description">
+      Index je 0-based - první element má index 0, druhý má index 1, atd. Pokud index neexistuje (je mimo rozsah), test selže.
+    </p>
+
+    <h3 class="h3">Negativní indexy</h3>
+    <p class="description">
+      Negativní indexy se počítají od konce: -1 = poslední, -2 = předposlední, atd. <code>.eq(-1)</code> je ekvivalentní k <code>.last()</code>.
+    </p>
+
+    <h3 class="h3">Alternativa</h3>
+    <p class="description">
+      Pro první element použijte <code>.first()</code>, pro poslední <code>.last()</code>. <code>.eq()</code> je užitečné pro výběr elementu uprostřed kolekce.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o vybraném elementu a indexu. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/eq" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/eq →
+      </a>
+    </p>
+  </section>
+</section>

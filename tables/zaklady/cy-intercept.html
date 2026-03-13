@@ -1,0 +1,137 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.intercept()</h1>
+    <p class="description">
+      Mockování, sledování a modifikace HTTP requestů. Umožňuje zachytit, mockovat nebo modifikovat API volání během testu.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.intercept(method, url, routeHandler)
+cy.intercept(method, url, response)
+cy.intercept(url, response)
+cy.intercept(routeMatcher, routeHandler)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.intercept('GET', '/api/users', { fixture: 'users.json' })  // Mock response
+cy.intercept('POST', '/api/login').as('login')                 // Sledování
+cy.intercept('GET', '/api/**', { statusCode: 500 })            // Simulace chyby
+cy.intercept('/api/users', { body: [] })                       // Bez metody</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.visit('/page')
+cy.intercept('GET', '/api/users')                              // Chyba, musí být před visit
+cy.get('.btn').intercept('GET', '/api/users')                  // Chyba, nelze řetězit</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">method (String)</h3>
+    <p class="description">
+      HTTP metoda (GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS). Volitelné - pokud není zadána, zachytí všechny metody.
+    </p>
+
+    <h3 class="h3">url (String|RegExp|RouteMatcher)</h3>
+    <p class="description">
+      URL pattern, regex nebo RouteMatcher objekt. Podporuje wildcards: <code>**</code> (libovolné znaky), <code>*</code> (jeden segment).
+    </p>
+
+    <h3 class="h3">response (Object|String|Fixture)</h3>
+    <p class="description">
+      Mock response. Může být objekt s statusCode, body, headers, nebo string, nebo fixture pomocí <code>{ fixture: 'filename' }</code>.
+    </p>
+
+    <h3 class="h3">routeHandler (Function)</h3>
+    <p class="description">
+      Callback funkce pro dynamickou response. Dostává request objekt a může modifikovat response.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable. Lze použít s <code>.as()</code> pro vytvoření aliasu pro použití s <code>cy.wait()</code>.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní mock</h3>
+    <pre><code>cy.intercept('GET', '/api/users', {
+  statusCode: 200,
+  body: [{ id: 1, name: 'John' }]
+})</code></pre>
+
+    <h3 class="h3">S aliasem</h3>
+    <pre><code>cy.intercept('GET', '/api/users').as('getUsers')
+cy.visit('/users')
+cy.wait('@getUsers')</code></pre>
+
+    <h3 class="h3">Simulace chyby</h3>
+    <pre><code>cy.intercept('POST', '/api/login', {
+  statusCode: 401,
+  body: { error: 'Unauthorized' }
+})</code></pre>
+
+    <h3 class="h3">S fixture</h3>
+    <pre><code>cy.intercept('GET', '/api/users', { fixture: 'users.json' })</code></pre>
+
+    <h3 class="h3">Dynamická response</h3>
+    <pre><code>cy.intercept('GET', '/api/users', (req) => {
+  req.reply((res) => {
+    res.body = res.body.filter(u => u.active)
+  })
+})</code></pre>
+
+    <h3 class="h3">Wildcards</h3>
+    <pre><code>cy.intercept('GET', '/api/**', { statusCode: 200 })
+cy.intercept('GET', '/api/users/*/posts', { body: [] })</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Pořadí</h3>
+    <p class="description">
+      <code>cy.intercept()</code> musí být definováno <strong>před</strong> <code>cy.visit()</code> nebo akcí, která spustí request. Intercepty jsou aktivní až do konce testu.
+    </p>
+
+    <h3 class="h3">Wildcards</h3>
+    <p class="description">
+      Cypress podporuje wildcards: <code>**</code> (libovolné znaky), <code>*</code> (jeden URL segment). Lze také použít regex pro URL matching.
+    </p>
+
+    <h3 class="h3">Fixture data</h3>
+    <p class="description">
+      Pro použití fixture dat použijte <code>{ fixture: 'filename' }</code>. Soubory musí být v <code>cypress/fixtures/</code> adresáři.
+    </p>
+
+    <h3 class="h3">Route handler</h3>
+    <p class="description">
+      Route handler funkce dostává request objekt a může modifikovat response, přidat delay, nebo vrátit vlastní response.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Intercepty jsou zobrazeny v Command Log. Kliknutím na intercept v logu uvidíte detaily requestu a response. Intercepty jsou také viditelné v Network tab.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/intercept" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/intercept →
+      </a>
+    </p>
+  </section>
+</section>

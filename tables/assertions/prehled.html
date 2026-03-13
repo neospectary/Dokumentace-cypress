@@ -1,0 +1,119 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Přehled Assertions (Chainers)</h1>
+    <p class="description">
+      Kompletní přehled všech dostupných assertions (chainers) v Cypressu. Tyto se používají s příkazy <code>.should()</code> a <code>.and()</code> pro ověření stavu elementů, hodnot a podmínek.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Jak používat assertions</h2>
+    <p class="description">
+      Assertions se používají s příkazy <code>.should()</code> a <code>.and()</code>:
+    </p>
+    <pre><code>cy.get('button').should('be.visible')
+cy.get('input').should('be.enabled')
+cy.get('h1').should('have.text', 'Nadpis')
+cy.get('a').should('have.attr', 'href')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kategorie assertions</h2>
+    <ul>
+      <li><strong>Stav elementu</strong> - be.visible, be.hidden, be.disabled, be.enabled, exist, not.exist</li>
+      <li><strong>Text a obsah</strong> - have.text, contain, include.text</li>
+      <li><strong>Atributy</strong> - have.attr, have.class, have.id, have.value</li>
+      <li><strong>CSS vlastnosti</strong> - have.css, have.length</li>
+      <li><strong>Hodnoty</strong> - equal, deep.equal, include, match</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Rychlý přehled - kdy použít který assertion</h2>
+    
+    <h3 class="h3">Viditelnost a existence</h3>
+    <ul>
+      <li><code>be.visible</code> - element je viditelný (použijte před interakcí)</li>
+      <li><code>be.hidden</code> - element je skrytý (po zavření modálu, menu)</li>
+      <li><code>exist</code> - element existuje v DOM (i když je skrytý)</li>
+      <li><code>not.exist</code> - element neexistuje v DOM (po odstranění)</li>
+    </ul>
+
+    <h3 class="h3">Stav elementu</h3>
+    <ul>
+      <li><code>be.enabled</code> - element je aktivní (před kliknutím na tlačítko)</li>
+      <li><code>be.disabled</code> - element je deaktivovaný (před vyplněním formuláře)</li>
+      <li><code>be.checked</code> - checkbox/radio je zaškrtnutý (po .check())</li>
+      <li><code>be.focused</code> - element má focus (po .focus())</li>
+    </ul>
+
+    <h3 class="h3">Text a obsah</h3>
+    <ul>
+      <li><code>have.text</code> - přesný text (včetně whitespace) - pro přesnou kontrolu</li>
+      <li><code>contain</code> - obsahuje text (částečná shoda) - flexibilnější</li>
+      <li><code>include.text</code> - alias pro contain</li>
+    </ul>
+
+    <h3 class="h3">Atributy</h3>
+    <ul>
+      <li><code>have.attr</code> - má atribut (href, src, data-cy, atd.)</li>
+      <li><code>have.class</code> - má CSS třídu (active, error, ng-valid, atd.)</li>
+      <li><code>have.id</code> - má ID</li>
+      <li><code>have.value</code> - má hodnotu (input, textarea po .type())</li>
+    </ul>
+
+    <h3 class="h3">CSS a styling</h3>
+    <ul>
+      <li><code>have.css</code> - má CSS vlastnost (color, background, display, atd.)</li>
+      <li><code>have.length</code> - má určitý počet elementů (tabulka, seznam)</li>
+    </ul>
+
+    <h3 class="h3">Hodnoty (pro cy.wrap() a cy.then())</h3>
+    <ul>
+      <li><code>equal</code> - přesná shoda hodnoty</li>
+      <li><code>deep.equal</code> - hluboká shoda objektů/arrays</li>
+      <li><code>include</code> - obsahuje hodnotu</li>
+      <li><code>match</code> - odpovídá regex patternu</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Nejčastější kombinace</h2>
+    
+    <h3 class="h3">Před interakcí</h3>
+    <pre><code>cy.get('button')
+  .should('be.visible')
+  .and('be.enabled')
+  .click()</code></pre>
+
+    <h3 class="h3">Po vyplnění formuláře</h3>
+    <pre><code>cy.get('input').type('text')
+cy.get('input').should('have.value', 'text')
+cy.get('button').should('be.enabled')</code></pre>
+
+    <h3 class="h3">Ověření textu</h3>
+    <pre><code>cy.get('h1')
+  .should('be.visible')
+  .and('contain', 'Nadpis')
+  .and('have.class', 'title')</code></pre>
+
+    <h3 class="h3">Kontrola kolekce</h3>
+    <pre><code>cy.get('li')
+  .should('have.length', 5)
+  .first()
+  .should('be.visible')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Negace assertions</h2>
+    <p class="description">
+      Všechny assertions lze negovat pomocí <code>not.</code>:
+    </p>
+    <pre><code>cy.should('not.be.visible')
+cy.should('not.have.class', 'error')
+cy.should('not.contain', 'text')
+cy.should('not.exist')</code></pre>
+  </section>
+</section>
+
+</section>

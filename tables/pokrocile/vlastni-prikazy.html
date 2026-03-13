@@ -1,0 +1,211 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Vlastní příkazy (Custom Commands)</h1>
+    <p class="description">
+      Vlastní příkazy v Cypressu umožňují vytvářet znovupoužitelné funkce, které zjednodušují testování. Pomocí custom commands můžete zapouzdřit opakující se logiku a vytvořit vlastní API pro vaše testy.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Co jsou vlastní příkazy?</h2>
+    <p class="description">
+      Vlastní příkazy (Custom Commands) jsou uživatelsky definované funkce, které rozšiřují Cypress API. Umožňují vám vytvořit vlastní příkazy jako <code>cy.fillInput()</code>, <code>cy.checkLabel()</code>, atd.
+    </p>
+
+    <h3 class="h3">Proč je používat?</h3>
+    <ul>
+      <li><strong>DRY princip</strong> - Vyhnete se opakování kódu napříč testy</li>
+      <li><strong>Čitelnější testy</strong> - Test kód je srozumitelnější a expresivnější</li>
+      <li><strong>Snadná údržba</strong> - Změny logiky na jednom místě</li>
+      <li><strong>Týmová spolupráce</strong> - Jednotné API pro celý tým</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kde se vlastní příkazy definují?</h2>
+    <p class="description">
+      Vlastní příkazy se obvykle definují v souboru <code>cypress/support/commands.ts</code> (nebo <code>commands.js</code>). Tento soubor je automaticky načítán před každým testem.
+    </p>
+
+    <h3 class="h3">Struktura projektu</h3>
+    <pre><code>cypress/
+├── e2e/
+│   └── your-test.cy.ts
+├── support/
+│   ├── commands.ts        ← Zde definujeme příkazy
+│   └── e2e.ts             ← Automaticky načítá commands.ts
+└── tsconfig.json</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">TypeScript deklarace</h2>
+    <p class="description">
+      Pro správnou TypeScript podporu je nutné deklarovat signatury vlastních příkazů.
+    </p>
+
+    <pre><code>/// &lt;reference types="cypress" /&gt;
+
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      fillInput(dataCy: string, value: string): Chainable&lt;JQuery&lt;HTMLElement&gt;&gt;;
+    }
+  }
+}
+
+export {};</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Vytvoření prvního příkazu</h2>
+    
+    <h3 class="h3">1. TypeScript deklarace</h3>
+    <pre><code>declare global {
+  namespace Cypress {
+    interface Chainable {
+      asterisk(required: boolean): Chainable&lt;JQuery&lt;HTMLElement&gt;&gt;;
+    }
+  }
+}</code></pre>
+
+    <h3 class="h3">2. Implementace</h3>
+    <pre><code>Cypress.Commands.add('asterisk', (required) => {
+  if (required) {
+    cy.dataCy('asterisk').scrollIntoView().should('be.visible');
+  } else {
+    cy.dataCy('asterisk').should('not.exist');
+  }
+});</code></pre>
+
+    <h3 class="h3">3. Použití</h3>
+    <pre><code>cy.asterisk(true);</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Pokročilý příkaz: fillInput</h2>
+    
+    <h3 class="h3">TypeScript deklarace</h3>
+    <pre><code>interface Chainable {
+  fillInput(
+    dataCy: string,
+    typeValue: string | null,
+    options?: {
+      clear?: boolean;
+      type?: string;
+      required?: boolean | null;
+    }
+  ): Chainable&lt;JQuery&lt;HTMLElement&gt;&gt;;
+}</code></pre>
+
+    <h3 class="h3">Implementace</h3>
+    <pre><code>Cypress.Commands.add('fillInput', (dataCy, typeValue, { clear, type, required = false } = {}) => {
+  cy.dataCy(dataCy)
+    .scrollIntoView()
+    .within(() => {
+      const input = cy.get(`input${type ? `[type=${type}]` : ''}`);
+      
+      if (clear) {
+        input.clear();
+      }
+      
+      if (typeValue) {
+        input.type(typeValue, { delay: 0 });
+      }
+      
+      if (required) {
+        cy.asterisk(required);
+      }
+    });
+});</code></pre>
+
+    <h3 class="h3">Použití</h3>
+    <pre><code>cy.fillInput('user-name', 'David');
+cy.fillInput('user-email', 'test@example.com', { type: 'email', required: true });</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Praktický příkaz: selectDropdownItem</h2>
+    <p class="description">
+      Příkaz pro výběr položky z overlay dropdownu (např. Angular Material, custom select komponenty). Automaticky otevře dropdown, najde overlay kontejner a vybere položku podle textu.
+    </p>
+    
+    <h3 class="h3">TypeScript deklarace</h3>
+    <pre><code>interface Chainable {
+  selectDropdownItem(
+    dataCy: string,
+    itemText: string
+  ): Chainable&lt;JQuery&lt;HTMLElement&gt;&gt;;
+}</code></pre>
+
+    <h3 class="h3">Implementace</h3>
+    <pre><code>Cypress.Commands.add('selectDropdownItem', (dataCy: string, itemText: string) => {
+  cy.dataCy(dataCy).scrollIntoView().click();
+  cy.get('.cdk-overlay-container')
+    .find('.dropdown-item')
+    .contains(itemText)
+    .should('be.visible')
+    .click();
+});</code></pre>
+
+    <h3 class="h3">Co příkaz dělá?</h3>
+    <ol>
+      <li><strong><code>cy.dataCy(dataCy).scrollIntoView().click()</code></strong> – Najde trigger dropdownu podle <code>data-cy</code> atributu, scrolluje k němu a klikne (otevře dropdown).</li>
+      <li><strong><code>cy.get('.cdk-overlay-container')</code></strong> – Najde overlay kontejner, kam se vykreslil dropdown seznam.</li>
+      <li><strong><code>.find('.dropdown-item')</code></strong> – Hledá položky dropdownu jen uvnitř overlay kontejneru (ne na celé stránce).</li>
+      <li><strong><code>.contains(itemText)</code></strong> – Najde položku obsahující zadaný text.</li>
+      <li><strong><code>.should('be.visible')</code></strong> – Ověří, že položka je viditelná (explicitní assertion).</li>
+      <li><strong><code>.click()</code></strong> – Klikne na položku a zavře dropdown.</li>
+    </ol>
+
+    <h3 class="h3">Použití</h3>
+    <pre><code>// Výběr typu feedu
+cy.selectDropdownItem('feed-type-select', 'Obecný XML');
+
+// Výběr země
+cy.selectDropdownItem('country-select', 'Česká republika');
+
+// Výběr segmentu
+cy.selectDropdownItem('segment-select', 'Aktivní uživatelé');</code></pre>
+
+    <h3 class="h3">Výhody tohoto příkazu</h3>
+    <ul>
+      <li><strong>Automatické scrollování</strong> – <code>scrollIntoView()</code> zajistí, že trigger je viditelný před kliknutím.</li>
+      <li><strong>Omezení scope</strong> – <code>.find('.dropdown-item')</code> hledá jen uvnitř overlay kontejneru, ne na celé stránce.</li>
+      <li><strong>Explicitní ověření</strong> – <code>.should('be.visible')</code> zajišťuje, že položka je skutečně viditelná před kliknutím.</li>
+      <li><strong>Čitelnost testů</strong> – V testu stačí napsat <code>cy.selectDropdownItem('feed-type-select', 'Obecný XML')</code> místo několika řádků kódu.</li>
+    </ul>
+
+    <h3 class="h3">Kdy použít</h3>
+    <p class="description">
+      Tento příkaz je ideální pro <strong>overlay dropdowny</strong> (Angular Material, custom select komponenty), kde se seznam vykresluje do <code>.cdk-overlay-container</code> nebo podobného overlay kontejneru. Pro nativní HTML <code>&lt;select&gt;</code> použij <code>cy.select()</code>.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Osvědčené postupy</h2>
+    
+    <h3 class="h3">✅ DOPORUČENO</h3>
+    <ul>
+      <li>Vytvářejte příkazy pro opakující se akce</li>
+      <li>Používejte options pattern pro flexibilitu</li>
+      <li>Vracejte Chainable typy pro řetězení</li>
+      <li>Používejte TypeScript pro type safety</li>
+    </ul>
+
+    <h3 class="h3">❌ NEDOPORUČENO</h3>
+    <ul>
+      <li>Nevytvářejte příliš komplexní příkazy</li>
+      <li>Neukládejte stav do proměnných mimo Cypress</li>
+      <li>Nepoužívejte async/await</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/cypress-api/custom-commands" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/cypress-api/custom-commands →
+      </a>
+    </p>
+  </section>
+</section>

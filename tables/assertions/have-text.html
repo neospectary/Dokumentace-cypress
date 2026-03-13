@@ -1,0 +1,64 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">have.text</h1>
+    <p class="description">
+      Ověření přesného textového obsahu elementu. Porovnává celý text včetně whitespace a textu z potomků.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Když potřebujete ověřit přesný text elementu</li>
+      <li>Pro kontrolu textu po změně</li>
+      <li>Když potřebujete ověřit celý text včetně whitespace</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.should('have.text', text)
+cy.and('have.text', text)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Parametry</h2>
+    <ul>
+      <li><strong>text</strong> (String) - Očekávaný přesný text</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('h1').should('have.text', 'Vítejte')
+cy.get('button').should('have.text', 'Odeslat')</code></pre>
+
+    <h3 class="h3">S whitespace</h3>
+    <pre><code>cy.get('p').should('have.text', 'Text s   mezerami')</code></pre>
+
+    <h3 class="h3">Po změně</h3>
+    <pre><code>cy.get('button').click()
+cy.get('.message').should('have.text', 'Úspěšně odesláno')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Porovnává <strong>přesný</strong> text včetně whitespace</li>
+      <li>Zahrnuje text z potomků elementu</li>
+      <li>Pro částečnou shodu použijte <code>contain</code> nebo <code>include.text</code></li>
+      <li>Case-sensitive (rozlišuje velká/malá písmena)</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Rozdíl oproti contain</h2>
+    <pre><code>// have.text - přesná shoda
+cy.get('p').should('have.text', 'Přesný text')
+
+// contain - částečná shoda
+cy.get('p').should('contain', 'Přesný')</code></pre>
+  </section>
+</section>

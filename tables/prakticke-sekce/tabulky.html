@@ -1,0 +1,214 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování tabulek</h1>
+    <p class="description">
+      Kompletní průvodce testováním tabulek v Cypressu. Zahrnuje ověření řádků, sloupců, buněk, vyhledávání v tabulce a práci s daty.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Základní ověření tabulky</h2>
+    
+    <h3 class="h3">Ověření existence tabulky</h3>
+    <pre><code>cy.dataCy('table').should('be.visible');
+cy.get('table').should('exist');</code></pre>
+
+    <h3 class="h3">Ověření počtu řádků</h3>
+    <pre><code>// Přesný počet
+cy.dataCy('table-row').should('have.length', 5);
+
+// Minimální počet
+cy.dataCy('table-row').should('have.length.greaterThan', 0);
+
+// Maximální počet
+cy.dataCy('table-row').should('have.length.at.most', 10);</code></pre>
+
+    <h3 class="h3">Ověření počtu sloupců</h3>
+    <pre><code>cy.get('table thead th').should('have.length', 4);
+cy.get('table tbody tr').first().find('td').should('have.length', 4);</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Práce s konkrétními řádky</h2>
+    
+    <h3 class="h3">První řádek</h3>
+    <pre><code>cy.dataCy('table-row')
+  .first()
+  .within(() => {
+    cy.dataCy('cell-name').should('contain.text', 'Název');
+  });</code></pre>
+
+    <h3 class="h3">Poslední řádek</h3>
+    <pre><code>cy.dataCy('table-row')
+  .last()
+  .within(() => {
+    cy.dataCy('cell-name').should('contain.text', 'Poslední');
+  });</code></pre>
+
+    <h3 class="h3">Konkrétní řádek podle indexu</h3>
+    <pre><code>cy.dataCy('table-row')
+  .eq(2) // třetí řádek (index 2)
+  .within(() => {
+    cy.dataCy('cell-email').should('contain.text', 'test@example.com');
+  });</code></pre>
+
+    <h3 class="h3">Řádek podle obsahu</h3>
+    <pre><code>cy.dataCy('table-row')
+  .contains('Hledaný text')
+  .within(() => {
+    cy.dataCy('cell-name').should('be.visible');
+  });</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Ověření buněk</h2>
+    
+    <h3 class="h3">Ověření textu v buňce</h3>
+    <pre><code>cy.dataCy('table-row')
+  .eq(0)
+  .within(() => {
+    cy.dataCy('cell-name').should('contain.text', 'Název');
+    cy.dataCy('cell-email').should('contain.text', 'email@example.com');
+  });</code></pre>
+
+    <h3 class="h3">Ověření všech buněk v řádku</h3>
+    <pre><code>const EXPECTED_DATA = ['Název', 'Email', 'Telefon'];
+
+cy.dataCy('table-row')
+  .eq(0)
+  .find('td')
+  .each(($cell, index) => {
+    cy.wrap($cell).should('contain.text', EXPECTED_DATA[index]);
+  });</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Komplexní ověření tabulky (Custom Command)</h2>
+    <p class="description">
+      Vlastní příkaz pro ověření celé tabulky najednou:
+    </p>
+    <pre><code>// Definice custom commandu
+Cypress.Commands.add('checkPreviewTable', (data, { numberOfColumns = 1 } = {}) => {
+  const ALL_ROWS = data.length;
+  const ALL_COLUMNS = data.length * numberOfColumns;
+
+  cy.dataCy('data-preview-table')
+    .scrollIntoView()
+    .within(() => {
+      cy.get('tr').should('have.length', ALL_ROWS);
+      cy.get('td').should('have.length', ALL_COLUMNS);
+
+      for (let row = 0; row < ALL_ROWS; row++) {
+        if (numberOfColumns === 1) {
+          cy.get('tr')
+            .eq(row)
+            .find('td')
+            .should('contain.text', data[row].join(', '));
+        } else {
+          for (let column = 0; column < numberOfColumns; column++) {
+            cy.get('tr')
+              .eq(row)
+              .find('td')
+              .eq(column)
+              .should('contain.text', data[row][column]);
+          }
+        }
+      }
+    });
+});
+
+// Použití
+const USERS = [
+  ['jmeno1@domena.cz', 'Karel', 'Novák'],
+  ['jmeno2@domena.cz', 'Honza', 'Mrkvička'],
+];
+
+cy.checkPreviewTable(USERS, { numberOfColumns: 3 });</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Interakce s tabulkou</h2>
+    
+    <h3 class="h3">Kliknutí na řádek</h3>
+    <pre><code>cy.dataCy('table-row')
+  .contains('Hledaný text')
+  .click();</code></pre>
+
+    <h3 class="h3">Kliknutí na tlačítko v řádku</h3>
+    <pre><code>cy.dataCy('table-row')
+  .eq(0)
+  .within(() => {
+    cy.dataCy('detail-button').click();
+  });</code></pre>
+
+    <h3 class="h3">Checkbox v řádku</h3>
+    <pre><code>cy.dataCy('table-row')
+  .eq(0)
+  .find('input[type="checkbox"]')
+  .check();</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Práce s prázdnou tabulkou</h2>
+    <pre><code>// Ověření, že tabulka je prázdná
+cy.dataCy('table-row').should('have.length', 0);
+
+// Ověření zprávy o prázdné tabulce
+cy.dataCy('empty-table')
+  .should('be.visible')
+  .and('contain.text', 'Žádné záznamy');
+
+// Nebo
+cy.dataCy('no-results-header')
+  .should('be.visible')
+  .and('contain.text', 'Nenalezeny žádné položky');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Ověření hlavičky tabulky</h2>
+    <pre><code>const HEADERS = ['Název', 'Email', 'Telefon', 'Akce'];
+
+cy.get('table thead th').each(($header, index) => {
+  cy.wrap($header).should('contain.text', HEADERS[index]);
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('Tabulka kontaktů', () => {
+  before(() => {
+    cy.tokenAuth('/contacts');
+  });
+
+  it('zobrazí tabulku s kontakty', () => {
+    cy.dataCy('table').should('be.visible');
+    cy.dataCy('table-row').should('have.length.greaterThan', 0);
+  });
+
+  it('obsahuje správné sloupce', () => {
+    const HEADERS = ['Jméno', 'Email', 'Telefon'];
+    cy.get('table thead th').should('have.length', HEADERS.length);
+  });
+
+  it('zobrazí správná data v prvním řádku', () => {
+    cy.dataCy('table-row')
+      .first()
+      .within(() => {
+        cy.dataCy('cell-name').should('be.visible');
+        cy.dataCy('cell-email').should('be.visible');
+      });
+  });
+
+  it('umožní kliknout na detail', () => {
+    cy.intercept('GET', '**/contact/detail/**').as('getDetail');
+    cy.dataCy('table-row')
+      .first()
+      .within(() => {
+        cy.dataCy('detail-button').click();
+      });
+    cy.wait('@getDetail');
+    cy.url().should('include', '/contact/detail');
+  });
+});</code></pre>
+  </section>
+</section>

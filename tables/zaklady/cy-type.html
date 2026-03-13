@@ -1,0 +1,114 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.type()</h1>
+    <p class="description">
+      Psaní textu do input polí, textarea nebo editovatelných elementů. Simuluje psaní na klávesnici s událostmi keyboard a input.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.type(text)
+.type(text, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('input').type('text')                // Psaní textu
+cy.get('textarea').type('Long text...')      // Psaní do textarea
+cy.get('input').type('text{enter}')          // S Enter klávesou
+cy.get('[contenteditable]').type('text')     // Editovatelný element</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.type('text')                               // Chyba, nelze řetězit z 'cy'
+cy.window().type('text')                      // Chyba, window nevrací DOM element</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">text (String)</h3>
+    <p class="description">
+      Text k napsání nebo speciální klávesy ({enter}, {esc}, {backspace}, atd.).
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>delay</strong> (Number, default: 10) - Delay mezi znaky v milisekundách</li>
+      <li><strong>parseSpecialCharSequences</strong> (Boolean, default: true) - Zda parsovat speciální sekvence</li>
+      <li><strong>force</strong> (Boolean, default: false) - Vynutí psaní, přeskočí kontrolu actionability</li>
+      <li><strong>timeout</strong> (Number) - Čas čekání na element</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací stejný element, do kterého bylo psáno. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní psaní</h3>
+    <pre><code>cy.get('input[name="email"]').type('test@example.com')
+cy.get('textarea').type('Dlouhý text...')</code></pre>
+
+    <h3 class="h3">S rychlým psaním (bez delay)</h3>
+    <pre><code>cy.get('input').type('text', { delay: 0 })</code></pre>
+
+    <h3 class="h3">Speciální klávesy</h3>
+    <pre><code>cy.get('input').type('text{enter}')        // Enter
+cy.get('input').type('{esc}')               // Escape
+cy.get('input').type('{backspace}')         // Backspace
+cy.get('input').type('{selectall}{del}')    // Vybrat vše a smazat</code></pre>
+
+    <h3 class="h3">Kombinace kláves</h3>
+    <pre><code>cy.get('input').type('{ctrl}a')            // Ctrl+A (Select All)
+cy.get('input').type('{cmd}c')             // Cmd+C (Mac)
+cy.get('input').type('{shift}text')        // Shift+text</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Actionability</h3>
+    <p class="description">
+      <code>.type()</code> je "action command", který čeká na actionability elementu. Element musí být viditelný, nepřekrytý a focusable.
+    </p>
+
+    <h3 class="h3">Delay mezi znaky</h3>
+    <p class="description">
+      Výchozí delay mezi znaky je 10ms, což simuluje přirozené psaní. Pro rychlejší testy použijte <code>{ delay: 0 }</code>.
+    </p>
+
+    <h3 class="h3">File inputy</h3>
+    <p class="description">
+      <code>.type()</code> nelze použít pro file inputy. Pro upload souborů použijte <code>cy.fixture()</code> a plugin <code>cypress-file-upload</code>.
+    </p>
+
+    <h3 class="h3">Speciální znaky</h3>
+    <p class="description">
+      Pro psaní literálních složených závorek použijte dvojité závorky: <code>{{</code> a <code>}}</code>.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o napsaném textu a elementu. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/type" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/type →
+      </a>
+    </p>
+  </section>
+</section>

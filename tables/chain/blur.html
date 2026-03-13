@@ -1,0 +1,100 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">.blur()</h1>
+    <p class="description">
+      Odstranění focusu z elementu. Deaktivuje focus na elementu (ztráta focusu). Užitečné pro testování blur událostí nebo simulaci kliknutí mimo element.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.blur()
+.blur(options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('input').blur()                          // Odstranění focusu
+cy.get('textarea').blur()                       // Blur textarea
+cy.get('input').type('text').blur()             // Psaní a blur</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.blur()                                        // Chyba, nelze řetězit z 'cy'
+cy.window().blur()                               // Chyba, window není focusable element</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>timeout</strong> (Number) - Čas čekání na element</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s elementem. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('input').blur()
+cy.get('textarea').blur()</code></pre>
+
+    <h3 class="h3">Testování validace po blur</h3>
+    <pre><code>cy.get('input[name="email"]')
+  .type('invalid-email')
+  .blur()
+  
+cy.get('.error-message').should('be.visible')</code></pre>
+
+    <h3 class="h3">S focus</h3>
+    <pre><code>cy.get('input')
+  .focus()
+  .type('text')
+  .blur()</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Blur událost</h3>
+    <p class="description">
+      <code>.blur()</code> spouští blur událost na elementu. Užitečné pro testování validace, která se spouští při ztrátě focusu.
+    </p>
+
+    <h3 class="h3">Focusable elementy</h3>
+    <p class="description">
+      <code>.blur()</code> funguje jen na focusable elementy (input, textarea, button, select, a, atd.). Element musí mít focus, aby bylo možné ho blur.
+    </p>
+
+    <h3 class="h3">Validace</h3>
+    <p class="description">
+      <code>.blur()</code> je často používán pro testování validace formulářů, která se spouští při ztrátě focusu (onBlur validace).
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o blur elementu. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/blur" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/blur →
+      </a>
+    </p>
+  </section>
+</section>

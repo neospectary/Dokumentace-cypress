@@ -1,0 +1,118 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.fixture()</h1>
+    <p class="description">
+      Načtení testovacích dat ze souboru. Umožňuje načíst JSON, text nebo binární data z fixtures složky pro použití v testech.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.fixture(filePath)
+cy.fixture(filePath, encoding)
+cy.fixture(filePath, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.fixture('users.json').then((users) => {     // JSON soubor
+  cy.log(users[0].name)
+})
+cy.fixture('image.jpg', 'base64')               // Binární soubor
+cy.fixture('data.json').as('testData')          // S aliasem</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.fixture()                                     // Chyba, chybí filePath
+cy.get('.btn').fixture('data.json')             // Chyba, nelze řetězit</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">filePath (String)</h3>
+    <p class="description">
+      Cesta k souboru v <code>cypress/fixtures/</code> složce. Může být relativní cesta nebo jen název souboru.
+    </p>
+
+    <h3 class="h3">encoding (String)</h3>
+    <p class="description">
+      Encoding pro binární soubory: <code>'utf8'</code> (výchozí), <code>'base64'</code>, <code>'hex'</code>.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>encoding</strong> (String) - Encoding pro soubor</li>
+      <li><strong>timeout</strong> (Number) - Čas čekání na načtení</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s načtenými daty. Pro JSON automaticky parsuje data. Lze použít s <code>.then()</code> pro přístup k datům.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Načtení JSON</h3>
+    <pre><code>cy.fixture('users.json').then((users) => {
+  cy.log(users[0].name)
+})</code></pre>
+
+    <h3 class="h3">S intercept</h3>
+    <pre><code>cy.fixture('users.json').then((users) => {
+  cy.intercept('GET', '/api/users', users)
+})</code></pre>
+
+    <h3 class="h3">Base64 encoding</h3>
+    <pre><code>cy.fixture('image.jpg', 'base64').then((fileContent) => {
+  // použít pro upload
+})</code></pre>
+
+    <h3 class="h3">S aliasem</h3>
+    <pre><code>cy.fixture('data.json').as('testData')
+cy.get('@testData').then((data) => {
+  // práce s daty
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Složka fixtures</h3>
+    <p class="description">
+      Soubory musí být v <code>cypress/fixtures/</code> složce. Cypress automaticky hledá soubory v této složce.
+    </p>
+
+    <h3 class="h3">Typy souborů</h3>
+    <p class="description">
+      Cypress podporuje JSON (automaticky parsuje), text, obrázky, binární soubory. Pro JSON vrací přímo objekt, pro ostatní vrací obsah jako string.
+    </p>
+
+    <h3 class="h3">Použití s intercept</h3>
+    <p class="description">
+      <code>cy.fixture()</code> je často používán s <code>cy.intercept()</code> pro mockování API response pomocí fixture dat.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o načteném souboru. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/fixture" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/fixture →
+      </a>
+    </p>
+  </section>
+</section>

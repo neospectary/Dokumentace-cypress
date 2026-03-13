@@ -1,0 +1,156 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Mocha BDD syntaxe v Cypressu</h1>
+    <p class="description">
+      Cypress používá jako testovací „motor“ knihovnu <strong>Mocha</strong> v BDD syntaxi. Všechny tvoje testy jsou postavené na těchto
+      funkcích: <code>describe()</code>, <code>context()</code>, <code>it()</code>, <code>before()</code>, <code>beforeEach()</code>, <code>afterEach()</code>, <code>after()</code>,
+      <code>.only()</code> a <code>.skip()</code>.
+    </p>
+    <p class="muted">
+      Oficiální dokumentace: <a href="https://docs.cypress.io/app/references/bundled-libraries#Mocha" target="_blank" rel="noopener">Bundled Libraries – Mocha →</a>
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Základní BDD struktura</h2>
+
+    <h3 class="h3">describe() – skupina testů</h3>
+    <p class="description">
+      <code>describe()</code> popisuje skupinu testů (funkcionalitu, stránku, modul). Uvnitř jsou konkrétní testy pomocí <code>it()</code>.
+    </p>
+    <pre><code>describe('Mailing list', () => {
+  it('vytvoří nový mailing list', () => {
+    // test krok
+  });
+});</code></pre>
+
+    <h3 class="h3">context() – alias pro describe()</h3>
+    <p class="description">
+      <code>context()</code> je jen alias pro <code>describe()</code>. Používá se, když chceš zdůraznit „kontext“ (např. „když je uživatel přihlášený“).
+    </p>
+    <pre><code>context('když je uživatel přihlášený', () => {
+  it('vidí dashboard', () => {
+    // test krok
+  });
+});</code></pre>
+
+    <h3 class="h3">it() – samotný test</h3>
+    <p class="description">
+      <code>it()</code> definuje jednotlivý test – jeden konkrétní scénář nebo chování, které ověřuješ.
+    </p>
+    <pre><code>it('zobrazí notifikaci po uložení', () => {
+  // Arrange + Act
+  cy.dataCy('save-button').click();
+
+  // Assert
+  cy.dataCy('notification')
+    .should('be.visible')
+    .and('contain.text', 'Uloženo');
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">before(), beforeEach(), afterEach(), after()</h2>
+    <p class="description">
+      Mocha poskytuje „hooky“ pro nastavení a úklid před/po testech. Cypress je používá stejně, jen s automatickou podporou asynchronních příkazů.
+    </p>
+
+    <h3 class="h3">before() – jednou před všemi testy</h3>
+    <pre><code>before(() => {
+  // Např. přihlášení jen jednou
+  cy.tokenAuth('/dashboard');
+});</code></pre>
+
+    <h3 class="h3">beforeEach() – před každým testem</h3>
+    <pre><code>beforeEach(() => {
+  // Např. otevření výchozí stránky před každým testem
+  cy.visit('/mailing-list');
+});</code></pre>
+
+    <h3 class="h3">afterEach() – po každém testu</h3>
+    <pre><code>afterEach(() => {
+  // Např. úklid dat, reset stavu, logování
+});</code></pre>
+
+    <h3 class="h3">after() – jednou po všech testech</h3>
+    <pre><code>after(() => {
+  // Např. odhlášení, úklid testovacích dat
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">.only() a .skip() – filtrování testů</h2>
+
+    <h3 class="h3">.only() – spustit jen vybrané testy</h3>
+    <p class="description">
+      Pro ladění můžeš použít <code>.only</code> – Cypress/Mocha spustí jen označené testy/skupiny.
+    </p>
+    <pre><code>describe.only('Mailing list', () => {
+  it('vytvoří nový mailing list', () => { ... });
+  it('smaže mailing list', () => { ... });
+});
+
+it.only('ladím jen tento test', () => { ... });</code></pre>
+
+    <h3 class="h3">.skip() – dočasně přeskočit test</h3>
+    <pre><code>it.skip('dočasně nefunkční scénář', () => {
+  // tento test se neprovede
+});</code></pre>
+
+    <p class="description">
+      Pozor: <strong>nenechávej</strong> <code>.only()</code> v kódu při commitu do repozitáře – v CI by se spustila jen malá část testů.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Asynchronní podpora a Cypress</h2>
+    <p class="description">
+      Mocha umí pracovat s asynchronním kódem (callback <code>done</code>, Promise). Cypress ale <strong>řídí asynchronitu sám</strong> pomocí
+      command queue, takže v <code>it()</code> a hookách prostě píšeš Cypress příkazy (<code>cy.get()</code>, <code>cy.request()</code> atd.)
+      bez použití <code>async/await</code> nebo <code>done</code>.
+    </p>
+
+    <h3 class="h3">Doporučený styl v Cypressu</h3>
+    <pre><code>it('pracuje s asynchronní odpovědí', () => {
+  cy.request('/api/user')
+    .its('body')
+    .its('name')
+    .should('eq', 'John');
+});</code></pre>
+
+    <p class="description">
+      Mocha se postará o strukturu testu a lifecycle (before/after), Cypress o správné načasování a retry příkazů.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Jak kombinovat Mocha, Chai a Cypress</h2>
+    <ul>
+      <li><strong>Mocha</strong> – struktura testů: <code>describe()</code>, <code>it()</code>, hooky.</li>
+      <li><strong>Chai</strong> – assertions (např. <code>expect()</code>, <code>should()</code>), v Cypressu hlavně přes <code>.should()</code>.</li>
+      <li><strong>Chai-jQuery</strong> – DOM assertions jako <code>be.visible</code>, <code>have.text</code>, <code>have.class</code>.</li>
+    </ul>
+
+    <pre><code>describe('Dashboard', () => {
+  beforeEach(() => {
+    cy.tokenAuth('/dashboard');
+  });
+
+  it('zobrazí souhrnné statistiky', () => {
+    cy.dataCy('stats-card')
+      .should('be.visible')
+      .and('have.length.at.least', 1);
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Shrnutí</h2>
+    <ul>
+      <li>Mocha dává Cypressu <strong>strukturu testů</strong> (BDD: <code>describe/it</code>, hooky).</li>
+      <li>Většinu času budeš psát kombinaci <strong>Mocha struktur + Cypress příkazů + Chai assertions</strong>.</li>
+      <li>Pro ladění používej <code>.only()</code> a <code>.skip()</code>, ale nenechávej je v produkčním kódu.</li>
+    </ul>
+  </section>
+</section>
+

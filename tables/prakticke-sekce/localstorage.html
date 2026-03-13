@@ -1,0 +1,48 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování localStorage</h1>
+    <p class="description">
+      Kompletní průvodce testováním localStorage v Cypressu. Zahrnuje čtení, zápis a ověření hodnot v localStorage.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Čtení z localStorage</h2>
+    <pre><code>cy.window().its('localStorage').invoke('getItem', 'API_TOKEN')
+  .should('not.be.null')
+  .and('not.be.empty');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Zápis do localStorage</h2>
+    <pre><code>cy.window().then((win) => {
+  win.localStorage.setItem('API_TOKEN', 'token-value');
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Ověření po logout</h2>
+    <pre><code>it('vymaže token po logout', () => {
+  cy.dataCy('logout-button').click();
+  cy.window().its('localStorage').invoke('getItem', 'API_TOKEN')
+    .should('be.null');
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('localStorage', () => {
+  it('uloží token po přihlášení', () => {
+    cy.tokenAuth('/dashboard');
+    cy.window().its('localStorage').invoke('getItem', 'API_TOKEN')
+      .should('not.be.null');
+  });
+
+  it('vymaže token po logout', () => {
+    cy.dataCy('logout-button').click();
+    cy.window().its('localStorage').invoke('getItem', 'API_TOKEN')
+      .should('be.null');
+  });
+});</code></pre>
+  </section>
+</section>

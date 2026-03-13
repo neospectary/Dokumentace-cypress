@@ -1,0 +1,58 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">have.length</h1>
+    <p class="description">
+      Ověření počtu elementů v kolekci. Používá se pro kontrolu, že bylo nalezeno správné množství elementů.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Pro ověření počtu řádků v tabulce</li>
+      <li>Pro kontrolu počtu položek v seznamu</li>
+      <li>Pro ověření, že se zobrazilo správné množství elementů</li>
+      <li>Po filtrování nebo vyhledávání</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.should('have.length', number)
+cy.should('have.length.greaterThan', number)
+cy.should('have.length.lessThan', number)
+cy.and('have.length', number)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Parametry</h2>
+    <ul>
+      <li><strong>number</strong> (Number) - Očekávaný počet elementů</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('li').should('have.length', 5)
+cy.get('table tbody tr').should('have.length', 10)</code></pre>
+
+    <h3 class="h3">Srovnání</h3>
+    <pre><code>cy.get('.items').should('have.length.greaterThan', 0)
+cy.get('.items').should('have.length.lessThan', 100)
+cy.get('.items').should('have.length.at.least', 5)</code></pre>
+
+    <h3 class="h3">Po filtrování</h3>
+    <pre><code>cy.get('input[type="search"]').type('test')
+cy.get('.search-results').should('have.length', 3)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Funguje jen na kolekce elementů</li>
+      <li>Podporuje srovnání: greaterThan, lessThan, at.least, at.most</li>
+    </ul>
+  </section>
+</section>

@@ -1,0 +1,60 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">have.class</h1>
+    <p class="description">
+      Ověření, že element má CSS třídu. Používá se pro kontrolu styling stavů (active, disabled, error, atd.).
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Pro ověření stavu elementu (active, selected, error)</li>
+      <li>Pro kontrolu styling tříd</li>
+      <li>Pro testování toggle funkcionality</li>
+      <li>Pro ověření validace (ng-invalid, ng-valid)</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.should('have.class', className)
+cy.and('have.class', className)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Parametry</h2>
+    <ul>
+      <li><strong>className</strong> (String) - Název CSS třídy</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('button').should('have.class', 'active')
+cy.get('.item').should('have.class', 'selected')</code></pre>
+
+    <h3 class="h3">Angular validace</h3>
+    <pre><code>cy.get('input').should('have.class', 'ng-valid')
+cy.get('input').should('not.have.class', 'ng-invalid')</code></pre>
+
+    <h3 class="h3">Po akci</h3>
+    <pre><code>cy.get('button').click()
+cy.get('button').should('have.class', 'clicked')</code></pre>
+
+    <h3 class="h3">Negace</h3>
+    <pre><code>cy.get('button').should('not.have.class', 'disabled')
+cy.get('.item').should('not.have.class', 'hidden')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Ověřuje jednu konkrétní třídu</li>
+      <li>Element může mít více tříd současně</li>
+      <li>Pro negaci použijte <code>not.have.class</code></li>
+    </ul>
+  </section>
+</section>

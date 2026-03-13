@@ -1,0 +1,142 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování modálů</h1>
+    <p class="description">
+      Kompletní průvodce testováním modálních oken v Cypressu. Zahrnuje otevírání, zavírání, vyplňování a potvrzování akcí v modálech.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Základní práce s modálem</h2>
+    
+    <h3 class="h3">Otevření modálu</h3>
+    <pre><code>cy.dataCy('open-modal-button').click();
+cy.dataCy('modal-window').should('be.visible');</code></pre>
+
+    <h3 class="h3">Zavření modálu</h3>
+    <pre><code>// Kliknutí na tlačítko Zavřít
+cy.dataCy('modal-window').within(() => {
+  cy.dataCy('close-button').click();
+});
+cy.dataCy('modal-window').should('not.exist');
+
+// Nebo kliknutí mimo modál
+cy.get('body').click(0, 0);
+cy.dataCy('modal-window').should('not.exist');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Práce uvnitř modálu</h2>
+    
+    <h3 class="h3">Vyplňování formuláře v modálu</h3>
+    <pre><code>cy.dataCy('modal-window')
+  .should('be.visible')
+  .within(() => {
+    cy.fillInput('name-container', 'Hodnota');
+    cy.fillTextarea('description-container', 'Popis');
+    cy.selectFromList('Hodnota', 0);
+  });</code></pre>
+
+    <h3 class="h3">Ověření obsahu modálu</h3>
+    <pre><code>cy.dataCy('modal-window')
+  .should('be.visible')
+  .within(() => {
+    cy.dataCy('modal-title')
+      .should('be.visible')
+      .and('contain.text', 'Název modálu');
+    
+    cy.dataCy('modal-description')
+      .should('be.visible')
+      .and('contain.text', 'Popis modálu');
+  });</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Potvrzovací modály</h2>
+    
+    <h3 class="h3">Základní potvrzení</h3>
+    <pre><code>cy.dataCy('modal-window')
+  .should('be.visible')
+  .within(() => {
+    cy.intercept({ method: 'DELETE', url: '**/api/item/**' }).as('delete');
+    cy.dataCy('confirm-button')
+      .should('be.visible')
+      .and('contain.text', 'Smazat')
+      .click();
+    cy.wait('@delete');
+  });
+cy.dataCy('modal-window').should('not.exist');</code></pre>
+
+    <h3 class="h3">Custom příkaz pro potvrzení (acceptModal)</h3>
+    <pre><code>// Definice
+Cypress.Commands.add('acceptModal', (path, buttonName, { header, description, method = 'POST' } = {}) => {
+  cy.intercept({ method: method, url: path }).as('acceptModal');
+  cy.dataCy('modal-window')
+    .should('be.visible')
+    .within(() => {
+      if (header) {
+        cy.dataCy('modal-title').contains(header);
+      }
+      if (description) {
+        cy.dataCy('modal-description').contains(description);
+      }
+      cy.dataCy('confirm-button').contains(buttonName).click();
+    });
+  cy.wait('@acceptModal');
+});
+
+// Použití
+cy.acceptModal('**/api/item/**', 'Smazat', {
+  header: 'Smazat záznam?',
+  description: 'Opravdu si přejete smazat tento záznam?',
+  method: 'DELETE'
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Zrušení akce v modálu</h2>
+    <pre><code>cy.dataCy('modal-window')
+  .should('be.visible')
+  .within(() => {
+    cy.dataCy('cancel-button').click();
+  });
+cy.dataCy('modal-window').should('not.exist');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('Smazání záznamu', () => {
+  before(() => {
+    cy.tokenAuth('/items');
+  });
+
+  it('otevře modál pro smazání', () => {
+    cy.dataCy('delete-button').click();
+    cy.dataCy('modal-window')
+      .should('be.visible')
+      .within(() => {
+        cy.dataCy('modal-title')
+          .should('contain.text', 'Smazat záznam?');
+      });
+  });
+
+  it('zobrazí správný obsah modálu', () => {
+    cy.dataCy('modal-window').within(() => {
+      cy.dataCy('modal-description')
+        .should('contain.text', 'Opravdu si přejete smazat');
+    });
+  });
+
+  it('potvrdí smazání', () => {
+    cy.acceptModal('**/api/item/**', 'Smazat', {
+      header: 'Smazat záznam?',
+      method: 'DELETE'
+    });
+  });
+
+  it('ověří, že modál byl zavřen', () => {
+    cy.dataCy('modal-window').should('not.exist');
+  });
+});</code></pre>
+  </section>
+</section>

@@ -1,0 +1,329 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Vlastní příkazy pro Angular direktivy</h1>
+    <p class="description">
+      Komplexní průvodce vytvářením vlastních Cypress příkazů pro testování Angular komponent a direktiv. Naučíte se vytvářet specializované příkazy pro práci s Angular Material, custom komponentami a direktivami.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Proč vlastní příkazy pro Angular?</h2>
+    <p class="description">
+      Angular aplikace často používají custom komponenty a direktivy, které vyžadují specifický přístup k testování. Vlastní příkazy umožňují zapouzdřit tuto logiku a vytvořit čitelné, udržovatelné testy.
+    </p>
+    <ul>
+      <li><strong>Angular Material komponenty</strong> - Specifické selektory a interakce</li>
+      <li><strong>Custom direktivy</strong> - Vlastní logika pro práci s direktivami</li>
+      <li><strong>Reactive Forms</strong> - Práce s FormControl a validací</li>
+      <li><strong>Component Inputs/Outputs</strong> - Testování vstupů a výstupů</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Základní setup pro Angular</h2>
+    
+    <h3 class="h3">1. Instalace Cypress Angular pluginu</h3>
+    <pre><code>npm install --save-dev cypress-angular</code></pre>
+
+    <h3 class="h3">2. Konfigurace v cypress.config.ts</h3>
+    <pre><code>import { defineConfig } from 'cypress';
+
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      // Angular specifická konfigurace
+    },
+    baseUrl: 'http://localhost:4200',
+  },
+});</code></pre>
+
+    <h3 class="h3">3. Import v support/e2e.ts</h3>
+    <pre><code>import './commands';
+import 'cypress-angular';</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příkaz pro Angular Material Select</h2>
+    <p class="description">
+      Angular Material má specifické komponenty, které vyžadují jiný přístup než standardní HTML elementy.
+    </p>
+
+    <h3 class="h3">TypeScript deklarace</h3>
+    <pre><code>declare global {
+  namespace Cypress {
+    interface Chainable {
+      selectMatOption(selector: string, optionText: string): Chainable&lt;JQuery&lt;HTMLElement&gt;&gt;;
+    }
+  }
+}</code></pre>
+
+    <h3 class="h3">Implementace</h3>
+    <pre><code>Cypress.Commands.add('selectMatOption', (selector, optionText) => {
+  // Otevřít select
+  cy.get(selector).click();
+  
+  // Vybrat option podle textu
+  cy.get('mat-option')
+    .contains(optionText)
+    .click();
+  
+  // Ověřit výběr
+  cy.get(selector).should('contain', optionText);
+});</code></pre>
+
+    <h3 class="h3">Použití</h3>
+    <pre><code>cy.selectMatOption('[data-cy="country-select"]', 'Česká republika');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příkaz pro Angular Reactive Forms</h2>
+    <p class="description">
+      Práce s Angular Reactive Forms vyžaduje specifický přístup k FormControl elementům.
+    </p>
+
+    <h3 class="h3">TypeScript deklarace</h3>
+    <pre><code>interface Chainable {
+  fillFormControl(
+    formControlName: string,
+    value: string,
+    options?: { clear?: boolean }
+  ): Chainable&lt;JQuery&lt;HTMLElement&gt;&gt;;
+}</code></pre>
+
+    <h3 class="h3">Implementace</h3>
+    <pre><code>Cypress.Commands.add('fillFormControl', (formControlName, value, { clear = false } = {}) => {
+  const selector = `[formControlName="${formControlName}"]`;
+  
+  cy.get(selector).then(($el) => {
+    const tagName = $el.prop('tagName').toLowerCase();
+    
+    if (tagName === 'input' || tagName === 'textarea') {
+      if (clear) {
+        cy.get(selector).clear();
+      }
+      cy.get(selector).type(value);
+    } else if (tagName === 'select') {
+      cy.get(selector).select(value);
+    }
+  });
+  
+  // Ověření validace
+  cy.get(selector).should('not.have.class', 'ng-invalid');
+});</code></pre>
+
+    <h3 class="h3">Použití</h3>
+    <pre><code>cy.fillFormControl('email', 'test@example.com');
+cy.fillFormControl('password', 'heslo123', { clear: true });</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příkaz pro Angular Custom Direktivy</h2>
+    <p class="description">
+      Testování vlastních Angular direktiv vyžaduje specifický přístup k jejich funkcionalitě.
+    </p>
+
+    <h3 class="h3">Příklad: Testování tooltip direktivy</h3>
+    <pre><code>Cypress.Commands.add('checkTooltip', (selector, expectedText) => {
+  cy.get(selector)
+    .trigger('mouseenter')
+    .then(() => {
+      cy.get('mat-tooltip-component')
+        .should('be.visible')
+        .and('contain', expectedText);
+    });
+  
+  cy.get(selector).trigger('mouseleave');
+});</code></pre>
+
+    <h3 class="h3">Příklad: Testování custom validace</h3>
+    <pre><code>Cypress.Commands.add('checkCustomValidation', (formControlName, errorMessage) => {
+  cy.get(`[formControlName="${formControlName}"]`)
+    .should('have.class', 'ng-invalid');
+  
+  cy.get(`[formControlName="${formControlName}"]`)
+    .parent()
+    .find('.error-message')
+    .should('contain', errorMessage);
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příkaz pro Angular Component Inputs</h2>
+    <p class="description">
+      Testování, že komponenta správně reaguje na změny inputů.
+    </p>
+
+    <h3 class="h3">TypeScript deklarace</h3>
+    <pre><code>interface Chainable {
+  setComponentInput(
+    componentSelector: string,
+    inputName: string,
+    value: any
+  ): Chainable&lt;JQuery&lt;HTMLElement&gt;&gt;;
+}</code></pre>
+
+    <h3 class="h3">Implementace</h3>
+    <pre><code>Cypress.Commands.add('setComponentInput', (componentSelector, inputName, value) => {
+  cy.window().then((win) => {
+    const component = win.ng.probe(
+      Cypress.$(componentSelector)[0]
+    )?.componentInstance;
+    
+    if (component) {
+      component[inputName] = value;
+      win.ng.probe(Cypress.$(componentSelector)[0])?.injector.get(
+        win.ng.coreTokens.ApplicationRef
+      ).tick();
+    }
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příkaz pro Angular Router</h2>
+    <p class="description">
+      Testování navigace v Angular aplikaci pomocí Router API.
+    </p>
+
+    <h3 class="h3">TypeScript deklarace</h3>
+    <pre><code>interface Chainable {
+  navigateTo(route: string): Chainable&lt;void&gt;;
+}</code></pre>
+
+    <h3 class="h3">Implementace</h3>
+    <pre><code>Cypress.Commands.add('navigateTo', (route) => {
+  cy.window().then((win) => {
+    const router = win.ng.probe(
+      Cypress.$('app-root')[0]
+    )?.injector.get(win.ng.router.Router);
+    
+    router.navigate([route]);
+  });
+  
+  cy.url().should('include', route);
+});</code></pre>
+
+    <h3 class="h3">Použití</h3>
+    <pre><code>cy.navigateTo('/dashboard');
+cy.navigateTo('/users/123');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad: Formulář s Angular komponentami</h2>
+    <p class="description">
+      Ukázka použití vlastních příkazů v komplexním testu Angular formuláře.
+    </p>
+
+    <pre><code>describe('Angular formulář', () => {
+  beforeEach(() => {
+    cy.visit('/register');
+  });
+
+  it('úspěšná registrace', () => {
+    // Vyplnění Reactive Form
+    cy.fillFormControl('firstName', 'David');
+    cy.fillFormControl('lastName', 'Novák');
+    cy.fillFormControl('email', 'david@example.com');
+    
+    // Angular Material Select
+    cy.selectMatOption('[data-cy="country-select"]', 'Česká republika');
+    
+    // Checkbox s Angular Material
+    cy.get('mat-checkbox[data-cy="terms"]').click();
+    
+    // Odeslání
+    cy.get('button[type="submit"]').click();
+    
+    // Ověření navigace
+    cy.url().should('include', '/dashboard');
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Best Practices pro Angular</h2>
+    
+    <h3 class="h3">✅ DOPORUČENO</h3>
+    <ul>
+      <li>Používejte <code>data-cy</code> atributy na Angular komponentách</li>
+      <li>Vytvářejte příkazy pro opakující se Angular patterns</li>
+      <li>Čekejte na Angular stabilitu před interakcemi</li>
+      <li>Používejte Angular DevTools pro debugování</li>
+    </ul>
+
+    <h3 class="h3">❌ NEDOPORUČENO</h3>
+    <ul>
+      <li>Nespoléhejte se na interní Angular strukturu</li>
+      <li>Nepoužívejte přímý přístup k komponentám bez opatrnosti</li>
+      <li>Nevytvářejte příkazy závislé na konkrétní Angular verzi</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Čekání na Angular</h2>
+    <p class="description">
+      Angular aplikace potřebují čas na inicializaci. Vytvořte příkaz pro čekání na Angular.
+    </p>
+
+    <pre><code>Cypress.Commands.add('waitForAngular', () => {
+  cy.window().then((win) => {
+    if (win.getAllAngularTestabilities) {
+      return new Cypress.Promise((resolve) => {
+        win.getAllAngularTestabilities()[0].whenStable(resolve);
+      });
+    }
+  });
+});</code></pre>
+
+    <h3 class="h3">Použití</h3>
+    <pre><code>cy.visit('/');
+cy.waitForAngular();
+cy.get('.app-content').should('be.visible');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Debugging Angular komponent</h2>
+    <p class="description">
+      Tipy pro ladění Angular komponent v Cypress testech.
+    </p>
+
+    <h3 class="h3">1. Přístup k komponentě</h3>
+    <pre><code>cy.get('[data-cy="my-component"]').then(($el) => {
+  const component = Cypress.$(Cypress.dom.getElementsByTagName($el[0], 'app-my-component')[0]);
+  const instance = Cypress.$(component[0]).data('$ngController');
+  cy.log('Component instance:', instance);
+});</code></pre>
+
+    <h3 class="h3">2. Ověření stavu komponenty</h3>
+    <pre><code>cy.window().then((win) => {
+  const component = win.ng.probe(
+    Cypress.$('[data-cy="my-component"]')[0]
+  )?.componentInstance;
+  
+  expect(component.isLoading).to.be.false;
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Shrnutí</h2>
+    <p class="description">
+      Vlastní příkazy pro Angular umožňují vytvářet robustní, čitelné testy:
+    </p>
+    <ul>
+      <li>Zapouzdřují Angular-specifickou logiku</li>
+      <li>Zjednodušují práci s Angular Material komponentami</li>
+      <li>Umožňují testovat Reactive Forms efektivně</li>
+      <li>Poskytují jednotné API pro celý tým</li>
+      <li>Usnadňují údržbu testů při změnách v Angular aplikaci</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/guides/component-testing/angular/overview" target="_blank" rel="noopener">
+        https://docs.cypress.io/guides/component-testing/angular/overview →
+      </a>
+    </p>
+  </section>
+</section>

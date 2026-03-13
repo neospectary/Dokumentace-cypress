@@ -1,0 +1,62 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování accordionů</h1>
+    <p class="description">
+      Kompletní průvodce testováním accordionů v Cypressu. Zahrnuje otevírání, zavírání a ověření obsahu accordionů.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Otevření accordionu</h2>
+    <pre><code>cy.dataCy('personal-info-accordion-item')
+  .should('be.visible')
+  .click();</code></pre>
+
+  <h3 class="h3">Ověření otevření</h3>
+    <pre><code>cy.dataCy('personal-info-accordion-item')
+  .should('have.class', 'open')
+  .or('have.attr', 'aria-expanded', 'true');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Ověření obsahu accordionu</h2>
+    <pre><code>cy.dataCy('personal-info-accordion-item').click();
+cy.dataCy('personal-info-accordion-item')
+  .within(() => {
+    cy.fillInput('phone-container', '123456789');
+    cy.fillInput('address-container', 'Adresa');
+  });</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Otevření více accordionů</h2>
+    <pre><code>cy.dataCy('personal-info-accordion-item').click();
+cy.dataCy('address-accordion-item').click();
+cy.dataCy('additional-info-accordion-item').click();</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('Accordiony', () => {
+  before(() => {
+    cy.tokenAuth('/contacts/create');
+  });
+
+  it('otevře všechny sekce', () => {
+    cy.dataCy('personal-info-accordion-item').click();
+    cy.dataCy('address-accordion-item').click();
+    cy.dataCy('additional-info-accordion-item').click();
+  });
+
+  it('vyplní údaje v otevřených sekcích', () => {
+    cy.dataCy('personal-info-accordion-item').within(() => {
+      cy.fillInput('phone-container', '123456789');
+    });
+    
+    cy.dataCy('address-accordion-item').within(() => {
+      cy.fillInput('street-container', 'Ulice 123');
+    });
+  });
+});</code></pre>
+  </section>
+</section>

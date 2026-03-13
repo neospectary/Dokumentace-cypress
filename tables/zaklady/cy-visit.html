@@ -1,0 +1,111 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.visit()</h1>
+    <p class="description">
+      Navigace na URL stránku. Základní příkaz pro otevření stránky v testu. Načte URL a čeká na načtení stránky.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.visit(url)
+cy.visit(url, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.visit('https://example.com')      // Absolutní URL
+cy.visit('/dashboard')                // Relativní URL (k baseUrl)
+cy.visit('/login', { method: 'POST' }) // S options</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.visit()                              // Chyba, chybí URL
+cy.get('.btn').visit('/page')           // Chyba, nelze řetězit</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">url (String)</h3>
+    <p class="description">
+      URL stránky k návštěvě. Může být absolutní URL nebo relativní cesta (relativní k baseUrl z config).
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>method</strong> (String) - HTTP metoda (GET, POST, atd.)</li>
+      <li><strong>body</strong> (Object|String) - Tělo requestu</li>
+      <li><strong>headers</strong> (Object) - HTTP hlavičky</li>
+      <li><strong>timeout</strong> (Number) - Čas čekání na načtení stránky</li>
+      <li><strong>onBeforeLoad</strong> (Function) - Callback před načtením</li>
+      <li><strong>onLoad</strong> (Function) - Callback po načtení</li>
+      <li><strong>failOnStatusCode</strong> (Boolean) - Zda selhat při HTTP error</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s window objektem. Po dokončení je stránka plně načtená a připravená pro interakci.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.visit('https://example.com')
+cy.visit('/dashboard')  // relativní k baseUrl</code></pre>
+
+    <h3 class="h3">S options</h3>
+    <pre><code>cy.visit('/login', {
+  method: 'POST',
+  body: { username: 'admin' }
+})</code></pre>
+
+    <h3 class="h3">V beforeEach</h3>
+    <pre><code>beforeEach(() => {
+  cy.visit('/dashboard')
+})</code></pre>
+
+    <h3 class="h3">S timeoutem</h3>
+    <pre><code>cy.visit('/slow-page', { timeout: 30000 })</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Čekání na načtení</h3>
+    <p class="description">
+      <code>cy.visit()</code> automaticky čeká na načtení stránky (pageLoadTimeout). Stránka musí být plně načtená před pokračováním.
+    </p>
+
+    <h3 class="h3">Base URL</h3>
+    <p class="description">
+      Relativní URL se kombinují s <code>baseUrl</code> z Cypress config. Pokud máte <code>baseUrl: 'http://localhost:4200'</code>, pak <code>cy.visit('/dashboard')</code> navštíví <code>http://localhost:4200/dashboard</code>.
+    </p>
+
+    <h3 class="h3">DOM Ready</h3>
+    <p class="description">
+      Cypress automaticky čeká na DOM ready event. Pro SPA aplikace může být potřeba čekat na další události pomocí <code>cy.wait()</code> nebo assertions.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o navštívené URL. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/visit" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/visit →
+      </a>
+    </p>
+  </section>
+</section>

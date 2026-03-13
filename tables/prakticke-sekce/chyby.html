@@ -1,0 +1,73 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování chybových stavů</h1>
+    <p class="description">
+      Kompletní průvodce testováním chybových stavů v Cypressu. Zahrnuje ověření chybových zpráv, 404 stránek a chyb API.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Chybové zprávy v UI</h2>
+    
+    <h3 class="h3">Ověření chybové zprávy</h3>
+    <pre><code>cy.dataCy('error-message')
+  .should('be.visible')
+  .and('contain.text', 'Došlo k chybě');</code></pre>
+
+    <h3 class="h3">Chybová zpráva po neúspěšném requestu</h3>
+    <pre><code>cy.intercept('POST', '**/api/endpoint', {
+  statusCode: 400,
+  body: { error: 'Validation failed' }
+}).as('errorRequest');
+
+cy.dataCy('submit-button').click();
+cy.wait('@errorRequest');
+cy.dataCy('error-message')
+  .should('be.visible')
+  .and('contain.text', 'Validation failed');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">404 stránka</h2>
+    <pre><code>cy.visit('/non-existent-page', { failOnStatusCode: false });
+cy.dataCy('404-message')
+  .should('be.visible')
+  .and('contain.text', 'Stránka nenalezena');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Prázdné výsledky</h2>
+    <pre><code>cy.dataCy('no-results-header')
+  .should('be.visible')
+  .and('contain.text', 'Nenalezeny žádné položky');
+
+cy.dataCy('no-results-description')
+  .should('be.visible')
+  .and('contain.text', 'Zkuste upravit filtry');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('Chybové stavy', () => {
+  it('zobrazí chybu při neplatném requestu', () => {
+    cy.intercept('POST', '**/api/endpoint', {
+      statusCode: 400,
+      body: { error: 'Invalid data' }
+    }).as('errorRequest');
+    
+    cy.dataCy('submit-button').click();
+    cy.wait('@errorRequest');
+    cy.dataCy('error-message')
+      .should('be.visible')
+      .and('contain.text', 'Invalid data');
+  });
+
+  it('zobrazí prázdný stav', () => {
+    cy.dataCy('search-input').type('neexistující');
+    cy.dataCy('no-results-header')
+      .should('be.visible')
+      .and('contain.text', 'Nenalezeny žádné položky');
+  });
+});</code></pre>
+  </section>
+</section>

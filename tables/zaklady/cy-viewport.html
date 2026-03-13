@@ -1,0 +1,109 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.viewport()</h1>
+    <p class="description">
+      Změna velikosti viewportu (okna prohlížeče). Užitečné pro testování responzivního designu. Změní rozlišení prohlížeče pro aktuální test.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.viewport(width, height)
+cy.viewport(preset)
+cy.viewport(width, height, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.viewport(1920, 1080)              // Vlastní rozlišení
+cy.viewport('iphone-x')              // Preset
+cy.viewport(375, 667)                // Mobilní rozlišení</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.viewport()                         // Chyba, chybí parametry
+cy.get('.btn').viewport(1920, 1080)  // Chyba, nelze řetězit</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">width (Number)</h3>
+    <p class="description">
+      Šířka viewportu v pixelech.
+    </p>
+
+    <h3 class="h3">height (Number)</h3>
+    <p class="description">
+      Výška viewportu v pixelech.
+    </p>
+
+    <h3 class="h3">preset (String)</h3>
+    <p class="description">
+      Předdefinované rozlišení: <code>'iphone-x'</code>, <code>'ipad-2'</code>, <code>'macbook-15'</code>, <code>'macbook-13'</code>, <code>'macbook-11'</code>, atd.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable. Změní velikost viewportu pro aktuální test. Viewport zůstane nastavený pro celý test, dokud není změněn.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Vlastní rozlišení</h3>
+    <pre><code>cy.viewport(1920, 1080)
+cy.viewport(375, 667)  // iPhone</code></pre>
+
+    <h3 class="h3">Presety</h3>
+    <pre><code>cy.viewport('iphone-x')
+cy.viewport('ipad-2')
+cy.viewport('macbook-15')</code></pre>
+
+    <h3 class="h3">V testu</h3>
+    <pre><code>it('test na mobilu', () => {
+  cy.viewport('iphone-x')
+  cy.visit('/')
+  cy.get('.menu').should('not.be.visible')
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Scope změny</h3>
+    <p class="description">
+      Změna viewportu platí pro celý test. Lze použít vícekrát v jednom testu pro testování různých rozlišení.
+    </p>
+
+    <h3 class="h3">Presety</h3>
+    <p class="description">
+      Cypress poskytuje předdefinované presety pro běžná zařízení. Seznam všech presetů naleznete v oficiální dokumentaci.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o nastaveném viewportu. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/viewport" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/viewport →
+      </a>
+    </p>
+  </section>
+</section>

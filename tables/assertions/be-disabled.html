@@ -1,0 +1,44 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">be.disabled</h1>
+    <p class="description">
+      Ověření, že element je deaktivovaný (disabled). Používá se pro ověření, že element není aktivní.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Pro ověření, že tlačítko je disabled před vyplněním formuláře</li>
+      <li>Pro kontrolu, že element je správně deaktivovaný</li>
+      <li>Pro testování validace formuláře</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.should('be.disabled')
+cy.and('be.disabled')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('button[type="submit"]').should('be.disabled')
+cy.get('input[disabled]').should('be.disabled')</code></pre>
+
+    <h3 class="h3">Před vyplněním formuláře</h3>
+    <pre><code>cy.get('button[type="submit"]').should('be.disabled')
+cy.get('input[name="email"]').type('test@example.com')
+cy.get('button[type="submit"]').should('be.enabled')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Opačná assertion: <code>be.enabled</code></li>
+      <li>Funguje s inputy, textarea, select, button</li>
+    </ul>
+  </section>
+</section>

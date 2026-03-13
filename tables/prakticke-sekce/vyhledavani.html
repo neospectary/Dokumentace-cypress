@@ -1,0 +1,116 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování vyhledávání</h1>
+    <p class="description">
+      Kompletní průvodce testováním vyhledávacích funkcí v Cypressu. Zahrnuje vyhledávání v tabulkách, globální vyhledávání a ověření výsledků.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Základní vyhledávání</h2>
+    
+    <h3 class="h3">Vyhledávání pomocí custom příkazu</h3>
+    <pre><code>// Definice custom příkazu
+Cypress.Commands.add('searchInput', (dataCy, typeValue, { clear, labelValue } = {}) => {
+  cy.dataCy(dataCy)
+    .scrollIntoView()
+    .within(() => {
+      const input = cy.get('input');
+      
+      if (labelValue) {
+        cy.get('se-input-label').should('contain.text', labelValue);
+      }
+      
+      if (clear) {
+        input.clear();
+      }
+      
+      input.type(typeValue, { delay: 0 });
+    });
+});
+
+// Použití
+cy.intercept({ method: 'GET', url: '**/search/global**' }).as('search');
+cy.searchInput('search-container', 'Hledaný text');
+cy.wait('@search').its('response.statusCode').should('eq', 200);</code></pre>
+
+    <h3 class="h3">Vyhledávání s čekáním na výsledky</h3>
+    <pre><code>cy.intercept({ method: 'GET', url: '**/api/search**' }).as('search');
+cy.searchInput('search-container', 'Hledaný text');
+cy.wait('@search');
+cy.dataCy('search-results').should('be.visible');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Ověření výsledků vyhledávání</h2>
+    
+    <h3 class="h3">Ověření zobrazení výsledků</h3>
+    <pre><code>cy.dataCy('search-results')
+  .should('be.visible')
+  .within(() => {
+    cy.dataCy('result-item').should('have.length.greaterThan', 0);
+  });</code></pre>
+
+    <h3 class="h3">Ověření obsahu výsledků</h3>
+    <pre><code>cy.dataCy('result-item')
+  .should('contain.text', 'Hledaný text')
+  .and('be.visible');</code></pre>
+
+    <h3 class="h3">Navigace z výsledků</h3>
+    <pre><code>cy.intercept({ method: 'GET', url: '**/contact/detail/**' }).as('goToDetail');
+cy.dataCy('result-item')
+  .first()
+  .click();
+cy.wait('@goToDetail');
+cy.url().should('include', '/contact/detail');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Prázdné výsledky</h2>
+    <pre><code>cy.searchInput('search-container', 'Neexistující text');
+cy.dataCy('no-results-message')
+  .should('be.visible')
+  .and('contain.text', 'Bohužel jsme nenašli žádné výsledky');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Vymazání vyhledávání</h2>
+    <pre><code>cy.dataCy('clear-button')
+  .should('be.visible')
+  .click();
+
+cy.dataCy('search-results').should('not.exist');
+cy.get('input').should('have.value', '');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('Globální vyhledávání', () => {
+  const SEARCH_TERM = 'Můj první seznam';
+
+  before(() => {
+    cy.tokenAuth('/dashboard');
+  });
+
+  it('vyhledá existující položku', () => {
+    cy.intercept({ method: 'GET', url: '**/search/global**' }).as('search');
+    cy.searchInput('search-container', SEARCH_TERM);
+    cy.wait('@search').its('response.statusCode').should('eq', 200);
+  });
+
+  it('zobrazí výsledky vyhledávání', () => {
+    cy.dataCy('search-results').should('be.visible');
+    cy.dataCy('result-item')
+      .should('be.visible')
+      .and('contain.text', SEARCH_TERM);
+  });
+
+  it('naviguje na výsledek', () => {
+    cy.intercept({ method: 'GET', url: '**/contact-list/**' }).as('goToItem');
+    cy.dataCy('result-item').first().click();
+    cy.wait('@goToItem');
+    cy.dataCy('page-header').should('contain.text', SEARCH_TERM);
+  });
+});</code></pre>
+  </section>
+</section>

@@ -1,0 +1,63 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Instalace Cypressu</h1>
+    <p class="description">
+      Postup instalace Cypressu do projektu. Cypress se instaluje jako dev dependency pomocí npm nebo yarn.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Při vytváření nového projektu s Cypressem</li>
+      <li>Když přidáváte Cypress do existujícího projektu</li>
+      <li>Když potřebujete aktualizovat Cypress</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Instalace</h2>
+    
+    <h3 class="h3">1. Vytvoření projektu (pokud neexistuje)</h3>
+    <pre><code>mkdir cypress-project
+cd cypress-project
+npm init -y</code></pre>
+
+    <h3 class="h3">2. Instalace Cypressu</h3>
+    <pre><code># Pomocí npm
+npm install --save-dev cypress
+
+# Nebo pomocí yarn
+yarn add -D cypress</code></pre>
+
+    <h3 class="h3">3. Otevření Cypressu</h3>
+    <pre><code># První spuštění (otevře Cypress Test Runner)
+npx cypress open
+
+# Nebo pomocí yarn
+yarn cypress open</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Struktura projektu po instalaci</h2>
+    <pre><code>cypress-project/
+├── cypress/
+│   ├── e2e/              # Testovací soubory
+│   ├── fixtures/         # Testovací data
+│   ├── support/          # Custom commands, helpers
+│   │   ├── commands.ts
+│   │   └── e2e.ts
+│   └── downloads/        # Stažené soubory
+├── cypress.config.ts     # Konfigurace Cypressu
+└── package.json</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Cypress se instaluje jako dev dependency (--save-dev)</li>
+      <li>První spuštění vytvoří strukturu složek</li>
+      <li>Doporučená verze: nejnovější LTS</li>
+    </ul>
+  </section>
+</section>

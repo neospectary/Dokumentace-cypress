@@ -1,0 +1,60 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">be.enabled</h1>
+    <p class="description">
+      Ověření, že element je aktivní (není disabled). Používá se pro inputy, tlačítka a další interaktivní elementy.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Před interakcí s inputem nebo tlačítkem</li>
+      <li>Pro ověření, že tlačítko je aktivní po vyplnění formuláře</li>
+      <li>Pro kontrolu, že element není disabled</li>
+      <li>Po změně stavu, která by měla aktivovat element</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.should('be.enabled')
+cy.and('be.enabled')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('button[type="submit"]').should('be.enabled')
+cy.get('input[name="email"]').should('be.enabled')</code></pre>
+
+    <h3 class="h3">Po vyplnění formuláře</h3>
+    <pre><code>cy.get('input[name="email"]').type('test@example.com')
+cy.get('input[name="password"]').type('password')
+cy.get('button[type="submit"]').should('be.enabled')</code></pre>
+
+    <h3 class="h3">Kombinace s dalšími assertions</h3>
+    <pre><code>cy.get('button')
+  .should('be.visible')
+  .and('be.enabled')
+  .and('not.have.class', 'loading')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Funguje s inputy, textarea, select, button</li>
+      <li>Opačná assertion: <code>be.disabled</code></li>
+      <li>Automaticky čeká na změnu stavu</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Související assertions</h2>
+    <ul>
+      <li><code>be.disabled</code> - element je deaktivovaný</li>
+      <li><code>be.visible</code> - element je viditelný</li>
+    </ul>
+  </section>
+</section>

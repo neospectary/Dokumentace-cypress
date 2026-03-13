@@ -1,0 +1,54 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování paginace</h1>
+    <p class="description">
+      Kompletní průvodce testováním paginace v Cypressu. Zahrnuje navigaci mezi stránkami a ověření zobrazení správných dat.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Základní ověření paginace</h2>
+    
+    <h3 class="h3">Ověření zobrazení paginace</h3>
+    <pre><code>cy.dataCy('pagination-links')
+  .should('be.visible')
+  .and('have.length', 1);</code></pre>
+
+    <h3 class="h3">Kliknutí na stránku</h3>
+    <pre><code>cy.intercept({ method: 'GET', url: '**/api/data?page=2' }).as('page2');
+cy.dataCy('pagination-link-2').click();
+cy.wait('@page2');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Ověření dat na stránce</h2>
+    <pre><code>cy.wait('@page2').then(() => {
+  cy.dataCy('table-row').should('have.length', 10);
+  // Ověření, že data se změnila
+  cy.dataCy('table-row').first().should('not.contain.text', 'Předchozí text');
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('Paginace', () => {
+  before(() => {
+    cy.tokenAuth('/contacts');
+  });
+
+  it('zobrazí paginaci', () => {
+    cy.dataCy('pagination-links').should('be.visible');
+  });
+
+  it('přejde na druhou stránku', () => {
+    cy.intercept({ method: 'GET', url: '**/contact/grid/**' }).as('page2');
+    cy.dataCy('pagination-link-2').click();
+    cy.wait('@page2');
+  });
+
+  it('zobrazí data druhé stránky', () => {
+    cy.dataCy('table-row').should('have.length.greaterThan', 0);
+  });
+});</code></pre>
+  </section>
+</section>

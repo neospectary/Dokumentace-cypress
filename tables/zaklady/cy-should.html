@@ -1,0 +1,131 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.should()</h1>
+    <p class="description">
+      Assertions (ověření). Ověřuje stav elementu, hodnotu nebo podmínku. Základní příkaz pro testování. Automaticky opakuje assertion až do úspěchu nebo timeoutu.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.should(chainers)
+.should(chainers, value)
+.should(callbackFn)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('button').should('be.visible')           // S chainerem
+cy.get('input').should('have.value', 'text')     // S hodnotou
+cy.get('h1').should('contain', 'text')           // Částečná shoda
+cy.get('div').should(($div) => {                 // Vlastní callback
+  expect($div).to.have.length(3)
+})</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.should('be.visible')                          // Chyba, nelze řetězit z 'cy'
+cy.window().should('be.visible')                 // Chyba, window není DOM element</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">chainers (String)</h3>
+    <p class="description">
+      Chainer pro assertion (např. 'be.visible', 'have.text', 'contain', 'have.value', atd.). Viz sekce Assertions pro kompletní seznam.
+    </p>
+
+    <h3 class="h3">value (Any)</h3>
+    <p class="description">
+      Očekávaná hodnota pro assertion (např. text, třída, atribut, hodnota).
+    </p>
+
+    <h3 class="h3">callbackFn (Function)</h3>
+    <p class="description">
+      Vlastní callback funkce pro komplexní ověření. Funkce dostane element jako argument.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací stejný element, na kterém byla assertion provedena. Lze řetězit další assertions pomocí <code>.and()</code>.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní assertions</h3>
+    <pre><code>cy.get('button').should('be.visible')
+cy.get('input').should('be.disabled')
+cy.get('.error').should('not.exist')</code></pre>
+
+    <h3 class="h3">Text a obsah</h3>
+    <pre><code>cy.get('h1').should('have.text', 'Vítejte')
+cy.get('p').should('contain', 'text')
+cy.get('span').should('include.text', 'část')</code></pre>
+
+    <h3 class="h3">Atributy a hodnoty</h3>
+    <pre><code>cy.get('input').should('have.value', 'test')
+cy.get('a').should('have.attr', 'href', '/page')
+cy.get('img').should('have.attr', 'alt')</code></pre>
+
+    <h3 class="h3">CSS třídy</h3>
+    <pre><code>cy.get('.btn').should('have.class', 'active')
+cy.get('.item').should('not.have.class', 'disabled')</code></pre>
+
+    <h3 class="h3">Vícenásobné assertions</h3>
+    <pre><code>cy.get('button')
+  .should('be.visible')
+  .and('be.enabled')
+  .and('have.text', 'Odeslat')</code></pre>
+
+    <h3 class="h3">Vlastní callback</h3>
+    <pre><code>cy.get('input').should(($input) => {
+  expect($input.val()).to.match(/^\d+$/)
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Retry mechanismus</h3>
+    <p class="description">
+      <code>.should()</code> automaticky opakuje assertion (retry mechanismus). Čeká až do úspěchu nebo timeoutu. To znamená, že nemusíte explicitně čekat na element.
+    </p>
+
+    <h3 class="h3">Řetězení assertions</h3>
+    <p class="description">
+      Lze řetězit více assertions pomocí <code>.and()</code> aliasu: <code>.should('be.visible').and('have.text', 'text')</code>.
+    </p>
+
+    <h3 class="h3">Chai assertions</h3>
+    <p class="description">
+      <code>.should()</code> používá Chai assertions pod kapotou. Všechny Chai chainers jsou dostupné.
+    </p>
+
+    <h3 class="h3">Callback funkce</h3>
+    <p class="description">
+      Vlastní callback funkce jsou užitečné pro komplexní ověření, která nelze vyjádřit pomocí standardních chainers.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o assertion. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/should" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/should →
+      </a>
+    </p>
+  </section>
+</section>

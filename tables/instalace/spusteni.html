@@ -1,0 +1,84 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Spuštění Cypressu</h1>
+    <p class="description">
+      Způsoby spuštění Cypress testů. Cypress lze spustit v interaktivním režimu (Test Runner) nebo v headless režimu (CI/CD).
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Interaktivní režim (Test Runner)</h2>
+    <p class="description">
+      Otevře grafické rozhraní pro spouštění a debugování testů.
+    </p>
+    
+    <h3 class="h3">Spuštění</h3>
+    <pre><code>npx cypress open
+# nebo
+yarn cypress open</code></pre>
+
+    <h3 class="h3">Kdy použít</h3>
+    <ul>
+      <li>Při vývoji testů</li>
+      <li>Pro debugování</li>
+      <li>Pro vizuální kontrolu</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Headless režim (CLI)</h2>
+    <p class="description">
+      Spuštění testů z příkazové řádky bez grafického rozhraní.
+    </p>
+    
+    <h3 class="h3">Spuštění všech testů</h3>
+    <pre><code>npx cypress run
+# nebo
+yarn cypress run</code></pre>
+
+    <h3 class="h3">Spuštění konkrétního souboru</h3>
+    <pre><code>npx cypress run --spec "cypress/e2e/my-test.cy.ts"</code></pre>
+
+    <h3 class="h3">Spuštění s prohlížečem</h3>
+    <pre><code>npx cypress run --browser chrome
+npx cypress run --browser firefox
+npx cypress run --browser edge</code></pre>
+
+    <h3 class="h3">Kdy použít</h3>
+    <ul>
+      <li>V CI/CD pipeline</li>
+      <li>Pro automatické spouštění</li>
+      <li>Pro rychlejší spuštění</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">NPM skripty</h2>
+    <p class="description">
+      Přidejte do package.json pro snadné spouštění:
+    </p>
+    
+    <pre><code>{
+  "scripts": {
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "cy:run:chrome": "cypress run --browser chrome",
+    "test:e2e": "cypress run"
+  }
+}</code></pre>
+
+    <h3 class="h3">Použití</h3>
+    <pre><code>npm run cy:open
+npm run cy:run
+npm run cy:run:chrome</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Interaktivní režim: pro vývoj a debug</li>
+      <li>Headless režim: pro CI/CD a automatizaci</li>
+      <li>V headless režimu se automaticky pořizují screenshots při selhání</li>
+    </ul>
+  </section>
+</section>

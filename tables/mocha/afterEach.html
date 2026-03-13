@@ -1,0 +1,43 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">afterEach()</h1>
+    <p class="description">
+      <code>afterEach()</code> je Mocha hook, který se spustí <strong>po každém testu</strong> v daném <code>describe()</code> bloku. V Cypressu se používá
+      hlavně pro úklid, logování nebo doplňkové akce po testu.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>afterEach(fn)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít afterEach()</h2>
+    <ul>
+      <li>Když potřebuješ po každém testu <strong>uklidit</strong> (např. smazat vytvořená data přes API).</li>
+      <li>Pro <strong>logování</strong> stavu po testu, případně pro doplňkové screenshoty.</li>
+      <li>Méně často než <code>beforeEach()</code>, ale užitečné v komplexnějších scénářích.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklad – úklid testovacích dat</h2>
+    <pre><code>describe('Segmenty', () => {
+  beforeEach(() => {
+    cy.tokenAuth('/segments');
+  });
+
+  afterEach(() => {
+    // Příklad: smazání dočasně vytvořeného segmentu přes API
+    // (pseudo-kód podle konkrétního API)
+    // cy.request('DELETE', '/api/segments/temp-test-segment');
+  });
+
+  it('vytvoří dočasný testovací segment', () => {
+    // ...
+  });
+});</code></pre>
+  </section>
+</section>
+

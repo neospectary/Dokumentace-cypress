@@ -1,0 +1,165 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování filtrování</h1>
+    <p class="description">
+      Kompletní průvodce testováním filtrů v Cypressu. Zahrnuje aplikování filtrů, ověření aktivních filtrů a jejich odstraňování.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Otevření filtru</h2>
+    <pre><code>cy.dataCy('filters-button')
+  .should('be.visible')
+  .click();
+
+cy.dataCy('modal-window')
+  .should('be.visible')
+  .within(() => {
+    cy.dataCy('modal-title')
+      .should('contain.text', 'Filtry');
+  });</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Aplikování filtru</h2>
+    
+    <h3 class="h3">Základní filtr</h3>
+    <pre><code>cy.dataCy('modal-window').within(() => {
+  cy.fillInput('Email-container', 'test@example.com', {
+    required: false
+  });
+  
+  cy.intercept({ method: 'GET', url: '**/contact/grid/**' }).as('filter');
+  cy.dataCy('save-button').click();
+  cy.wait('@filter');
+});</code></pre>
+
+    <h3 class="h3">Více filtrů</h3>
+    <pre><code>cy.dataCy('modal-window').within(() => {
+  cy.fillInput('Email-container', 'test@example.com');
+  cy.fillInput('Name-container', 'Jméno');
+  cy.selectFromList('Status', 0);
+  
+  cy.intercept({ method: 'GET', url: '**/contact/grid/**' }).as('filter');
+  cy.dataCy('save-button').click();
+  cy.wait('@filter');
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Ověření aktivních filtrů</h2>
+    
+    <h3 class="h3">Zobrazení aktivních filtrů</h3>
+    <pre><code>cy.dataCy('active-filters-label')
+  .should('be.visible')
+  .and('contain.text', 'Aktivní filtry:');
+
+cy.dataCy('Email-card').within(() => {
+  cy.dataCy('filter-label')
+    .should('be.visible')
+    .and('contain.text', 'Email');
+  cy.dataCy('filter-value')
+    .should('be.visible')
+    .and('contain.text', 'test@example.com');
+});</code></pre>
+
+    <h3 class="h3">Ověření filtrovaných výsledků</h3>
+    <pre><code>cy.dataCy('table-row').should('have.length', 3);
+// Ověření, že všechny řádky obsahují filtrovanou hodnotu
+cy.dataCy('table-row').each(($row) => {
+  cy.wrap($row).should('contain.text', 'test@example.com');
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odstranění filtru</h2>
+    
+    <h3 class="h3">Odstranění jednoho filtru</h3>
+    <pre><code>cy.intercept({ method: 'GET', url: '**/contact/grid/**' }).as('removeFilter');
+cy.dataCy('remove-filter-button')
+  .should('be.visible')
+  .click();
+cy.wait('@removeFilter');
+
+cy.dataCy('Email-card').should('not.exist');
+cy.dataCy('active-filters-label').should('not.exist');</code></pre>
+
+    <h3 class="h3">Vymazání všech filtrů v modálu</h3>
+    <pre><code>cy.dataCy('modal-window').within(() => {
+  cy.dataCy('clear-filter-button')
+    .find('button')
+    .should('be.visible')
+    .and('not.be.disabled')
+    .click();
+  
+  cy.checkInputValue('Email-container', '');
+  
+  cy.intercept({ method: 'GET', url: '**/contact/grid/**' }).as('clearFilter');
+  cy.dataCy('save-button').click();
+  cy.wait('@clearFilter');
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Filtr bez výsledků</h2>
+    <pre><code>cy.dataCy('modal-window').within(() => {
+  cy.fillInput('Email-container', 'neexistujici@example.com', {
+    required: false
+  });
+  
+  cy.intercept({ method: 'GET', url: '**/contact/grid/**' }).as('filter');
+  cy.dataCy('save-button')
+    .should('contain.text', 'Zobrazit (0) výsledků')
+    .click();
+  cy.wait('@filter');
+});
+
+cy.dataCy('table-row').should('have.length', 0);
+cy.dataCy('no-results-header')
+  .should('be.visible')
+  .and('contain.text', 'Nenalezeny žádné položky');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('Filtrování kontaktů', () => {
+  const EMAIL = 'cypress@smartemailing.cz';
+
+  before(() => {
+    cy.tokenAuth('/subscribers/contacts');
+  });
+
+  it('otevře modál filtrů', () => {
+    cy.dataCy('filters-button').click();
+    cy.dataCy('modal-window').should('be.visible');
+  });
+
+  it('aplikuje email filtr', () => {
+    cy.dataCy('modal-window').within(() => {
+      cy.fillInput('Email-container', EMAIL, { required: false });
+      cy.intercept({ method: 'GET', url: '**/contact/grid/**' }).as('filter');
+      cy.dataCy('save-button').click();
+      cy.wait('@filter');
+    });
+  });
+
+  it('zobrazí aktivní filtr', () => {
+    cy.dataCy('active-filters-label').should('be.visible');
+    cy.dataCy('Email-card').within(() => {
+      cy.dataCy('filter-value').should('contain.text', EMAIL);
+    });
+  });
+
+  it('zobrazí filtrované výsledky', () => {
+    cy.dataCy('table-row').should('have.length', 3);
+  });
+
+  it('odstraní filtr', () => {
+    cy.intercept({ method: 'GET', url: '**/contact/grid/**' }).as('removeFilter');
+    cy.dataCy('remove-filter-button').click();
+    cy.wait('@removeFilter');
+    cy.dataCy('Email-card').should('not.exist');
+  });
+});</code></pre>
+  </section>
+</section>

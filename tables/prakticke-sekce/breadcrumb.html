@@ -1,0 +1,170 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování drobečkové navigace (Breadcrumb)</h1>
+    <p class="description">
+      Kompletní průvodce testováním drobečkové navigace (breadcrumb) v Cypressu. Zahrnuje ověření zobrazení, obsahu jednotlivých položek a navigaci pomocí breadcrumb.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Základní ověření breadcrumb</h2>
+    
+    <h3 class="h3">Ověření existence breadcrumb</h3>
+    <pre><code>cy.dataCy('breadcrumb').should('be.visible');</code></pre>
+
+    <h3 class="h3">Ověření jednotlivých položek</h3>
+    <pre><code>cy.dataCy('breadcrumb-item-0')
+  .should('be.visible')
+  .and('contain.text', 'Nastavení');
+
+cy.dataCy('breadcrumb-item-1')
+  .should('be.visible')
+  .and('contain.text', 'Datové zdroje');
+
+cy.dataCy('breadcrumb-item-2')
+  .should('be.visible')
+  .and('contain.text', 'Feedy');</code></pre>
+
+    <h3 class="h3">Ověření aktuální stránky v breadcrumb</h3>
+    <pre><code>// Aktuální stránka je obvykle poslední položka nebo text v breadcrumb
+cy.dataCy('breadcrumb')
+  .should('contain.text', 'Feedy');
+
+// Nebo pro konkrétní stránku
+cy.dataCy('breadcrumb')
+  .should('contain.text', 'Párování feedu');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Navigace pomocí breadcrumb</h2>
+    
+    <h3 class="h3">Kliknutí na konkrétní položku</h3>
+    <pre><code>cy.intercept({ method: 'GET', url: '**/settings/**' }).as('navigate');
+cy.dataCy('breadcrumb-item-0')
+  .should('be.visible')
+  .click();
+cy.wait('@navigate');
+cy.url().should('include', '/settings');</code></pre>
+
+    <h3 class="h3">Navigace na předchozí úroveň</h3>
+    <pre><code>// Kliknutí na předposlední položku
+cy.dataCy('breadcrumb-item-1')
+  .should('be.visible')
+  .click();
+cy.url().should('include', '/settings/data-sources');</code></pre>
+
+    <h3 class="h3">Navigace z výsledků vyhledávání</h3>
+    <pre><code>cy.intercept({ method: 'GET', url: '**/contact-list/grid/**' }).as('goToLists');
+cy.dataCy('breadcrumb-seznamy-kontaktů')
+  .should('be.visible')
+  .click();
+cy.wait('@goToLists');
+cy.dataCy('page-header').should('contain.text', 'Seznamy kontaktů');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Komplexní ověření breadcrumb</h2>
+    
+    <h3 class="h3">Ověření celé cesty</h3>
+    <pre><code>it('ověří breadcrumb navigaci', () => {
+  cy.dataCy('breadcrumb').should('be.visible');
+  cy.dataCy('breadcrumb-item-0')
+    .should('be.visible')
+    .and('contain.text', 'Nastavení');
+  cy.dataCy('breadcrumb-item-1')
+    .should('be.visible')
+    .and('contain.text', 'Datové zdroje');
+  cy.dataCy('breadcrumb-item-2')
+    .should('be.visible')
+    .and('contain.text', 'Feedy');
+  cy.dataCy('breadcrumb')
+    .should('contain.text', 'Párování feedu');
+});</code></pre>
+
+    <h3 class="h3">Ověření po navigaci</h3>
+    <pre><code>// Po kliknutí na breadcrumb položku
+cy.dataCy('breadcrumb-item-0').click();
+cy.url().should('include', '/settings');
+cy.dataCy('page-header')
+  .should('be.visible')
+  .and('contain.text', 'Nastavení');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Práce s více breadcrumb na stránce</h2>
+    <pre><code>// Pokud je na stránce více breadcrumb (např. v různých sekcích)
+cy.dataCy('breadcrumb-item-0')
+  .last() // poslední výskyt
+  .click();</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('Breadcrumb navigace', () => {
+  before(() => {
+    cy.tokenAuth('/settings/data-sources/feed');
+  });
+
+  it('zobrazí breadcrumb navigaci', () => {
+    cy.dataCy('breadcrumb').should('be.visible');
+    cy.dataCy('breadcrumb-item-0')
+      .should('be.visible')
+      .and('contain.text', 'Nastavení');
+    cy.dataCy('breadcrumb-item-1')
+      .should('be.visible')
+      .and('contain.text', 'Datové zdroje');
+    cy.dataCy('breadcrumb')
+      .should('contain.text', 'Feedy');
+  });
+
+  it('naviguje na předchozí úroveň', () => {
+    cy.intercept({ method: 'GET', url: '**/settings/data-sources/**' }).as('navigate');
+    cy.dataCy('breadcrumb-item-1').click();
+    cy.wait('@navigate');
+    cy.url().should('include', '/settings/data-sources');
+  });
+
+  it('naviguje na kořenovou stránku', () => {
+    cy.intercept({ method: 'GET', url: '**/settings/**' }).as('navigate');
+    cy.dataCy('breadcrumb-item-0').click();
+    cy.wait('@navigate');
+    cy.url().should('include', '/settings');
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Breadcrumb v různých kontextech</h2>
+    
+    <h3 class="h3">Breadcrumb na stránce seznamu</h3>
+    <pre><code>describe('Seznam feedů', () => {
+  it('zobrazí breadcrumb se správnými položkami', () => {
+    cy.dataCy('breadcrumb').should('be.visible');
+    cy.dataCy('breadcrumb-item-0').should('contain.text', 'Nastavení');
+    cy.dataCy('breadcrumb-item-1').should('contain.text', 'Datové zdroje');
+    cy.dataCy('breadcrumb').should('contain.text', 'Feedy');
+  });
+});</code></pre>
+
+    <h3 class="h3">Breadcrumb na stránce detailu/editace</h3>
+    <pre><code>describe('Editace feedu', () => {
+  it('zobrazí breadcrumb s aktuální stránkou', () => {
+    cy.dataCy('breadcrumb').should('be.visible');
+    cy.dataCy('breadcrumb-item-0').should('contain.text', 'Nastavení');
+    cy.dataCy('breadcrumb-item-1').should('contain.text', 'Datové zdroje');
+    cy.dataCy('breadcrumb-item-2').should('contain.text', 'Feedy');
+    cy.dataCy('breadcrumb').should('contain.text', 'Párování feedu');
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Breadcrumb položky jsou obvykle indexované od 0 (breadcrumb-item-0, breadcrumb-item-1, atd.)</li>
+      <li>Aktuální stránka může být zobrazena jako poslední položka nebo jako text v breadcrumb kontejneru</li>
+      <li>Při navigaci pomocí breadcrumb je vhodné použít cy.intercept() a cy.wait() pro čekání na načtení stránky</li>
+      <li>Pokud je na stránce více breadcrumb, použijte .last() nebo .eq() pro výběr správného</li>
+    </ul>
+  </section>
+</section>

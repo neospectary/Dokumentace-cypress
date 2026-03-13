@@ -1,0 +1,103 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.exec()</h1>
+    <p class="description">
+      Spuštění shell příkazu. Umožňuje spustit systémový příkaz v Node.js prostředí. Užitečné pro systémové operace, práci s databází nebo spuštění shell skriptů.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.exec(command)
+cy.exec(command, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.exec('npm run build')                  // Shell příkaz
+cy.exec('ls -la')                         // List souborů
+cy.exec('echo "Hello"')                   // Echo příkaz</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.exec()                                  // Chyba, chybí command
+cy.get('.btn').exec('ls')                 // Chyba, nelze řetězit</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">command (String)</h3>
+    <p class="description">
+      Shell příkaz k provedení. Může být jakýkoli systémový příkaz dostupný v shellu.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>timeout</strong> (Number) - Čas čekání na dokončení příkazu</li>
+      <li><strong>failOnNonZeroExit</strong> (Boolean, default: true) - Zda selhat při non-zero exit kódu</li>
+      <li><strong>env</strong> (Object) - Environment proměnné</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s výsledkem příkazu obsahujícím <code>code</code> (exit kód), <code>stdout</code> (výstup), <code>stderr</code> (chybový výstup). Lze použít s <code>.then()</code>.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.exec('npm run build')
+cy.exec('ls -la')</code></pre>
+
+    <h3 class="h3">S výsledkem</h3>
+    <pre><code>cy.exec('echo "Hello"').then((result) => {
+  expect(result.code).to.eq(0)
+  expect(result.stdout).to.include('Hello')
+})</code></pre>
+
+    <h3 class="h3">S failOnNonZeroExit</h3>
+    <pre><code>cy.exec('command-that-might-fail', { failOnNonZeroExit: false })</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Node.js prostředí</h3>
+    <p class="description">
+      Příkazy se spouštějí v Node.js prostředí (mimo prohlížeč), takže můžete používat systémové příkazy dostupné v shellu.
+    </p>
+
+    <h3 class="h3">Bezpečnost</h3>
+    <p class="description">
+      <code>cy.exec()</code> může být bezpečnostní riziko, protože spouští systémové příkazy. Používejte opatrně a jen pro důvěryhodné příkazy.
+    </p>
+
+    <h3 class="h3">Exit kód</h3>
+    <p class="description">
+      Výchozí je <code>failOnNonZeroExit: true</code>, což znamená, že test selže, pokud příkaz vrátí non-zero exit kód. Pro příkazy, které mohou selhat, nastavte <code>failOnNonZeroExit: false</code>.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o spuštěném příkazu a výsledku. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/exec" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/exec →
+      </a>
+    </p>
+  </section>
+</section>

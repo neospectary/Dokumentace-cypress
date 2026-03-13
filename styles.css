@@ -1,0 +1,568 @@
+/* ================================
+   Cypress UI (Inter) – COMPACT SIDE BARS
+   ================================ */
+
+/* Design tokens – Cypress green theme */
+:root{
+  /* Dark mode (default) */
+  --bg:           #0d1117;
+  --panel:        #161b22;
+  --surface:      #161b22;
+  --surface-2:    #0d1117;
+  --text:         #e6edf3;
+  --muted:        #8b949e;
+  --description:  #8b949e;
+  --border:       #30363d;
+  --link:         #04C38D;
+  --link-hover:   #00b37e;
+  --brand:        #04C38D;
+
+  --layout-max:   1900px;
+  --content-max:  1300px;
+  --sidebar-w:    250px;
+  --subsidebar-w: 250px;
+  --gap:          24px;
+  --pad:          24px;
+  --radius:       10px;
+  --topbar-h:     56px;
+
+  --code-bg:      #0d1117;
+  --code-fg:      #e6edf3;
+  --code-border:  #30363d;
+}
+
+/* Light mode - Modern pastel theme */
+[data-theme="light"]{
+  --bg:           #fafbfc;        /* jemně šedá místo čisté bílé */
+  --panel:        #f0f4f8;        /* pastelově modrá */
+  --surface:      #ffffff;        /* bílá pro kontrastní karty */
+  --surface-2:    #f5f9fc;        /* velmi světle modrá */
+  --text:         #334155;        /* tmavě šedá s nádechem modré - žádná černá! */
+  --muted:        #64748b;        /* šedá s modrým odstínem */
+  --description:  #64748b;        /* stejná jako muted */
+  --border:       #e2e8f0;        /* velmi jemná šedá */
+  --link:         #04C38D;        /* zelená Cypress - zachováno */
+  --link-hover:   #059669;        /* tmavší zelená */
+  --brand:        #04C38D;        /* zelená Cypress */
+
+  --code-bg:      #f1f5f9;        /* pastelově modrošedá */
+  --code-fg:      #475569;        /* šedá místo černé */
+  --code-border:  #cbd5e1;        /* jemný border */
+}
+
+/* Smooth transitions for theme switching */
+body, .topbar, .sidebar, .subsidebar, .card, pre,
+.nav-cats a, .subnav a{
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Základ */
+*{ box-sizing:border-box }
+html,body{ height:100% }
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size:16px; line-height:1.7;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  padding-top: var(--topbar-h);
+  overflow: hidden; /* vlastní scrollbary uvnitř aplikace, okno nesroluje */
+}
+a{ color:var(--link); text-decoration:none }
+a:hover{ color:var(--link-hover) }
+
+/* Horní lišta */
+.topbar{
+  position: fixed; top:0; left:0; right:0;
+  z-index: 1000;
+  height: var(--topbar-h);
+  background: linear-gradient(180deg,#161b22,#0d1117);
+  border-bottom:1px solid var(--border);
+}
+/* Light mode topbar */
+[data-theme="light"] .topbar{
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.topbar-inner{
+  max-width: var(--layout-max);
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 var(--pad);
+  display:flex; align-items:center; gap:12px;
+  color:#fff;
+}
+.brand-logo{ width:22px; height:22px; display:inline-block }
+.brand-title{ font-weight: 800; letter-spacing:.2px }
+
+/* Light mode - tmavší text v topbaru */
+[data-theme="light"] .topbar-inner{
+  color: var(--text);
+}
+[data-theme="light"] .brand-title{
+  color: #1e293b;
+}
+
+/* Layout */
+.layout{
+  display:grid;
+  grid-template-columns: var(--sidebar-w) var(--subsidebar-w) minmax(0,1fr);
+  gap: var(--gap);
+  max-width: var(--layout-max);
+  margin: 0 auto;
+  padding: var(--pad);
+  height: calc(100dvh - var(--topbar-h)); /* vyplní viewport pod lištou */
+  min-height: auto;
+}
+
+/* Boční panely – STICKY + vlastní vnitřní scroll */
+.sidebar,
+.subsidebar{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  display:flex; flex-direction:column;
+
+  position: sticky;
+  top: calc(var(--topbar-h) + var(--pad)); /* drží se pod topbarem, neschovají se */
+  align-self: start;
+
+  max-height: calc(100dvh - var(--topbar-h) - (var(--pad) * 2));
+  overflow: hidden; /* scroller je uvnitř .nav-* */
+}
+
+.brand, .subbrand{
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: .3px;
+  margin-bottom: 15px;
+}
+/* Light mode - tmavší nadpisy */
+[data-theme="light"] .brand,
+[data-theme="light"] .subbrand{
+  color: #1e293b;
+}
+
+/* Menu – vnitřní scroller (když je položek hodně) */
+.nav-cats, .subnav{
+  display:flex; flex-direction:column; gap:8px;
+  flex: 1 1 auto;        /* zabere zbytek výšky panelu */
+  min-height: 0;         /* umožní overflow v flex kontejneru */
+  overflow: auto;        /* vlastní skrolování menu */
+  padding-right:8px;
+  scrollbar-gutter: stable both-edges;
+  overscroll-behavior: contain; /* nepropaguje scroll do stránky */
+}
+
+/* Položky menu – dark pills (oprava modrého proužku) */
+.nav-cats a, .subnav a{
+  display:block;
+  padding:10px 12px;
+  border-radius:12px;
+  color: var(--text);
+  border:1px solid transparent;
+  background: transparent;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, transform .06s ease;
+
+  /* proužek je teď uvnitř prvku → scroll ho nikdy neodřízne */
+  border-left: 3px solid transparent;
+}
+.nav-cats a:hover, .subnav a:hover{
+  background: rgba(4, 195, 141, 0.1);
+  color: #04C38D;
+}
+/* Light mode hover - jemnější */
+[data-theme="light"] .nav-cats a:hover,
+[data-theme="light"] .subnav a:hover{
+  background: rgba(4, 195, 141, 0.08);
+  color: #059669;
+}
+.nav-cats a.active, .subnav a.active{
+  background: linear-gradient(180deg,#1c2128,#161b22);
+  border-color: #30363d;
+  color: #ffffff;
+
+  /* obarvení rezervovaného proužku - Cypress zelená */
+  border-left-color: var(--link);
+}
+/* Light mode active states */
+[data-theme="light"] .nav-cats a.active,
+[data-theme="light"] .subnav a.active{
+  background: linear-gradient(180deg, #e0f2fe, #dbeafe);
+  border-color: #bae6fd;
+  color: #0c4a6e;
+  border-left-color: var(--link);
+}
+/* zrušení starého pseudo-proužku mimo box (ten se ořezával) */
+.nav-cats a.active::before,
+.subnav a.active::before{ content:none; }
+
+/* Popisek dole */
+.muted{ color: var(--muted); font-size: 13px; margin-top: 10px }
+
+.description { color: var(--description);}
+
+/* Obsah (pravý sloupec) */
+.content{
+  width: min(100%, var(--content-max));
+  margin: 0 auto;
+  padding-bottom: 0; /* padding řeší vnitřní wrapper */
+  height: 100%;      /* vyplní grid řádek */
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Vlastní scroller pro breadcrumbs + obsah */
+.content-scroll{
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;             /* scrolluje se jen střed */
+  padding-right: 8px;
+  padding-bottom: 56px;
+  overscroll-behavior: contain;
+}
+
+/* Hezké scrollbary i pro střed */
+.content-scroll::-webkit-scrollbar{ width:5px; height:10px }
+.content-scroll::-webkit-scrollbar-thumb{ background:#334155; border-radius:8px }
+.content-scroll::-webkit-scrollbar-thumb:hover{ background:#475569 }
+/* Light mode – světlejší posuvník ve středu */
+[data-theme="light"] .content-scroll::-webkit-scrollbar-thumb{ background:#cbd5e1; }
+[data-theme="light"] .content-scroll::-webkit-scrollbar-thumb:hover{ background:#94a3b8; }
+
+/* Breadcrumbs – jen text */
+.breadcrumbs{
+  display:flex; align-items:center; flex-wrap:wrap; gap:8px;
+  color: var(--muted); font-size: 14px; margin: 4px 0 14px;
+}
+.breadcrumbs .crumb-sep{ opacity:.55 }
+
+/* Karty & sekce – dark surfaces */
+.card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+/* Light mode cards - jemné stíny */
+[data-theme="light"] .card{
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+}
+[data-theme="light"] .sidebar,
+[data-theme="light"] .subsidebar{
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.content > section + section{ margin-top: 28px }
+.card + .card{ margin-top: 18px }
+
+/* Typografie */
+.h1{
+  font-size: 40px; line-height:1.2; font-weight: 900;
+  margin: 0 0 10px; letter-spacing:.2px;
+}
+.h2{
+  font-size: 26px; line-height:1.3; font-weight: 800;
+  margin: 0 0 10px;
+}
+p{ margin: 10px 0 }
+ul{ margin: 10px 0 10px 18px }
+li{ margin: 3px 0 }
+
+/* Kód bloky */
+pre{
+  background: var(--code-bg);
+  color: var(--code-fg);
+  border-radius: 14px;
+  padding: 14px;
+  overflow: auto;
+  border: 1px solid var(--code-border);
+  margin: 12px 0;
+}
+code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 13.5px;
+}
+/* Light mode - inline code styling */
+[data-theme="light"] p code,
+[data-theme="light"] li code,
+[data-theme="light"] .description code{
+  background: #e0f2fe;
+  color: #0c4a6e;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #bae6fd;
+}
+
+/* Scrollbary (Chromium/Edge) – menu + bloky kódu */
+.nav-cats::-webkit-scrollbar,
+.subnav::-webkit-scrollbar,
+pre::-webkit-scrollbar{ height:10px; width:5px }
+.nav-cats::-webkit-scrollbar-thumb,
+.subnav::-webkit-scrollbar-thumb,
+pre::-webkit-scrollbar-thumb{ background:#334155; border-radius:8px }
+.nav-cats::-webkit-scrollbar-thumb:hover,
+.subnav::-webkit-scrollbar-thumb:hover,
+pre::-webkit-scrollbar-thumb:hover{ background:#475569 }
+/* Light mode – světlejší posuvníky v menu a kódu */
+[data-theme="light"] .nav-cats::-webkit-scrollbar-thumb,
+[data-theme="light"] .subnav::-webkit-scrollbar-thumb,
+[data-theme="light"] pre::-webkit-scrollbar-thumb{ background:#cbd5e1; }
+[data-theme="light"] .nav-cats::-webkit-scrollbar-thumb:hover,
+[data-theme="light"] .subnav::-webkit-scrollbar-thumb:hover,
+[data-theme="light"] pre::-webkit-scrollbar-thumb:hover{ background:#94a3b8; }
+
+/* Theme toggle switch */
+.theme-toggle{
+  margin-left: auto;
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.theme-toggle-label{
+  font-size: 14px;
+  color: var(--muted);
+  user-select: none;
+}
+.toggle-switch{
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+.toggle-switch input{
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-slider{
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #30363d;
+  transition: 0.3s;
+  border-radius: 34px;
+}
+.toggle-slider:before{
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+.toggle-switch input:checked + .toggle-slider{
+  background-color: #04C38D;
+}
+.toggle-switch input:checked + .toggle-slider:before{
+  transform: translateX(24px);
+}
+.toggle-switch:hover .toggle-slider{
+  background-color: #3d444d;
+}
+.toggle-switch input:checked:hover + .toggle-slider{
+  background-color: #00b37e;
+}
+
+/* Search */
+.search-container{
+  position: relative;
+  flex: 0 0 auto;
+}
+.search-input-wrapper{
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-icon{
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  pointer-events: none;
+}
+.search-input{
+  width: 280px;
+  height: 36px;
+  padding: 0 12px 0 36px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+.search-input::placeholder{
+  color: var(--muted);
+}
+.search-input:focus{
+  outline: none;
+  border-color: var(--link);
+  background: rgba(255,255,255,0.12);
+  box-shadow: 0 0 0 3px rgba(4, 195, 141, 0.1);
+}
+/* Light mode search input */
+[data-theme="light"] .search-input{
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+[data-theme="light"] .search-input:focus{
+  background: #ffffff;
+  border-color: var(--link);
+  box-shadow: 0 0 0 3px rgba(4, 195, 141, 0.08);
+}
+
+/* Search dropdown */
+.search-dropdown{
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  max-height: 400px;
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  z-index: 2000;
+  display: none;
+}
+.search-dropdown.active{
+  display: block;
+}
+/* Light mode dropdown */
+[data-theme="light"] .search-dropdown{
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.search-result-group{
+  padding: 8px 0;
+}
+.search-result-group:not(:last-child){
+  border-bottom: 1px solid var(--border);
+}
+.search-group-title{
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.search-result-item{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-decoration: none;
+}
+.search-result-item:hover,
+.search-result-item.selected{
+  background: rgba(4, 195, 141, 0.1);
+  color: var(--link);
+}
+/* Light mode hover */
+[data-theme="light"] .search-result-item:hover,
+[data-theme="light"] .search-result-item.selected{
+  background: rgba(4, 195, 141, 0.08);
+  color: #059669;
+}
+.search-result-icon{
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.search-result-item:hover .search-result-icon,
+.search-result-item.selected .search-result-icon{
+  color: var(--link);
+}
+.search-result-text{
+  flex: 1;
+  min-width: 0;
+}
+.search-result-title{
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.search-result-breadcrumb{
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.search-no-results{
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Scrollbar pro dropdown */
+.search-dropdown::-webkit-scrollbar{ width:5px }
+.search-dropdown::-webkit-scrollbar-thumb{ background:#334155; border-radius:8px }
+.search-dropdown::-webkit-scrollbar-thumb:hover{ background:#475569 }
+/* Light mode – světlejší posuvník v dropdown vyhledávání */
+[data-theme="light"] .search-dropdown::-webkit-scrollbar-thumb{ background:#cbd5e1; }
+[data-theme="light"] .search-dropdown::-webkit-scrollbar-thumb:hover{ background:#94a3b8; }
+
+/* Responsivita */
+@media (max-width: 1260px){
+  :root{ --content-max: 1000px; }
+}
+@media (max-width: 1120px){
+  :root{ --sidebar-w: 300px; --subsidebar-w: 300px; }
+}
+@media (max-width: 980px){
+  .layout{ grid-template-columns: 1fr; }
+  .sidebar, .subsidebar{
+    position: static;                /* na mobilu bez sticky */
+    max-height: none;
+    overflow: visible;
+    margin-bottom: var(--gap);
+  }
+  /* Na mobilu raději vrátíme scroll oknu (lepší UX gest) */
+  body{ overflow: auto; }
+  .content{ height: auto; }
+  .content-scroll{ overflow: visible; padding-right: 0; }
+  .nav-cats, .subnav{
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+  .content{ width: 100% }
+}
+@media (max-width: 640px){
+  .theme-toggle-label{ display: none; }
+  .search-container{ margin-left: 12px; }
+  .search-input{ width: 180px; }
+}
+@media (max-width: 480px){
+  .search-container{
+    position: fixed;
+    top: 64px;
+    left: 12px;
+    right: 12px;
+    margin: 0;
+    z-index: 1001;
+  }
+  .search-input{ width: 100%; }
+}

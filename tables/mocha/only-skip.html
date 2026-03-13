@@ -1,0 +1,58 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">.only() a .skip()</h1>
+    <p class="description">
+      <code>.only()</code> a <code>.skip()</code> jsou Mocha utility pro <strong>filtrování testů</strong>. Pomáhají při ladění – můžeš spouštět jen vybrané
+      testy nebo některé dočasně přeskočit.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">.only() – spustit jen vybrané testy</h2>
+    <p class="description">
+      <code>.only()</code> říká Mocha/Cypressu: „spusť jen tento test nebo tuto skupinu“. Hodí se při debugování konkrétního scénáře.
+    </p>
+
+    <h3 class="h3">Použití na úrovni describe()</h3>
+    <pre><code>describe.only('Mailing list', () => {
+  it('vytvoří nový mailing list', () => { /* ... */ });
+  it('smaže mailing list', () => { /* ... */ });
+});</code></pre>
+
+    <h3 class="h3">Použití na úrovni it()</h3>
+    <pre><code>it.only('ladím jen tento test', () => {
+  // ...
+});</code></pre>
+
+    <p class="description">
+      <strong>Pozor:</strong> Pokud někde v souboru existuje <code>.only</code>, spustí se <strong>jen tyto testy</strong> a ostatní se ignorují.
+      Ideální pro lokální vývoj, ale nemělo by zůstat v kódu při commitu.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">.skip() – dočasně přeskočit test</h2>
+    <p class="description">
+      <code>.skip()</code> říká Mocha/Cypressu: „tento test teď neprováděj“. Použij, pokud je scénář dočasně nefunkční nebo čeká na úpravu.
+    </p>
+
+    <h3 class="h3">Použití</h3>
+    <pre><code>it.skip('dočasně nefunkční scénář', () => {
+  // tento test se nyní neprovede
+});</code></pre>
+
+    <p class="description">
+      Přeskočené testy se v reportu zobrazí jako „skipped“. Je dobré k nim doplnit komentář, proč jsou přeskočené.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Doporučení pro praxi</h2>
+    <ul>
+      <li>Používej <code>.only()</code> a <code>.skip()</code> jen při vývoji / ladění.</li>
+      <li>Před commitem do repozitáře zkontroluj, že v kódu nezůstalo žádné <code>.only</code>.</li>
+      <li>Pokud něco dlouhodobě nefunguje, raději scénář uprav nebo přeskočení zdůvodni v komentáři.</li>
+    </ul>
+  </section>
+</section>
+

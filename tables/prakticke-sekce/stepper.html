@@ -1,0 +1,76 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování stepperu</h1>
+    <p class="description">
+      Kompletní průvodce testováním stepperu (progress indikátoru) v Cypressu. Zahrnuje ověření stavu kroků a navigaci mezi kroky.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Ověření stepperu pomocí custom příkazu</h2>
+    
+    <h3 class="h3">Definice custom příkazu</h3>
+    <pre><code>Cypress.Commands.add('checkStepper', ({ processed, disabled, visited }) => {
+  const length = 1 + processed + disabled + visited;
+
+  cy.dataCy('progress-header')
+    .should('be.visible')
+    .within(() => {
+      cy.get('.active').should('have.length', 1);
+      cy.get('.processed').should('have.length', processed);
+      cy.get('.disabled').should('have.length', disabled);
+      cy.get('.visited').should('have.length', visited);
+      cy.get('.stepper').find('li').not('.arrow').should('have.length', length);
+    });
+});</code></pre>
+
+    <h3 class="h3">Použití</h3>
+    <pre><code>// První krok (0 processed, 3 disabled, 0 visited)
+cy.checkStepper({ processed: 0, disabled: 3, visited: 0 });
+
+// Druhý krok (1 processed, 2 disabled, 0 visited)
+cy.checkStepper({ processed: 1, disabled: 2, visited: 0 });
+
+// Po návratu (1 processed, 2 disabled, 1 visited)
+cy.checkStepper({ processed: 1, disabled: 2, visited: 1 });</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Navigace mezi kroky</h2>
+    
+    <h3 class="h3">Přechod na další krok</h3>
+    <pre><code>cy.intercept({ method: 'PATCH', url: '**/api/endpoint/**' }).as('nextStep');
+cy.dataCy('continue-button').click();
+cy.wait('@nextStep');
+cy.checkStepper({ processed: 1, disabled: 2, visited: 0 });</code></pre>
+
+    <h3 class="h3">Návrat na předchozí krok</h3>
+    <pre><code>cy.intercept({ method: 'GET', url: '**/api/endpoint/**' }).as('prevStep');
+cy.dataCy('step-1').click();
+cy.wait('@prevStep');
+cy.checkStepper({ processed: 0, disabled: 2, visited: 1 });</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('Wizard s stepperem', () => {
+  before(() => {
+    cy.tokenAuth('/wizard');
+  });
+
+  it('zobrazí správný stav stepperu na začátku', () => {
+    cy.checkStepper({ processed: 0, disabled: 3, visited: 0 });
+  });
+
+  it('přejde na druhý krok', () => {
+    cy.continue('endpoint', 'PATCH');
+    cy.checkStepper({ processed: 1, disabled: 2, visited: 0 });
+  });
+
+  it('vrátí se na první krok', () => {
+    cy.dataCy('step-1').click();
+    cy.checkStepper({ processed: 0, disabled: 2, visited: 1 });
+  });
+});</code></pre>
+  </section>
+</section>

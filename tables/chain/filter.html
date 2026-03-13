@@ -1,0 +1,107 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">.filter()</h1>
+    <p class="description">
+      Filtrování elementů z kolekce podle selektoru nebo callback funkce. Vrací pouze elementy, které splňují podmínku. Užitečné pro zúžení kolekce podle kritérií.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.filter(selector)
+.filter(callbackFn)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('button').filter('.active').click()         // Podle třídy
+cy.get('input').filter('[type="text"]').type('text') // Podle atributu
+cy.get('tr').filter(($row) => {                     // Callback funkce
+  return $row.find('td').length > 3
+})</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.filter('.active')                                 // Chyba, nelze řetězit z 'cy'
+cy.window().filter('.active')                        // Chyba, window není kolekce</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">selector (String)</h3>
+    <p class="description">
+      CSS selektor pro filtrování elementů. Vrátí pouze elementy, které odpovídají selektoru.
+    </p>
+
+    <h3 class="h3">callbackFn (Function)</h3>
+    <p class="description">
+      Callback funkce pro vlastní filtrování. Dostává jQuery element a index jako argumenty. Vrátí <code>true</code> pro elementy, které mají být zahrnuty.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s filtrovanými elementy. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Filtrování podle selektoru</h3>
+    <pre><code>cy.get('button').filter('.active').click()
+cy.get('li').filter('.selected').should('have.length', 3)</code></pre>
+
+    <h3 class="h3">Filtrování podle atributu</h3>
+    <pre><code>cy.get('input').filter('[type="text"]').type('text')
+cy.get('a').filter('[href*="example"]').should('have.length', 5)</code></pre>
+
+    <h3 class="h3">Filtrování pomocí callback</h3>
+    <pre><code>cy.get('tr').filter(($row) => {
+  return $row.find('td').length > 3
+}).should('have.length', 10)</code></pre>
+
+    <h3 class="h3">Filtrování podle textu</h3>
+    <pre><code>cy.get('li').filter(($el) => {
+  return $el.text().includes('Important')
+}).click()</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Filtrování z kolekce</h3>
+    <p class="description">
+      <code>.filter()</code> filtruje z aktuální kolekce elementů. Vrací novou kolekci s elementy, které splňují podmínku.
+    </p>
+
+    <h3 class="h3">Callback funkce</h3>
+    <p class="description">
+      Callback dostává jQuery element jako první argument a index jako druhý argument. Vrátí <code>true</code> pro elementy, které mají být zahrnuty do výsledku.
+    </p>
+
+    <h3 class="h3">Rozdíl od .not()</h3>
+    <p class="description">
+      <code>.filter()</code> vybírá elementy, které splňují podmínku, zatímco <code>.not()</code> vybírá elementy, které podmínku nesplňují (negace).
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o filtrovaných elementech. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/filter" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/filter →
+      </a>
+    </p>
+  </section>
+</section>

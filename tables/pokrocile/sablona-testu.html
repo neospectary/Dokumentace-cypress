@@ -1,0 +1,715 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Šablona pro nové testy</h1>
+    <p class="description">
+      Kompletní šablona struktury testu založená na analýze reálných profesionálních testů. Použijte tuto šablonu jako startovní bod pro nové testy.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Základní struktura testu</h2>
+    <p class="description">
+      Každý test by měl následovat tuto strukturu:
+    </p>
+    <pre><code>/**
+ * Popis scénáře - co test dělá
+ * 1. Krok 1
+ * 2. Krok 2
+ * 3. Krok 3
+ */
+
+// Konstanta pro unikátní hodnoty (používá se pro testovací data)
+const HASH = (+new Date()).toString(36);
+
+// Další konstanty pro testovací data
+const TEST_DATA = {
+  name: 'Test Name',
+  email: 'test@example.com'
+};
+
+describe('Název feature/modulu', () => {
+  // Context pro viewport/device
+  context('DESKTOP', Cypress.env('resolution')['desktop'], () => {
+    
+    // Setup - autentizace a navigace
+    before(() => {
+      cy.tokenAuth('/cesta-k-strance');
+    });
+
+    // Volitelné: Kroky rozdělené do describe bloků
+    describe('Step 1: Název kroku', () => {
+      it('popis co test dělá', () => {
+        // Test kód
+      });
+    });
+
+    // Nebo přímo jednotlivé testy
+    it('popis co test dělá', () => {
+      // Test kód
+    });
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní šablona s komentáři</h2>
+    <pre><code>/**
+ * Název scénáře
+ * -------------------------------------------------------------
+ * Tento scénář testuje:
+ * 1. Vytvoření nového záznamu
+ * 2. Ověření zobrazení v tabulce
+ * 3. Editace záznamu
+ * 4. Smazání záznamu
+ */
+
+// ============================================
+// KONSTANTY PRO TESTOVACÍ DATA
+// ============================================
+const HASH = (+new Date()).toString(36);
+const TEST_NAME = `Test_${HASH}`;
+const TEST_EMAIL = `test_${HASH}@example.com`;
+
+// ============================================
+// HLAVNÍ BLOK TESTOVÁNÍ
+// ============================================
+describe('Název feature (např. Contact List)', () => {
+  
+  // Context pro viewport/device
+  context('DESKTOP', Cypress.env('resolution')['desktop'], () => {
+    
+    // ============================================
+    // SETUP - PŘÍPRAVA TESTOVACÍHO PROSTŘEDÍ
+    // ============================================
+    before(() => {
+      // Autentizace pomocí API (rychlejší než UI)
+      cy.tokenAuth('/cesta-k-strance');
+      
+      // Nebo pomocí UI
+      // cy.visit('/login');
+      // cy.authorization('/dashboard');
+    });
+
+    // ============================================
+    // KROK 1: VYTVOŘENÍ ZÁZNAMU
+    // ============================================
+    describe('Step 1: Vytvoření nového záznamu', () => {
+      
+      it('otevře formulář pro vytvoření', () => {
+        cy.intercept({ method: 'GET', url: '**/api/endpoint' }).as('getData');
+        cy.dataCy('create-button').should('be.visible').click();
+        cy.wait('@getData');
+        cy.dataCy('modal-window').should('be.visible');
+      });
+
+      it('vyplní název záznamu', () => {
+        cy.dataCy('modal-window').within(() => {
+          cy.checkLabel('name-container', {
+            labelValue: 'Název',
+            tooltipValue: 'Tooltip text'
+          });
+          cy.fillInput('name-container', TEST_NAME, {
+            required: true,
+            type: 'text'
+          });
+        });
+      });
+
+      it('vyplní email', () => {
+        cy.dataCy('modal-window').within(() => {
+          cy.checkLabel('email-container', {
+            labelValue: 'Email'
+          });
+          cy.fillInput('email-container', TEST_EMAIL, {
+            type: 'email',
+            required: true
+          });
+        });
+      });
+
+      it('uloží záznam', () => {
+        cy.dataCy('modal-window').within(() => {
+          cy.intercept({ method: 'POST', url: '**/api/endpoint' }).as('create');
+          cy.dataCy('save-button').click();
+          cy.wait('@create');
+        });
+        cy.dataCy('modal-window').should('not.exist');
+      });
+    });
+
+    // ============================================
+    // KROK 2: OVĚŘENÍ V TABULCE
+    // ============================================
+    describe('Step 2: Ověření v tabulce', () => {
+      
+      it('vyhledá vytvořený záznam', () => {
+        cy.intercept({ method: 'GET', url: '**/api/endpoint/**' }).as('search');
+        cy.searchInput('search-container', TEST_NAME);
+        cy.wait('@search');
+      });
+
+      it('ověří zobrazení záznamu v tabulce', () => {
+        cy.dataCy('table-row').should('have.length', 1);
+        cy.dataCy('cell-name').should('contain.text', TEST_NAME);
+        cy.dataCy('cell-email').should('contain.text', TEST_EMAIL);
+      });
+    });
+
+    // ============================================
+    // KROK 3: EDITACE
+    // ============================================
+    describe('Step 3: Editace záznamu', () => {
+      
+      it('otevře detail záznamu', () => {
+        cy.intercept({ method: 'GET', url: '**/api/endpoint/**' }).as('getDetail');
+        cy.dataCy('detail-button').click();
+        cy.wait('@getDetail');
+        cy.dataCy('page-header').should('contain.text', TEST_NAME);
+      });
+
+      it('upraví název', () => {
+        const UPDATED_NAME = `Updated_${TEST_NAME}`;
+        cy.fillInput('name-container', UPDATED_NAME, {
+          clear: true,
+          required: true
+        });
+      });
+
+      it('uloží změny', () => {
+        cy.intercept({ method: 'PUT', url: '**/api/endpoint/**' }).as('update');
+        cy.continue('endpoint', 'PUT');
+        cy.wait('@update');
+      });
+
+      it('ověří uložení změn', () => {
+        cy.dataCy('page-header').should('contain.text', `Updated_${TEST_NAME}`);
+        cy.checkInputValue('name-container', `Updated_${TEST_NAME}`);
+      });
+    });
+
+    // ============================================
+    // KROK 4: SMAZÁNÍ
+    // ============================================
+    describe('Step 4: Smazání záznamu', () => {
+      
+      it('otevře modál pro smazání', () => {
+        cy.dataCy('dropdown-button').click();
+        cy.dataCy('delete-button').should('be.visible').click();
+        cy.dataCy('modal-window').should('be.visible');
+      });
+
+      it('potvrdí smazání', () => {
+        cy.dataCy('modal-window').within(() => {
+          cy.intercept({ method: 'DELETE', url: '**/api/endpoint/**' }).as('delete');
+          cy.acceptModal('**/api/endpoint/**', 'Smazat', {
+            header: 'Smazat záznam?',
+            description: `Opravdu si přejete smazat ${TEST_NAME}?`,
+            method: 'DELETE'
+          });
+          cy.wait('@delete');
+        });
+      });
+
+      it('ověří, že záznam byl smazán', () => {
+        cy.searchInput('search-container', TEST_NAME, { clear: true });
+        cy.dataCy('empty-table').should('be.visible');
+      });
+    });
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Nejčastější patterns</h2>
+    
+    <h3 class="h3">1. Autentizace</h3>
+    <pre><code>// Rychlá autentizace pomocí API (doporučeno)
+before(() => {
+  cy.tokenAuth('/dashboard');
+});
+
+// Nebo pomocí UI
+before(() => {
+  cy.visit('/login');
+  cy.authorization('/dashboard');
+});</code></pre>
+
+    <h3 class="h3">2. Mockování API</h3>
+    <pre><code>// Před akcí, která spustí request
+cy.intercept({ method: 'GET', url: '**/api/endpoint' }).as('getData');
+cy.dataCy('button').click();
+cy.wait('@getData');
+
+// Ověření response
+cy.wait('@getData').its('response.statusCode').should('eq', 200);</code></pre>
+
+    <h3 class="h3">3. Práce s formulářem</h3>
+    <pre><code>// Vyplnění inputu
+cy.fillInput('name-container', 'Hodnota', {
+  required: true,
+  type: 'text',
+  clear: true
+});
+
+// Vyplnění textarea
+cy.fillTextarea('description-container', 'Text', {
+  required: false,
+  clear: true
+});
+
+// Výběr z dropdownu
+cy.selectFromList('Hodnota', 0);
+
+// Checkbox
+cy.fillCheckbox('terms-container', 'Souhlasím', {
+  required: true
+});</code></pre>
+
+    <h3 class="h3">4. Ověření</h3>
+    <pre><code>// Viditelnost a stav
+cy.get('button')
+  .should('be.visible')
+  .and('be.enabled');
+
+// Text
+cy.get('h1')
+  .should('be.visible')
+  .and('contain.text', 'Nadpis');
+
+// Atributy
+cy.get('a')
+  .should('have.attr', 'href')
+  .and('include', '/page');
+
+// Hodnoty
+cy.checkInputValue('name-container', 'Hodnota');</code></pre>
+
+    <h3 class="h3">5. Práce s modálem</h3>
+    <pre><code>// Otevření modálu
+cy.dataCy('open-modal-button').click();
+cy.dataCy('modal-window').should('be.visible');
+
+// Práce uvnitř modálu
+cy.dataCy('modal-window').within(() => {
+  cy.fillInput('name', 'Hodnota');
+  cy.dataCy('save-button').click();
+});
+
+// Zavření modálu
+cy.dataCy('modal-window').should('not.exist');</code></pre>
+
+    <h3 class="h3">6. Práce s tabulkou</h3>
+    <pre><code>// Vyhledávání
+cy.searchInput('search-container', 'Hledaný text');
+
+// Ověření počtu řádků
+cy.dataCy('table-row').should('have.length', 5);
+
+// Práce s konkrétním řádkem
+cy.dataCy('table-row')
+  .eq(0)
+  .within(() => {
+    cy.dataCy('cell-name').should('contain.text', 'Text');
+    cy.dataCy('detail-button').click();
+  });</code></pre>
+
+    <h3 class="h3">7. Navigace</h3>
+    <pre><code>// Ověření URL
+cy.url().should('include', '/dashboard');
+cy.location('pathname').should('eq', '/settings');
+
+// Navigace zpět
+cy.go('back');
+cy.goBack(); // vlastní příkaz</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Best Practices</h2>
+    
+    <h3 class="h3">✅ DOPORUČENO</h3>
+    <ul>
+      <li><strong>Používejte HASH pro unikátní hodnoty</strong> - <code>const HASH = (+new Date()).toString(36);</code></li>
+      <li><strong>Autentizace v before()</strong> - pomocí API je rychlejší</li>
+      <li><strong>Rozdělte testy do logických kroků</strong> - použijte describe() pro kroky</li>
+      <li><strong>Každý it() testuje jednu věc</strong> - jasný popis v názvu</li>
+      <li><strong>Používejte cy.intercept() a cy.wait()</strong> - pro čekání na API</li>
+      <li><strong>Používejte cy.dataCy()</strong> - místo cy.get('[data-cy="..."]')</li>
+      <li><strong>Komentáře nahoře</strong> - popište, co test dělá</li>
+      <li><strong>Konstanty pro data</strong> - snadná údržba a změna</li>
+    </ul>
+
+    <h3 class="h3">❌ NEDOPORUČENO</h3>
+    <ul>
+      <li><strong>Nepoužívejte cy.wait(ms)</strong> - použijte cy.wait('@alias')</li>
+      <li><strong>Nepoužívejte hardcoded hodnoty</strong> - použijte konstanty</li>
+      <li><strong>Nekombinujte více akcí v jednom it()</strong> - rozdělte na více testů</li>
+      <li><strong>Nepoužívejte cy.pause() v produkci</strong> - jen pro debug</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Minimální šablona pro rychlý start</h2>
+    <pre><code>const HASH = (+new Date()).toString(36);
+
+describe('Název feature', () => {
+  context('DESKTOP', Cypress.env('resolution')['desktop'], () => {
+    before(() => {
+      cy.tokenAuth('/cesta');
+    });
+
+    it('popis testu', () => {
+      cy.dataCy('element').should('be.visible').click();
+      cy.dataCy('result').should('contain.text', 'Očekávaný text');
+    });
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kopírovatelná šablona</h2>
+    <p class="description">
+      Zkopírujte tento kód a upravte podle potřeby:
+    </p>
+    <pre><code>/**
+ * Název scénáře
+ * -------------------------------------------------------------
+ * Tento scénář testuje:
+ * 1. Krok 1
+ * 2. Krok 2
+ * 3. Krok 3
+ */
+
+const HASH = (+new Date()).toString(36);
+
+describe('Název feature', () => {
+  context('DESKTOP', Cypress.env('resolution')['desktop'], () => {
+    before(() => {
+      cy.tokenAuth('/cesta-k-strance');
+    });
+
+    describe('Step 1: Název kroku', () => {
+      it('popis co test dělá', () => {
+        cy.intercept({ method: 'GET', url: '**/api/endpoint' }).as('getData');
+        cy.dataCy('button').should('be.visible').click();
+        cy.wait('@getData');
+      });
+    });
+
+    it('popis testu', () => {
+      cy.dataCy('element')
+        .should('be.visible')
+        .and('be.enabled')
+        .click();
+      
+      cy.dataCy('result')
+        .should('be.visible')
+        .and('contain.text', 'Očekávaný text');
+    });
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Organizace testů - kdy použít describe() pro kroky</h2>
+    
+    <h3 class="h3">✅ Použijte describe() pro kroky když:</h3>
+    <ul>
+      <li>Test má více logických kroků (Step 1, Step 2, atd.)</li>
+      <li>Chcete jasně oddělit části testu</li>
+      <li>Test je komplexní a má více fází</li>
+    </ul>
+
+    <h3 class="h3">Příklad s kroky:</h3>
+    <pre><code>describe('Contact List', () => {
+  describe('Step 1: Vytvoření seznamu', () => {
+    it('otevře formulář', () => {});
+    it('vyplní údaje', () => {});
+    it('uloží seznam', () => {});
+  });
+
+  describe('Step 2: Ověření v tabulce', () => {
+    it('vyhledá seznam', () => {});
+    it('ověří zobrazení', () => {});
+  });
+});</code></pre>
+
+    <h3 class="h3">Nepoužívejte describe() když:</h3>
+    <ul>
+      <li>Test je jednoduchý a má jen pár testů</li>
+      <li>Kroky na sebe nezávisí</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Časté problémy a řešení</h2>
+    
+    <h3 class="h3">1. Element není nalezen</h3>
+    <pre><code>// ❌ ŠPATNĚ
+cy.get('.element').click(); // může selhat
+
+// ✅ SPRÁVNĚ
+cy.dataCy('element')
+  .should('be.visible')
+  .click();</code></pre>
+
+    <h3 class="h3">2. Čekání na načtení</h3>
+    <pre><code>// ❌ ŠPATNĚ
+cy.wait(2000); // anti-pattern
+
+// ✅ SPRÁVNĚ
+cy.intercept('GET', '**/api/data').as('getData');
+cy.dataCy('button').click();
+cy.wait('@getData');</code></pre>
+
+    <h3 class="h3">3. Práce s dynamickými daty</h3>
+    <pre><code>// ✅ Použijte HASH pro unikátní hodnoty
+const HASH = (+new Date()).toString(36);
+const TEST_NAME = `Test_${HASH}`;
+
+cy.fillInput('name-container', TEST_NAME);
+cy.searchInput('search-container', TEST_NAME);</code></pre>
+
+    <h3 class="h3">4. Práce s modálem</h3>
+    <pre><code>// ✅ Vždy použijte within() pro scope
+cy.dataCy('modal-window').within(() => {
+  cy.fillInput('name', 'Hodnota');
+  cy.dataCy('save-button').click();
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Typické scénáře - šablony</h2>
+    
+    <h3 class="h3">CRUD operace (Create, Read, Update, Delete)</h3>
+    <pre><code>describe('CRUD operace', () => {
+  const HASH = (+new Date()).toString(36);
+  
+  before(() => {
+    cy.tokenAuth('/page');
+  });
+
+  describe('CREATE', () => {
+    it('otevře formulář', () => {});
+    it('vyplní údaje', () => {});
+    it('uloží záznam', () => {});
+  });
+
+  describe('READ', () => {
+    it('vyhledá záznam', () => {});
+    it('zobrazí detail', () => {});
+  });
+
+  describe('UPDATE', () => {
+    it('otevře editaci', () => {});
+    it('upraví údaje', () => {});
+    it('uloží změny', () => {});
+  });
+
+  describe('DELETE', () => {
+    it('otevře modál smazání', () => {});
+    it('potvrdí smazání', () => {});
+    it('ověří smazání', () => {});
+  });
+});</code></pre>
+
+    <h3 class="h3">Wizard/Multi-step formulář</h3>
+    <pre><code>describe('Wizard formulář', () => {
+  before(() => {
+    cy.tokenAuth('/wizard');
+  });
+
+  describe('Step 1: Základní údaje', () => {
+    it('ověří progress header', () => {
+      cy.checkStepper({ processed: 0, disabled: 3, visited: 0 });
+    });
+    it('vyplní údaje', () => {});
+    it('pokračuje na další krok', () => {
+      cy.continue('endpoint', 'PATCH');
+    });
+  });
+
+  describe('Step 2: Další údaje', () => {
+    it('ověří progress header', () => {
+      cy.checkStepper({ processed: 1, disabled: 2, visited: 0 });
+    });
+    it('vyplní údaje', () => {});
+    it('vrací se na předchozí krok', () => {
+      cy.dataCy('step-1').click();
+    });
+  });
+});</code></pre>
+
+    <h3 class="h3">Tabulka s vyhledáváním</h3>
+    <pre><code>describe('Tabulka s vyhledáváním', () => {
+  const SEARCH_TERM = 'Hledaný text';
+  
+  before(() => {
+    cy.tokenAuth('/table');
+  });
+
+  it('zobrazí tabulku', () => {
+    cy.dataCy('table').should('be.visible');
+    cy.dataCy('table-row').should('have.length.greaterThan', 0);
+  });
+
+  it('vyhledá záznam', () => {
+    cy.intercept('GET', '**/api/search**').as('search');
+    cy.searchInput('search-container', SEARCH_TERM);
+    cy.wait('@search');
+  });
+
+  it('zobrazí výsledky', () => {
+    cy.dataCy('table-row').each(($row) => {
+      cy.wrap($row).should('contain.text', SEARCH_TERM);
+    });
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Checklist před spuštěním testu</h2>
+    <ul>
+      <li>✅ Je autentizace v before()?</li>
+      <li>✅ Používám HASH pro unikátní hodnoty?</li>
+      <li>✅ Používám cy.intercept() a cy.wait() místo cy.wait(ms)?</li>
+      <li>✅ Každý it() testuje jednu věc?</li>
+      <li>✅ Používám cy.dataCy() místo cy.get('[data-cy="..."]')?</li>
+      <li>✅ Ověřuji stav před interakcí (be.visible, be.enabled)?</li>
+      <li>✅ Používám within() pro práci s modály a kontejnery?</li>
+      <li>✅ Mám popisný název pro každý it()?</li>
+      <li>✅ Mám komentář nahoře popisující scénář?</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Práce s proměnnými a hodnotami</h2>
+    
+    <h3 class="h3">Ukládání hodnot pro pozdější použití</h3>
+    <pre><code>// Uložení URL pro pozdější použití
+let LIST_URL;
+let CONTACT_URL;
+
+it('otevře detail a uloží URL', () => {
+  cy.dataCy('detail-button').click();
+  cy.url().then((url) => {
+    LIST_URL = new URL(url).pathname;
+  });
+});
+
+it('vrátí se na uloženou URL', () => {
+  cy.visit(LIST_URL);
+});</code></pre>
+
+    <h3 class="h3">Ukládání hodnot z API response</h3>
+    <pre><code>let CREATED_ID;
+
+it('vytvoří záznam a uloží ID', () => {
+  cy.intercept('POST', '**/api/endpoint').as('create');
+  cy.dataCy('create-button').click();
+  cy.wait('@create').then((interception) => {
+    CREATED_ID = interception.response.body.id;
+  });
+});
+
+it('použije uložené ID', () => {
+  cy.visit(`/detail/${CREATED_ID}`);
+});</code></pre>
+
+    <h3 class="h3">Dynamické hodnoty</h3>
+    <pre><code>// HASH pro unikátní hodnoty
+const HASH = (+new Date()).toString(36);
+
+// Datum (zítra)
+const TOMORROW = (() => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+})();</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Tipy pro začátek</h2>
+    <ol>
+      <li><strong>Začněte s minimální šablonou</strong> - přidejte postupně další části</li>
+      <li><strong>Nejdřív napište strukturu</strong> - describe(), context(), before(), it()</li>
+      <li><strong>Pak přidejte autentizaci</strong> - v before()</li>
+      <li><strong>Pak přidejte první test</strong> - jednoduchý, který funguje</li>
+      <li><strong>Postupně přidávejte další testy</strong> - jeden po druhém</li>
+      <li><strong>Refaktorujte</strong> - když vidíte opakování, vytvořte vlastní příkaz</li>
+      <li><strong>Používejte konstanty</strong> - pro data, které se opakují</li>
+      <li><strong>Testujte postupně</strong> - spouštějte test po každém přidání</li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Viewporty a devices</h2>
+    
+    <h3 class="h3">Testování na různých viewportech</h3>
+    <pre><code>describe('Feature', () => {
+  const Devices = ['desktop', 'mobile'];
+  
+  Devices.filter((device) => Cypress.env('devices')[device]).forEach((device) => {
+    context(device, Cypress.env('resolution')[device], () => {
+      before(() => {
+        cy.tokenAuth('/page');
+      });
+
+      it('test pro tento viewport', () => {
+        // Test kód
+      });
+    });
+  });
+});</code></pre>
+
+    <h3 class="h3">Jednoduchý přístup</h3>
+    <pre><code>describe('Feature', () => {
+  context('DESKTOP', Cypress.env('resolution')['desktop'], () => {
+    // Testy pro desktop
+  });
+
+  context('MOBILE', Cypress.env('resolution')['mobile'], () => {
+    // Testy pro mobile
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Importy a fixtures</h2>
+    
+    <h3 class="h3">Import textů z fixtures</h3>
+    <pre><code>// Import statických textů
+import { general as g, contact_list as cl } from '@fixtures/static-texts';
+
+// Použití
+cy.dataCy('title').should('contain.text', g.page_title);
+cy.checkLabel('name-container', { labelValue: cl.name.label });</code></pre>
+
+    <h3 class="h3">Struktura souboru</h3>
+    <pre><code>// 1. Importy (pokud jsou potřeba)
+import { texts } from '@fixtures/static-texts';
+
+// 2. Konstanty
+const HASH = (+new Date()).toString(36);
+
+// 3. Hlavní blok
+describe('Feature', () => {
+  // ...
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Rychlý start - 5 kroků</h2>
+    <ol>
+      <li><strong>Zkopírujte minimální šablonu</strong></li>
+      <li><strong>Upravte název describe()</strong> - podle feature, kterou testujete</li>
+      <li><strong>Upravte cestu v tokenAuth()</strong> - kam chcete navigovat</li>
+      <li><strong>Napište první jednoduchý test</strong> - např. ověření zobrazení stránky</li>
+      <li><strong>Spusťte test a postupně přidávejte další</strong></li>
+    </ol>
+  </section>
+</section>
+
+
+
+
+

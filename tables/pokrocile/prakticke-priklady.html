@@ -1,0 +1,284 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Praktické příklady z praxe</h1>
+    <p class="description">
+      Reálné příklady testů z profesionálních projektů. Ukázky komplexních scénářů, které kombinují různé Cypress příkazy a vlastní custom commands.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Příklad 1: Přihlášení pomocí API</h2>
+    <p class="description">
+      Rychlé přihlášení pomocí API requestu místo UI interakce. Užitečné pro setup testů.
+    </p>
+
+    <pre><code>describe('Dashboard', () => {
+  before(() => {
+    // Přihlášení pomocí API
+    cy.request('POST', '/api/login', {
+      username: Cypress.env('CY_EMAIL'),
+      password: Cypress.env('CY_PASSWORD')
+    }).then((response) => {
+      cy.window().then((win) => {
+        win.localStorage.setItem('API_TOKEN', response.body.token);
+      });
+    });
+  });
+
+  beforeEach(() => {
+    cy.visit('/dashboard');
+  });
+
+  it('zobrazí dashboard', () => {
+    cy.get('[data-cy="dashboard-content"]').should('be.visible');
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklad 2: Práce s formulářem</h2>
+    <p class="description">
+      Komplexní test formuláře s validací a různými typy inputů.
+    </p>
+
+    <pre><code>describe('Registrační formulář', () => {
+  beforeEach(() => {
+    cy.visit('/register');
+  });
+
+  it('úspěšná registrace', () => {
+    // Textové inputy
+    cy.fillInput('first-name', 'David', { required: true });
+    cy.fillInput('last-name', 'Novák', { required: true });
+    cy.fillInput('email', 'david@example.com', { 
+      type: 'email', 
+      required: true 
+    });
+
+    // Textarea
+    cy.fillTextarea('bio', 'Jsem vývojář', { required: false });
+
+    // Checkbox
+    cy.fillCheckbox('terms', 'Souhlasím s podmínkami', { required: true });
+
+    // Dropdown (custom Angular komponenta)
+    cy.selectFromList('Česká republika');
+
+    // Odeslání
+    cy.get('[data-cy="submit"]').click();
+
+    // Ověření
+    cy.url().should('include', '/success');
+    cy.get('.success-message').should('contain', 'Registrace úspěšná');
+  });
+
+  it('validace povinných polí', () => {
+    cy.get('[data-cy="submit"]').click();
+    
+    cy.get('.error-message').should('be.visible');
+    cy.asterisk(true);
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklad 3: Práce s tabulkou</h2>
+    <p class="description">
+      Testování dynamické tabulky s řazením, filtrováním a stránkováním.
+    </p>
+
+    <pre><code>describe('Tabulka uživatelů', () => {
+  beforeEach(() => {
+    cy.tokenAuth('/users');
+  });
+
+  it('zobrazí správný počet řádků', () => {
+    cy.get('table tbody tr').should('have.length', 10);
+  });
+
+  it('řazení podle sloupce', () => {
+    cy.get('th[data-cy="name-column"]').click();
+    
+    cy.get('table tbody tr')
+      .first()
+      .find('td')
+      .first()
+      .should('contain', 'A');
+  });
+
+  it('filtrování', () => {
+    cy.get('[data-cy="search-input"]').type('David');
+    
+    cy.get('table tbody tr').each(($row) => {
+      cy.wrap($row).find('td').first().should('contain', 'David');
+    });
+  });
+
+  it('stránkování', () => {
+    cy.get('[data-cy="next-page"]').click();
+    cy.url().should('include', 'page=2');
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklad 4: Mockování API</h2>
+    <p class="description">
+      Použití cy.intercept() pro mockování API response a testování různých scénářů.
+    </p>
+
+    <pre><code>describe('Seznam produktů', () => {
+  it('zobrazí produkty z API', () => {
+    cy.intercept('GET', '/api/products', {
+      statusCode: 200,
+      body: [
+        { id: 1, name: 'Produkt 1', price: 100 },
+        { id: 2, name: 'Produkt 2', price: 200 }
+      ]
+    }).as('getProducts');
+
+    cy.visit('/products');
+    cy.wait('@getProducts');
+
+    cy.get('[data-cy="product-item"]').should('have.length', 2);
+  });
+
+  it('zobrazí chybovou zprávu při selhání API', () => {
+    cy.intercept('GET', '/api/products', {
+      statusCode: 500,
+      body: { error: 'Server error' }
+    }).as('getProductsError');
+
+    cy.visit('/products');
+    cy.wait('@getProductsError');
+
+    cy.get('.error-message').should('contain', 'Chyba načítání');
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklad 5: Upload souboru</h2>
+    <p class="description">
+      Testování nahrávání souborů pomocí cypress-file-upload pluginu.
+    </p>
+
+    <pre><code>describe('Upload souboru', () => {
+  beforeEach(() => {
+    cy.visit('/upload');
+  });
+
+  it('nahrání CSV souboru', () => {
+    cy.fixture('test-data.csv', 'base64').then((fileContent) => {
+      cy.get('input[type="file"]').attachFile({
+        fileContent,
+        fileName: 'test-data.csv',
+        mimeType: 'text/csv',
+        encoding: 'base64'
+      });
+    });
+
+    cy.get('.upload-success').should('be.visible');
+    cy.get('.file-name').should('contain', 'test-data.csv');
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklad 6: Responzivní testování</h2>
+    <p class="description">
+      Testování různých viewportů a responzivního chování.
+    </p>
+
+    <pre><code>describe('Responzivní menu', () => {
+  it('desktop - menu je viditelné', () => {
+    cy.viewport(1920, 1080);
+    cy.visit('/');
+    
+    cy.get('.desktop-menu').should('be.visible');
+    cy.get('.mobile-menu-toggle').should('not.be.visible');
+  });
+
+  it('mobile - hamburger menu', () => {
+    cy.viewport('iphone-x');
+    cy.visit('/');
+    
+    cy.get('.desktop-menu').should('not.be.visible');
+    cy.get('.mobile-menu-toggle').click();
+    cy.get('.mobile-menu').should('be.visible');
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklad 7: Práce s modály</h2>
+    <p class="description">
+      Testování modálních oken a jejich interakcí.
+    </p>
+
+    <pre><code>describe('Modální okno', () => {
+  beforeEach(() => {
+    cy.visit('/');
+  });
+
+  it('otevření a zavření modálu', () => {
+    cy.get('[data-cy="open-modal"]').click();
+    
+    cy.get('.modal').should('be.visible');
+    cy.get('.modal-content').should('contain', 'Modal obsah');
+    
+    cy.get('.modal-close').click();
+    cy.get('.modal').should('not.exist');
+  });
+
+  it('zavření kliknutím mimo modál', () => {
+    cy.get('[data-cy="open-modal"]').click();
+    cy.get('.modal-overlay').click({ force: true });
+    cy.get('.modal').should('not.exist');
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklad 8: Čekání na dynamický obsah</h2>
+    <p class="description">
+      Správné čekání na dynamicky se měnící obsah bez použití cy.wait(ms).
+    </p>
+
+    <pre><code>describe('Dynamický obsah', () => {
+  it('čekání na načtení dat', () => {
+    cy.visit('/dashboard');
+    
+    // Čekání na konkrétní element místo časového intervalu
+    cy.get('[data-cy="loading-spinner"]').should('not.exist');
+    cy.get('[data-cy="data-table"]').should('be.visible');
+    
+    // Ověření, že data jsou načtená
+    cy.get('[data-cy="data-table"] tbody tr').should('have.length.greaterThan', 0);
+  });
+
+  it('čekání na API request', () => {
+    cy.intercept('GET', '/api/data').as('getData');
+    
+    cy.visit('/dashboard');
+    cy.wait('@getData');
+    
+    cy.get('[data-cy="data-content"]').should('be.visible');
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Shrnutí</h2>
+    <p class="description">
+      Tyto příklady ukazují běžné patterns v reálných testech:
+    </p>
+    <ul>
+      <li>Použití API pro rychlý setup</li>
+      <li>Kombinování vlastních příkazů s Cypress API</li>
+      <li>Mockování API pro izolované testy</li>
+      <li>Responzivní testování</li>
+      <li>Správné čekání na dynamický obsah</li>
+    </ul>
+  </section>
+</section>

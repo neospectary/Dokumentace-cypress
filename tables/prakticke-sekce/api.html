@@ -1,0 +1,103 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování API</h1>
+    <p class="description">
+      Kompletní průvodce testováním API v Cypressu. Zahrnuje mockování requestů, ověření response a testování API endpointů.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Mockování API requestů</h2>
+    
+    <h3 class="h3">Základní intercept</h3>
+    <pre><code>cy.intercept({ method: 'GET', url: '**/api/endpoint' }).as('getData');
+cy.dataCy('load-button').click();
+cy.wait('@getData');</code></pre>
+
+    <h3 class="h3">Ověření response</h3>
+    <pre><code>cy.wait('@getData').its('response.statusCode').should('eq', 200);
+cy.wait('@getData').its('response.body').should('have.property', 'data');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Mockování response</h2>
+    <pre><code>cy.intercept('GET', '**/api/users', {
+  statusCode: 200,
+  body: {
+    users: [
+      { id: 1, name: 'Test User' }
+    ]
+  }
+}).as('getUsers');
+
+cy.dataCy('load-users').click();
+cy.wait('@getUsers');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Přímé testování API</h2>
+    <pre><code>cy.request({
+  method: 'GET',
+  url: 'https://api.example.com/users',
+  headers: {
+    Authorization: `Bearer ${Cypress.env('API_TOKEN')}`
+  }
+}).then((response) => {
+  expect(response.status).to.eq(200);
+  expect(response.body).to.have.property('users');
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Ověření API response po smazání</h2>
+    <pre><code>// Custom příkaz pro ověření 404
+Cypress.Commands.add('verifyApiResponse', (baseApiURL, expectedStatus) => {
+  cy.wait(1000);
+  cy.request({
+    method: 'GET',
+    url: baseApiURL,
+    failOnStatusCode: expectedStatus < 400,
+    headers: {
+      Authorization: `Bearer ${Cypress.env('CY_API_TOKEN')}`
+    }
+  }).then((response) => {
+    expect(response.status).to.eq(expectedStatus);
+  });
+});
+
+// Použití
+const ITEM_ID = '123';
+cy.verifyApiResponse(
+  `https://api.example.com/items/${ITEM_ID}`,
+  404
+);</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('API testování', () => {
+  it('mockuje API request', () => {
+    cy.intercept('GET', '**/api/users', {
+      statusCode: 200,
+      body: { users: [] }
+    }).as('getUsers');
+    
+    cy.visit('/users');
+    cy.wait('@getUsers');
+  });
+
+  it('ověří API response', () => {
+    cy.request({
+      method: 'GET',
+      url: 'https://api.example.com/users',
+      headers: {
+        Authorization: `Bearer ${Cypress.env('API_TOKEN')}`
+      }
+    }).then((response) => {
+      expect(response.status).to.eq(200);
+      expect(response.body).to.have.property('users');
+    });
+  });
+});</code></pre>
+  </section>
+</section>

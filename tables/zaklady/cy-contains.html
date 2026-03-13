@@ -1,0 +1,117 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.contains()</h1>
+    <p class="description">
+      Výběr elementu podle textového obsahu. Najde element, který obsahuje zadaný text (včetně potomků).
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.contains(text)
+cy.contains(selector, text)
+cy.contains(text, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.contains('Odeslat')                    // Najde element s textem
+cy.contains('button', 'Odeslat')          // S selektorem
+cy.contains(/Odeslat|Submit/)             // S regex
+cy.contains('.menu-item', 'Nastavení')     // V rámci selektoru</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.contains()                              // Chyba, chybí text
+cy.window().contains('text')               // Chyba, nelze řetězit</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">text (String|RegExp)</h3>
+    <p class="description">
+      Text k nalezení nebo regex pattern. Hledá v celém textovém obsahu elementu (včetně potomků).
+    </p>
+
+    <h3 class="h3">selector (String)</h3>
+    <p class="description">
+      CSS selektor pro omezení hledání. Najde elementy odpovídající selektoru, které obsahují text.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>matchCase</strong> (Boolean, default: true) - Zda respektovat velikost písmen</li>
+      <li><strong>timeout</strong> (Number) - Čas čekání na element</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s nalezeným elementem obsahujícím text. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.contains('Odeslat').click()
+cy.contains('Přihlásit se')</code></pre>
+
+    <h3 class="h3">S selektorem</h3>
+    <pre><code>cy.contains('button', 'Odeslat')
+cy.contains('.menu-item', 'Nastavení')
+cy.contains('form', 'Přihlášení')</code></pre>
+
+    <h3 class="h3">S regex</h3>
+    <pre><code>cy.contains(/Odeslat|Submit/)
+cy.contains(/^\d+$/)  // pouze čísla</code></pre>
+
+    <h3 class="h3">Case insensitive</h3>
+    <pre><code>cy.contains('odeslat', { matchCase: false })</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Hledání textu</h3>
+    <p class="description">
+      <code>cy.contains()</code> hledá v celém textovém obsahu elementu včetně všech potomků. Text může být rozdělen mezi více elementů.
+    </p>
+
+    <h3 class="h3">Case sensitivity</h3>
+    <p class="description">
+      Výchozí je case-sensitive hledání. Pro case-insensitive použijte <code>{ matchCase: false }</code>.
+    </p>
+
+    <h3 class="h3">První nalezený element</h3>
+    <p class="description">
+      Vrací první element, který obsahuje zadaný text. Pokud potřebujete konkrétní element, použijte selektor.
+    </p>
+
+    <h3 class="h3">Performance</h3>
+    <p class="description">
+      <code>cy.contains()</code> může být pomalejší než <code>cy.get()</code> s přesným selektorem, protože musí prohledat textový obsah elementů.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o nalezeném textu a elementu. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/contains" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/contains →
+      </a>
+    </p>
+  </section>
+</section>

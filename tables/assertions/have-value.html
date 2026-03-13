@@ -1,0 +1,60 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">have.value</h1>
+    <p class="description">
+      Ověření hodnoty inputu, textarea nebo select elementu. Používá se pro kontrolu vyplněných hodnot.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Po vyplnění inputu nebo textarea</li>
+      <li>Pro ověření, že hodnota byla správně uložena</li>
+      <li>Pro kontrolu předchozí hodnoty</li>
+      <li>Po změně hodnoty</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.should('have.value', value)
+cy.and('have.value', value)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Parametry</h2>
+    <ul>
+      <li><strong>value</strong> (String) - Očekávaná hodnota</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('input[name="email"]').type('test@example.com')
+cy.get('input[name="email"]').should('have.value', 'test@example.com')</code></pre>
+
+    <h3 class="h3">S textarea</h3>
+    <pre><code>cy.get('textarea').type('Dlouhý text')
+cy.get('textarea').should('have.value', 'Dlouhý text')</code></pre>
+
+    <h3 class="h3">Po změně</h3>
+    <pre><code>cy.get('input').clear().type('nová hodnota')
+cy.get('input').should('have.value', 'nová hodnota')</code></pre>
+
+    <h3 class="h3">Prázdná hodnota</h3>
+    <pre><code>cy.get('input').clear()
+cy.get('input').should('have.value', '')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Funguje s input, textarea, select</li>
+      <li>Porovnává přesnou hodnotu</li>
+      <li>Pro částečnou shodu použijte <code>include</code></li>
+    </ul>
+  </section>
+</section>

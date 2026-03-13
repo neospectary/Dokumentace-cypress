@@ -1,0 +1,96 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">.prev()</h1>
+    <p class="description">
+      Výběr předchozího sourozence. Vrací bezprostředně předcházející element (previous sibling). Užitečné pro práci s pořadím elementů.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.prev()
+.prev(selector)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('li').last().prev().click()              // Předchozí element
+cy.get('input').prev('label').should('contain', 'Label') // Předchozí label
+cy.get('button').prev('.icon').should('be.visible')       // Předchozí ikona</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.prev()                                         // Chyba, nelze řetězit z 'cy'
+cy.window().prev()                                // Chyba, window nemá sourozence</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">selector (String, volitelné)</h3>
+    <p class="description">
+      CSS selektor pro ověření předchozího elementu. Pokud je zadán, test selže, pokud předchozí element neodpovídá selektoru.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s předchozím sourozencem. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('li').last().prev().click()
+cy.get('input').prev('label').should('contain', 'Label')</code></pre>
+
+    <h3 class="h3">S selektorem</h3>
+    <pre><code>cy.get('button').prev('.icon').should('be.visible')
+cy.get('p').prev('h2').should('contain', 'Nadpis')</code></pre>
+
+    <h3 class="h3">Vícenásobné prev()</h3>
+    <pre><code>cy.get('li').last()
+  .prev()
+  .prev()
+  .should('have.class', 'third-from-end')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Bezprostředně předcházející</h3>
+    <p class="description">
+      <code>.prev()</code> vrací bezprostředně předcházejícího sourozence (previous sibling). Pokud předchozí element neexistuje, test selže.
+    </p>
+
+    <h3 class="h3">Řetězení</h3>
+    <p class="description">
+      Lze řetězit více <code>.prev()</code> za sebou pro přístup k dalším sourozencům. Každé <code>.prev()</code> jde o jeden krok zpět.
+    </p>
+
+    <h3 class="h3">Rozdíl od .siblings()</h3>
+    <p class="description">
+      <code>.prev()</code> vrací jen předchozího sourozence, zatímco <code>.siblings()</code> vrací všechny sourozence.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o předchozím elementu. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/prev" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/prev →
+      </a>
+    </p>
+  </section>
+</section>

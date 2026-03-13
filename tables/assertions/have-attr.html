@@ -1,0 +1,64 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">have.attr</h1>
+    <p class="description">
+      Ověření, že element má atribut. Můžete ověřit existenci atributu nebo jeho hodnotu.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Pro ověření existence atributu</li>
+      <li>Pro kontrolu hodnoty atributu</li>
+      <li>Pro testování data atributů (data-cy, data-test)</li>
+      <li>Pro ověření href, src, alt, atd.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.should('have.attr', attributeName)
+cy.should('have.attr', attributeName, value)
+cy.and('have.attr', attributeName, value)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Parametry</h2>
+    <ul>
+      <li><strong>attributeName</strong> (String) - Název atributu</li>
+      <li><strong>value</strong> (String, volitelné) - Očekávaná hodnota atributu</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Ověření existence atributu</h3>
+    <pre><code>cy.get('img').should('have.attr', 'alt')
+cy.get('a').should('have.attr', 'href')</code></pre>
+
+    <h3 class="h3">Ověření hodnoty atributu</h3>
+    <pre><code>cy.get('a').should('have.attr', 'href', '/page')
+cy.get('img').should('have.attr', 'alt', 'Obrázek')
+cy.get('input').should('have.attr', 'type', 'email')</code></pre>
+
+    <h3 class="h3">Data atributy</h3>
+    <pre><code>cy.get('[data-cy="submit"]').should('have.attr', 'data-cy')
+cy.get('[data-test="button"]').should('have.attr', 'data-test', 'button')</code></pre>
+
+    <h3 class="h3">Kombinace</h3>
+    <pre><code>cy.get('a')
+  .should('have.attr', 'href')
+  .and('include', '/dashboard')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Bez hodnoty ověří jen existenci atributu</li>
+      <li>S hodnotou ověří existenci i hodnotu</li>
+      <li>Case-sensitive pro název atributu</li>
+    </ul>
+  </section>
+</section>

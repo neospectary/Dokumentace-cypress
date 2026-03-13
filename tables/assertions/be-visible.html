@@ -1,0 +1,66 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">be.visible</h1>
+    <p class="description">
+      Ověření, že element je viditelný na stránce. Element musí být v DOM a mít CSS vlastnosti, které ho činí viditelným (display: none, visibility: hidden, opacity: 0, atd. způsobí selhání).
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Před interakcí s elementem (click, type, atd.)</li>
+      <li>Pro ověření, že se element zobrazil po akci</li>
+      <li>Pro kontrolu, že element není skrytý</li>
+      <li>Po načtení stránky nebo po změně stavu</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.should('be.visible')
+cy.and('be.visible')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('button').should('be.visible')
+cy.get('.modal').should('be.visible')</code></pre>
+
+    <h3 class="h3">Před interakcí</h3>
+    <pre><code>cy.get('input[name="email"]')
+  .should('be.visible')
+  .type('test@example.com')</code></pre>
+
+    <h3 class="h3">Po akci</h3>
+    <pre><code>cy.get('[data-cy="open-modal"]').click()
+cy.get('.modal').should('be.visible')</code></pre>
+
+    <h3 class="h3">Kombinace s dalšími assertions</h3>
+    <pre><code>cy.get('button')
+  .should('be.visible')
+  .and('be.enabled')
+  .and('contain', 'Odeslat')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Element musí být v DOM <strong>a</strong> viditelný</li>
+      <li>Automaticky čeká na viditelnost (retry mechanismus)</li>
+      <li>Selže pokud je element skrytý pomocí CSS (display: none, visibility: hidden, opacity: 0)</li>
+      <li>Nepoužívejte pokud element může být mimo viewport (použijte scrollIntoView)</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kdy NEPOUŽÍVAT</h2>
+    <ul>
+      <li>Když element může být mimo viewport - použijte <code>.scrollIntoView()</code> předtím</li>
+      <li>Když chcete jen ověřit existenci - použijte <code>exist</code></li>
+      <li>Když element může být skrytý - použijte <code>be.hidden</code> nebo <code>not.be.visible</code></li>
+    </ul>
+  </section>
+</section>

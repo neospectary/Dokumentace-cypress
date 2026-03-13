@@ -1,0 +1,58 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">before()</h1>
+    <p class="description">
+      <code>before()</code> je Mocha hook, který se spustí <strong>jednou před všemi testy</strong> v daném <code>describe()</code> bloku. V Cypressu se používá
+      hlavně pro nastavení „drahých“ věcí, které nechceš dělat před každým testem zvlášť (např. přihlášení).
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>before(fn)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít before()</h2>
+    <ul>
+      <li>Když chceš něco spustit <strong>jen jednou</strong> před všemi testy ve skupině.</li>
+      <li>Typicky: přihlášení, vytvoření testovacích dat přes API, nastavení globálního stavu.</li>
+      <li>Ne: věci, které se mají resetovat před každým testem (to patří do <code>beforeEach()</code>).</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklad z praxe – přihlášení jednou pro celou sadu</h2>
+    <pre><code>describe('Dashboard', () => {
+  before(() => {
+    // Přihlášení jen jednou před všemi testy
+    cy.tokenAuth('/dashboard');
+  });
+
+  it('zobrazí souhrnné statistiky', () => {
+    cy.dataCy('stats-card')
+      .should('be.visible')
+      .and('have.length.at.least', 1);
+  });
+
+  it('umožní přejít do detailu feedu', () => {
+    cy.dataCy('feed-row').first().click();
+    cy.location('pathname').should('include', '/feeds/');
+  });
+});</code></pre>
+
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Pozor na sdílený stav mezi testy</h2>
+    <p class="description">
+      <code>before()</code> se spustí jen jednou – pokud v testech měníš stav aplikace (např. mažeš data), další testy mohou běžet
+      už v „rozbitém“ stavu. Proto:
+    </p>
+    <ul>
+      <li>Používej <code>before()</code> pro věci, které jsou bezpečné pro všechny testy (přihlášení, základní nastavení).</li>
+      <li>Pro reset stavu (např. otevření konkrétní stránky) preferuj <code>beforeEach()</code>.</li>
+    </ul>
+  </section>
+</section>
+

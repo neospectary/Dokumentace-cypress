@@ -1,0 +1,230 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování toastových hlášek</h1>
+    <p class="description">
+      Kompletní průvodce testováním toastových hlášek (toast notifications) v Cypressu. Toastové hlášky jsou dočasné zprávy, které se zobrazují po akcích uživatele (úspěch, chyba, varování).
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Základní ověření toastu</h2>
+    
+    <h3 class="h3">Ověření zobrazení toastu</h3>
+    <pre><code>// Toast se zobrazuje v elementu se-toasts-hosting
+cy.get('se-toasts-hosting')
+  .should('be.visible');</code></pre>
+
+    <h3 class="h3">Ověření obsahu toastu</h3>
+    <pre><code>// Ověření textu v toastu
+cy.get('se-toasts-hosting')
+  .should('be.visible')
+  .and('contain.text', 'Úspěšně uloženo');
+
+// Nebo pomocí contains
+cy.get('se-toasts-hosting')
+  .contains('Úspěšně uloženo')
+  .should('be.visible');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Zavření toastu</h2>
+    
+    <h3 class="h3">Základní zavření</h3>
+    <pre><code>// Kliknutí na tlačítko zavření v toastu
+cy.get('se-toasts-hosting')
+  .find('button')
+  .click({ force: true });</code></pre>
+
+    <h3 class="h3">Ověření, že toast zmizel</h3>
+    <pre><code>cy.get('se-toasts-hosting')
+  .find('button')
+  .click({ force: true });
+
+// Toast může zmizet automaticky nebo po kliknutí
+cy.get('se-toasts-hosting')
+  .should('not.exist')
+  .or('not.be.visible');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Typy toastových hlášek</h2>
+    
+    <h3 class="h3">Úspěšná zpráva</h3>
+    <pre><code>it('zobrazí toast po úspěšném uložení', () => {
+  cy.dataCy('save-button').click();
+  cy.get('se-toasts-hosting')
+    .should('be.visible')
+    .and('contain.text', 'Úspěšně uloženo');
+});</code></pre>
+
+    <h3 class="h3">Chybová zpráva</h3>
+    <pre><code>it('zobrazí chybový toast', () => {
+  cy.dataCy('continue-button').click();
+  cy.get('se-toasts-hosting')
+    .should('be.visible')
+    .and('contain.text', 'Je nutné mít u každé skupiny alespoň jednu podmínku');
+});</code></pre>
+
+    <h3 class="h3">Varovná zpráva</h3>
+    <pre><code>it('zobrazí varovný toast', () => {
+  cy.dataCy('delete-button').click();
+  cy.get('se-toasts-hosting')
+    .should('be.visible')
+    .and('contain.text', 'Varování');
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Práce s více toasty</h2>
+    
+    <h3 class="h3">Zavření všech toastů</h3>
+    <pre><code>// Pokud se zobrazí více toastů najednou
+cy.get('se-toasts-hosting')
+  .find('button')
+  .each(($button) => {
+    cy.wrap($button).click({ force: true });
+  });</code></pre>
+
+    <h3 class="h3">Ověření konkrétního toastu</h3>
+    <pre><code>// Pokud je více toastů, můžeme použít contains pro konkrétní
+cy.get('se-toasts-hosting')
+  .contains('Úspěšně uloženo')
+  .should('be.visible')
+  .parent()
+  .find('button')
+  .click({ force: true });</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Toast po akci</h2>
+    
+    <h3 class="h3">Toast po uložení</h3>
+    <pre><code>it('zobrazí toast po uložení', () => {
+  cy.intercept({ method: 'POST', url: '**/api/endpoint' }).as('save');
+  cy.dataCy('save-button').click();
+  cy.wait('@save');
+  
+  cy.get('se-toasts-hosting')
+    .should('be.visible')
+    .and('contain.text', 'Úspěšně uloženo');
+});</code></pre>
+
+    <h3 class="h3">Toast po smazání</h3>
+    <pre><code>it('zobrazí toast po smazání', () => {
+  cy.intercept({ method: 'DELETE', url: '**/api/endpoint/**' }).as('delete');
+  cy.dataCy('delete-button').click();
+  cy.wait('@delete');
+  
+  cy.get('se-toasts-hosting')
+    .should('be.visible')
+    .and('contain.text', 'Úspěšně smazáno');
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Automatické zavření toastu</h2>
+    <p class="description">
+      Toasty se obvykle zavírají automaticky po určité době. Pokud potřebujete počkat na automatické zavření:
+    </p>
+    <pre><code>// Počkat na automatické zavření (obvykle 3-5 sekund)
+cy.get('se-toasts-hosting')
+  .should('be.visible');
+
+cy.wait(5000); // počkat 5 sekund
+
+cy.get('se-toasts-hosting')
+  .should('not.exist')
+  .or('not.be.visible');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklady</h2>
+    
+    <h3 class="h3">Příklad 1: Toast po úspěšné akci</h3>
+    <pre><code>describe('Toast po uložení', () => {
+  before(() => {
+    cy.tokenAuth('/page');
+  });
+
+  it('zobrazí toast po úspěšném uložení', () => {
+    cy.fillInput('name-container', 'Hodnota');
+    cy.intercept({ method: 'POST', url: '**/api/endpoint' }).as('save');
+    cy.dataCy('save-button').click();
+    cy.wait('@save');
+    
+    cy.get('se-toasts-hosting')
+      .should('be.visible')
+      .and('contain.text', 'Úspěšně uloženo');
+  });
+
+  it('zavře toast zprávu', () => {
+    cy.get('se-toasts-hosting')
+      .find('button')
+      .click({ force: true });
+  });
+});</code></pre>
+
+    <h3 class="h3">Příklad 2: Chybový toast</h3>
+    <pre><code>describe('Chybový toast', () => {
+  before(() => {
+    cy.tokenAuth('/page');
+  });
+
+  it('zobrazí chybový toast při neplatné akci', () => {
+    cy.dataCy('continue-button').scrollIntoView().click();
+    
+    cy.get('se-toasts-hosting')
+      .should('be.visible')
+      .and('contain.text', 'Je nutné mít u každé skupiny alespoň jednu podmínku');
+  });
+});</code></pre>
+
+    <h3 class="h3">Příklad 3: Toast po výběru šablony</h3>
+    <pre><code>describe('Toast při výběru šablony', () => {
+  before(() => {
+    cy.tokenAuth('/templates');
+  });
+
+  it('zobrazí toast a zavře ho', () => {
+    cy.dataCy('template-name')
+      .should('be.visible')
+      .and('contain.text', 'Template Name');
+    
+    // Zavření toastu, který se zobrazil při výběru
+    cy.get('se-toasts-hosting')
+      .find('button')
+      .click({ force: true });
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Best Practices</h2>
+    
+    <h3 class="h3">✅ DOPORUČENO</h3>
+    <ul>
+      <li><strong>Vždy ověřte zobrazení toastu</strong> - pomocí <code>should('be.visible')</code></li>
+      <li><strong>Ověřte obsah toastu</strong> - pomocí <code>contains()</code> nebo <code>contain.text</code></li>
+      <li><strong>Použijte force: true</strong> - při kliknutí na tlačítko zavření, pokud je toast překrytý</li>
+      <li><strong>Počkejte na API request</strong> - před ověřením toastu, pokud se zobrazí po API callu</li>
+    </ul>
+
+    <h3 class="h3">❌ NEDOPORUČENO</h3>
+    <ul>
+      <li><strong>Nepoužívejte cy.wait(ms)</strong> - pro čekání na toast, použijte should('be.visible')</li>
+      <li><strong>Neignorujte toasty</strong> - vždy je ověřte, pokud se mají zobrazit</li>
+      <li><strong>Nepředpokládejte automatické zavření</strong> - pokud potřebujete zavřít, zavřete explicitně</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Toastové hlášky se zobrazují v elementu <code>se-toasts-hosting</code></li>
+      <li>Toasty se obvykle zobrazují v pravém horním nebo dolním rohu</li>
+      <li>Toasty se mohou automaticky zavřít po 3-5 sekundách</li>
+      <li>Při kliknutí na tlačítko zavření použijte <code>{ force: true }</code>, pokud je toast překrytý</li>
+      <li>Pokud se toast zobrazí po API requestu, počkejte na request pomocí <code>cy.wait('@alias')</code></li>
+    </ul>
+  </section>
+</section>

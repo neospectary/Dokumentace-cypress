@@ -1,0 +1,101 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování validace</h1>
+    <p class="description">
+      Kompletní průvodce testováním validace formulářů v Cypressu. Zahrnuje ověření chybových zpráv, povinných polí a validace v reálném čase.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Ověření chybových zpráv</h2>
+    
+    <h3 class="h3">Zobrazení chybové zprávy</h3>
+    <pre><code>// Pokus o odeslání prázdného formuláře
+cy.dataCy('submit-button').click();
+
+// Ověření chybové zprávy
+cy.dataCy('error-validation')
+  .should('be.visible')
+  .and('contain.text', 'Toto pole je povinné.');</code></pre>
+
+    <h3 class="h3">Chybová zpráva u konkrétního pole</h3>
+    <pre><code>cy.dataCy('name-container')
+  .within(() => {
+    cy.dataCy('error-message')
+      .should('be.visible')
+      .and('contain.text', 'Název je povinný');
+  });</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Ověření povinných polí</h2>
+    
+    <h3 class="h3">Atribut required</h3>
+    <pre><code>cy.get('[data-cy="name-container"] input')
+  .should('have.attr', 'required');</code></pre>
+
+    <h3 class="h3">Vizuální indikace povinného pole</h3>
+    <pre><code>cy.dataCy('name-container')
+  .find('label')
+  .should('contain.text', '*'); // hvězdička pro povinné pole</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Validace v reálném čase</h2>
+    
+    <h3 class="h3">Validace po vyplnění</h3>
+    <pre><code>// Neplatný email
+cy.fillInput('email-container', 'neplatny-email');
+cy.dataCy('error-validation')
+  .should('be.visible')
+  .and('contain.text', 'Zadejte platný email');
+
+// Platný email
+cy.fillInput('email-container', 'platny@email.com');
+cy.dataCy('error-validation').should('not.exist');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Stav tlačítka podle validace</h2>
+    <pre><code>// Tlačítko by mělo být disabled, dokud není formulář validní
+cy.dataCy('submit-button')
+  .should('be.visible')
+  .and('be.disabled');
+
+// Po vyplnění všech povinných polí
+cy.fillInput('name-container', 'Hodnota');
+cy.fillInput('email-container', 'test@example.com');
+cy.dataCy('submit-button').should('be.enabled');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('Validace formuláře', () => {
+  before(() => {
+    cy.tokenAuth('/contacts/create');
+  });
+
+  it('zobrazí chybu při prázdném odeslání', () => {
+    cy.dataCy('submit-button').click();
+    cy.dataCy('error-validation')
+      .should('be.visible')
+      .and('contain.text', 'Toto pole je povinné.');
+  });
+
+  it('validuje email v reálném čase', () => {
+    cy.fillInput('email-container', 'neplatny');
+    cy.dataCy('error-validation')
+      .should('contain.text', 'Zadejte platný email');
+    
+    cy.fillInput('email-container', 'platny@email.com');
+    cy.dataCy('error-validation').should('not.exist');
+  });
+
+  it('povolí odeslání po vyplnění všech polí', () => {
+    cy.fillInput('name-container', 'Jméno');
+    cy.fillInput('email-container', 'test@example.com');
+    cy.dataCy('submit-button').should('be.enabled');
+  });
+});</code></pre>
+  </section>
+</section>

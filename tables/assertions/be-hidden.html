@@ -1,0 +1,43 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">be.hidden</h1>
+    <p class="description">
+      Ověření, že element je skrytý. Element může existovat v DOM, ale není viditelný.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Pro ověření, že element je skrytý po akci</li>
+      <li>Pro kontrolu, že modál nebo menu bylo zavřeno</li>
+      <li>Pro testování toggle funkcionality</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.should('be.hidden')
+cy.and('be.hidden')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('.modal').should('be.hidden')
+cy.get('.menu').should('be.hidden')</code></pre>
+
+    <h3 class="h3">Po zavření</h3>
+    <pre><code>cy.get('.close-button').click()
+cy.get('.modal').should('be.hidden')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Opačná assertion: <code>be.visible</code></li>
+      <li>Element může existovat v DOM, ale být skrytý</li>
+    </ul>
+  </section>
+</section>

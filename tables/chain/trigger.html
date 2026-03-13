@@ -1,0 +1,112 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">.trigger()</h1>
+    <p class="description">
+      Spuštění DOM události na elementu. Umožňuje simulovat různé DOM události jako mouseover, focus, blur, change, atd. Užitečné pro testování event handlerů nebo simulaci událostí, které nejsou přímo podporované Cypress příkazy.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.trigger(eventName)
+.trigger(eventName, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('button').trigger('mouseover')           // Mouseover událost
+cy.get('input').trigger('focus')                // Focus událost
+cy.get('input').trigger('change')               // Change událost
+cy.get('.tooltip-trigger').trigger('mouseenter') // Mouseenter</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.trigger('mouseover')                         // Chyba, nelze řetězit z 'cy'
+cy.window().trigger('focus')                    // Chyba, window není DOM element</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">eventName (String)</h3>
+    <p class="description">
+      Název DOM události k spuštění: <code>'mouseover'</code>, <code>'focus'</code>, <code>'blur'</code>, <code>'change'</code>, <code>'mouseenter'</code>, <code>'mouseleave'</code>, <code>'keydown'</code>, <code>'keyup'</code>, atd.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>bubbles</strong> (Boolean) - Zda událost probublává</li>
+      <li><strong>cancelable</strong> (Boolean) - Zda je událost zrušitelná</li>
+      <li><strong>detail</strong> (Any) - Custom data pro událost</li>
+      <li><strong>key</strong> (String) - Klávesa pro keyboard události</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s elementem. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní události</h3>
+    <pre><code>cy.get('button').trigger('mouseover')
+cy.get('input').trigger('focus')
+cy.get('input').trigger('blur')</code></pre>
+
+    <h3 class="h3">Mouse události</h3>
+    <pre><code>cy.get('.tooltip-trigger').trigger('mouseenter')
+cy.get('.menu-item').trigger('mouseleave')
+cy.get('button').trigger('mousedown')
+cy.get('button').trigger('mouseup')</code></pre>
+
+    <h3 class="h3">Keyboard události</h3>
+    <pre><code>cy.get('input').trigger('keydown', { key: 'Enter' })
+cy.get('input').trigger('keyup', { key: 'Escape' })</code></pre>
+
+    <h3 class="h3">Custom události</h3>
+    <pre><code>cy.get('.custom-element').trigger('customEvent', {
+  detail: { value: 'test' }
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Simulace událostí</h3>
+    <p class="description">
+      <code>.trigger()</code> simuluje DOM události, ne skutečné uživatelské akce. Pro reálné uživatelské akce použijte nativní Cypress příkazy (např. <code>.click()</code>, <code>.type()</code>) nebo plugin <code>cypress-real-events</code>.
+    </p>
+
+    <h3 class="h3">Podporované události</h3>
+    <p class="description">
+      Cypress podporuje všechny standardní DOM události (mouse, keyboard, focus, change, atd.). Můžete také vytvářet custom události.
+    </p>
+
+    <h3 class="h3">Kdy použít</h3>
+    <p class="description">
+      <code>.trigger()</code> je užitečné pro testování event handlerů nebo simulaci událostí, které nejsou přímo podporované Cypress příkazy. Pro většinu případů použijte nativní Cypress příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o spuštěné události. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/trigger" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/trigger →
+      </a>
+    </p>
+  </section>
+</section>

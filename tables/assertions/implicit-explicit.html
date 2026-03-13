@@ -1,0 +1,138 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Implicitní vs. explicitní assertions</h1>
+    <p class="description">
+      V Cypressu existují dva základní způsoby, jak ověřovat stav aplikace: <strong>implicitní</strong> a <strong>explicitní</strong> assertions.
+      Pochopení rozdílu vám pomůže psát čitelnější a stabilnější testy.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Co znamená „assertion“</h2>
+    <p class="description">
+      Assertion = tvrzení, očekávání. Říkáte testu: „<strong>očekávám, že</strong> tento prvek <strong>bude viditelný</strong>“, „<strong>očekávám, že</strong> hodnota
+      proměnné <strong>bude rovna</strong> 5“ atd. Pokud tvrzení neplatí, test selže.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Implicitní assertions</h2>
+    <p class="description">
+      Implicitní assertions jsou <strong>zabudované přímo v Cypress příkazech</strong>. Příkaz sám v sobě obsahuje očekávání a Cypress
+      podle něj automaticky čeká a vyhodnocuje stav.
+    </p>
+
+    <h3 class="h3">Jak to poznám</h3>
+    <ul>
+      <li>Používáte klasické Cypress příkazy jako <code>cy.get()</code>, <code>cy.contains()</code>, <code>cy.url()</code>, <code>cy.location()</code>, <code>cy.intercept()</code>…</li>
+      <li>Tyto příkazy <strong>automaticky čekají</strong>, dokud není splněna jejich vnitřní podmínka (element existuje, je viditelný, request proběhl atd.).</li>
+    </ul>
+
+    <h3 class="h3">Příklady implicitních assertions</h3>
+    <pre><code>// cy.get() implicitně asertuje, že element existuje v DOM
+cy.get('[data-cy=\"submit-button\"]')
+
+// cy.contains() implicitně asertuje, že text existuje
+cy.contains('Uložit změny')
+
+// cy.url() implicitně asertuje, že existuje URL (čeká na načtení stránky)
+cy.url()
+
+// cy.intercept() + cy.wait() implicitně asertuje, že request proběhl
+cy.intercept('GET', '/api/users').as('getUsers')
+cy.wait('@getUsers')</code></pre>
+
+    <h3 class="h3">Kdy je to užitečné</h3>
+    <ul>
+      <li>Když jen potřebujete „něco získat“ (element, URL, response) a spolehnout se, že Cypress za vás počká.</li>
+      <li>Když nechcete psát extra <code>should()</code>, ale využít chytré čekání Cypressu.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Explicitní assertions</h2>
+    <p class="description">
+      Explicitní assertions jsou <strong>tvrzení, která napíšete sami pomocí</strong> <code>.should()</code> nebo <code>.and()</code>.
+      Říkáte přesně, co má platit: <code>be.visible</code>, <code>have.text</code>, <code>eq</code>, <code>include</code> atd.
+    </p>
+
+    <h3 class="h3">Jak to poznám</h3>
+    <ul>
+      <li>V řetězu vidíte <code>.should(...)</code> nebo <code>.and(...)</code>.</li>
+      <li>Uvnitř používáte assertion chainery jako <code>be.visible</code>, <code>be.enabled</code>, <code>have.text</code>, <code>eq</code>, <code>deep.eq</code>…</li>
+    </ul>
+
+    <h3 class="h3">Příklady explicitních assertions</h3>
+    <pre><code>// Element je viditelný a povolený
+cy.get('[data-cy=\"submit-button\"]')
+  .should('be.visible')
+  .and('be.enabled')
+
+// Text v elementu
+cy.get('[data-cy=\"toast-message\"]').should('have.text', 'Uloženo úspěšně')
+
+// Práce s URL
+cy.location('pathname').should('eq', '/settings/user')
+
+// Práce s daty z API
+cy.wait('@getUsers')
+  .its('response.statusCode')
+  .should('eq', 200)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Jak spolu implicitní a explicitní assertions spolupracují</h2>
+    <p class="description">
+      V praxi téměř vždy používáte <strong>kombinaci</strong> obou:
+    </p>
+
+    <pre><code>cy.get('[data-cy=\"user-row\"]')      // implicitně: element musí existovat
+  .should('have.length', 5)           // explicitně: musí jich být přesně 5
+  .first()                            // implicitně: musí existovat první prvek
+  .should('contain.text', 'Nový uživatel') // explicitně: text v prvním řádku</code></pre>
+
+    <ul>
+      <li><strong>Implicitní assertions</strong> se starají o to, že pracujete s platnými daty / elementy.</li>
+      <li><strong>Explicitní assertions</strong> přesně definují, co má být splněno.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít který typ</h2>
+
+    <h3 class="h3">Stačí implicitní assertions</h3>
+    <ul>
+      <li>Když jen „chcete něco najít“ a hned s tím dál pracovat (např. <code>cy.get()</code>, <code>cy.contains()</code>, <code>cy.url()</code>).</li>
+      <li>Když vás v tu chvíli nezajímá konkrétní hodnota, ale jen to, že je něco dostupné.</li>
+    </ul>
+
+    <h3 class="h3">Potřebujete explicitní assertions</h3>
+    <ul>
+      <li>Když chcete <strongpřesně ověřit stav</strong>: text, číslo, viditelnost, třídu, atribut, počet prvků…</li>
+      <li>Když píšete <strong>podmínky business logiky</strong> (např. „musí se zobrazit hláška“, „řádků musí být 10“).</li>
+      <li>Když testujete výsledek akce (submit formuláře, volání API, změna stavu UI).</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Shrnutí v jedné větě</h2>
+    <ul>
+      <li><strong>Implicitní assertions</strong>: Cypress za vás <strong>automaticky čeká</strong> a kontroluje základní věci (existence, načtení).</li>
+      <li><strong>Explicitní assertions</strong>: Vy sami <strong>píšete konkrétní očekávání</strong> pomocí <code>.should()</code> / <code>.and()</code>.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kam dál</h2>
+    <p class="description">
+      Pro konkrétní assertion chainery (např. <code>be.visible</code>, <code>have.text</code>, <code>be.enabled</code>) se podívej na jednotlivé stránky
+      v sekci <strong>Assertions</strong> nebo na oficiální dokumentaci:
+    </p>
+    <p>
+      <a href="https://docs.cypress.io/guides/core-concepts/introduction-to-cypress#Assertions" target="_blank" rel="noopener">
+        https://docs.cypress.io/guides/core-concepts/introduction-to-cypress#Assertions →
+      </a>
+    </p>
+  </section>
+</section>
+

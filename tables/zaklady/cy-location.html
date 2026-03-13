@@ -1,0 +1,120 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.location()</h1>
+    <p class="description">
+      Ověření URL a dalších vlastností location objektu. Umožňuje kontrolovat pathname, hash, search, host, href a další vlastnosti aktuální URL. Užitečné pro přesné ověření navigace.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.location()
+cy.location(key)
+cy.location(key, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.location('pathname').should('eq', '/dashboard')  // Pathname
+cy.location('hash').should('eq', '#section1')       // Hash
+cy.location('search').should('include', 'id=123')   // Query parametry
+cy.location('href').should('include', 'dashboard')  // Celá URL</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.get('.btn').location('pathname')                  // Chyba, nelze řetězit
+cy.location()                                        // Chyba, bez key vrací objekt (použijte cy.location('href'))</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">key (String)</h3>
+    <p class="description">
+      Název vlastnosti location objektu: <code>'pathname'</code>, <code>'hash'</code>, <code>'search'</code>, <code>'host'</code>, <code>'href'</code>, <code>'port'</code>, <code>'protocol'</code>, atd.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>timeout</strong> (Number) - Čas čekání</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s hodnotou location vlastnosti. Lze použít s <code>.should()</code> pro assertions.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Ověření pathname</h3>
+    <pre><code>cy.location('pathname').should('eq', '/dashboard')
+cy.location('pathname').should('include', '/settings')
+
+// Po kliknutí na link
+cy.dataCy('settings-link').click()
+cy.location('pathname').should('eq', '/settings/user')</code></pre>
+
+    <h3 class="h3">Ověření celé URL (href)</h3>
+    <pre><code>cy.location('href').should('include', 'dashboard')
+cy.location('href').should('eq', 'http://localhost:4200/dashboard')</code></pre>
+
+    <h3 class="h3">Ověření hash</h3>
+    <pre><code>cy.location('hash').should('eq', '#section1')
+cy.location('hash').should('include', 'section')</code></pre>
+
+    <h3 class="h3">Ověření query parametrů</h3>
+    <pre><code>cy.location('search').should('include', 'id=123')
+cy.location('search').should('eq', '?id=123&page=1')</code></pre>
+
+    <h3 class="h3">Praktický příklad</h3>
+    <pre><code>it('naviguje na správnou stránku', () => {
+  cy.dataCy('profile-menu-content').within(() => {
+    cy.contains('se-button', 'Nastavení účtu').click()
+  })
+  
+  cy.location('pathname').should('eq', '/settings/user')
+  cy.get('h1').should('contain.text', 'Uživatelské nastavení')
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Preferujte cy.location() před cy.url()</h3>
+    <p class="description">
+      <code>cy.location('pathname')</code> je přesnější než <code>cy.url()</code> pro ověření konkrétní části URL. <code>cy.url()</code> vrací celou URL jako string, zatímco <code>cy.location()</code> umožňuje přístup k jednotlivým částem.
+    </p>
+
+    <h3 class="h3">Navigace</h3>
+    <p class="description">
+      <code>cy.location()</code> je užitečné pro ověření navigace po akcích (kliknutí, submit, atd.). Automaticky čeká, dokud není hodnota dostupná.
+    </p>
+
+    <h3 class="h3">Dostupné vlastnosti</h3>
+    <p class="description">
+      Cypress podporuje všechny vlastnosti location objektu: <code>pathname</code>, <code>hash</code>, <code>search</code>, <code>host</code>, <code>href</code>, <code>port</code>, <code>protocol</code>, atd.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o location vlastnosti. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/location" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/location →
+      </a>
+    </p>
+  </section>
+</section>

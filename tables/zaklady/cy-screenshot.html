@@ -1,0 +1,103 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.screenshot()</h1>
+    <p class="description">
+      Pořízení screenshotu. Uloží obrázek aktuálního stavu stránky nebo elementu. Užitečné pro debugování, vizuální testování nebo dokumentaci.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.screenshot()
+cy.screenshot(name)
+cy.screenshot(name, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.screenshot()                         // Screenshot celé stránky
+cy.screenshot('login-page')            // S názvem
+cy.get('.modal').screenshot('modal')   // Screenshot elementu</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.get('.btn').screenshot()             // Chyba, nelze řetězit
+cy.window().screenshot()                // Chyba, window není DOM element</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">name (String)</h3>
+    <p class="description">
+      Název souboru pro screenshot. Pokud není zadán, použije se automatický název.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>clip</strong> (Object) - Oříznutí screenshotu (x, y, width, height)</li>
+      <li><strong>capture</strong> (String) - Typ screenshotu ('fullPage', 'viewport', 'runner')</li>
+      <li><strong>overwrite</strong> (Boolean) - Přepsat existující soubor</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable. Screenshot je uložen v <code>cypress/screenshots/</code> adresáři.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní screenshot</h3>
+    <pre><code>cy.screenshot()</code></pre>
+
+    <h3 class="h3">S názvem</h3>
+    <pre><code>cy.screenshot('login-page')</code></pre>
+
+    <h3 class="h3">Elementu</h3>
+    <pre><code>cy.get('.modal').screenshot('modal')</code></pre>
+
+    <h3 class="h3">Full page</h3>
+    <pre><code>cy.screenshot('full-page', { capture: 'fullPage' })</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Ukládání</h3>
+    <p class="description">
+      Screenshots jsou uloženy v <code>cypress/screenshots/</code> adresáři. Struktura adresáře odpovídá struktuře test souborů.
+    </p>
+
+    <h3 class="h3">Automatické screenshoty</h3>
+    <p class="description">
+      Cypress automaticky pořizuje screenshoty při selhání testu. Můžete také pořídit screenshoty manuálně pomocí <code>cy.screenshot()</code>.
+    </p>
+
+    <h3 class="h3">Element screenshoty</h3>
+    <p class="description">
+      Pro screenshot konkrétního elementu použijte <code>.screenshot()</code> na elementu (např. <code>cy.get('.modal').screenshot('modal')</code>).
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o screenshotu. Kliknutím na příkaz v logu můžete zobrazit screenshot.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/screenshot" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/screenshot →
+      </a>
+    </p>
+  </section>
+</section>

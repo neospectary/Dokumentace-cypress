@@ -1,0 +1,246 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování dropdownů a select listů</h1>
+    <p class="description">
+      Jak v Cypressu spolehlivě pracovat s dropdown menu a výběrovými seznamy (select), zejména s překryvnými (overlay) komponentami,
+      kde potřebujete vyhledávat <strong>jen uvnitř otevřeného dropdownu</strong>, ne na zbytku stránky.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Typy dropdownů v praxi</h2>
+
+    <h3 class="h3">1. Nativní HTML &lt;select&gt;</h3>
+    <p class="description">
+      Klasický HTML prvek <code>&lt;select&gt;</code> s <code>&lt;option&gt;</code>. V Cypressu se ovládá příkazem <code>cy.select()</code>
+      (viz stránka <code>cy.select()</code> v základech).
+    </p>
+
+    <h3 class="h3">2. Vlastní (custom) dropdown komponenty</h3>
+    <p class="description">
+      Moderní aplikace (Angular, React, Vue, …) často používají vlastní dropdowny: seznam je vykreslený v <strong>overlay</strong> mimo
+      původní DOM strom (např. do <code>.cdk-overlay-container</code>, <code>.dropdown-menu</code>, apod.).
+      Tam <strong>nelze použít</strong> <code>cy.select()</code> a je potřeba pracovat s <code>.click()</code>, <code>.find()</code>, <code>.contains()</code>,
+      <code>.within()</code> atd.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Základní postup v naší aplikaci (overlay dropdown)</h2>
+    <p class="description">
+      V naší aplikaci (podle reálných testů) se dropdown často otevírá do overlay kontejneru (např. <code>.cdk-overlay-container</code>).
+      Postup je vždy stejný:
+    </p>
+
+    <ol>
+      <li><strong>Otevřít dropdown</strong> – klik na trigger (input, tlačítko, řádek v tabulce…).</li>
+      <li><strong>Najít overlay kontejner</strong> – např. <code>cy.get('.cdk-overlay-container')</code> nebo lépe pomocí <code>data-cy</code>.</li>
+      <li><strong>Omezit scope</strong> – použít <code>.within()</code> nebo <code>.find()</code>, aby se hledalo jen uvnitř overlaye.</li>
+      <li><strong>Vybrat položku</strong> – <code>.contains()</code> / <code>.find()</code> na konkrétní text/hodnotu.</li>
+    </ol>
+
+    <h3 class="h3">Typický vzor v naší aplikaci</h3>
+    <pre><code>// 1) Otevřu dropdown
+cy.dataCy('feed-type-select').click();
+
+// 2) Pracuji pouze v overlay okně
+cy.get('.cdk-overlay-container').within(() =&gt; {
+  // 3) Hledám jen uvnitř overlaye, ne na celé stránce
+  cy.contains('.dropdown-item', 'Obecný XML')
+    .should('be.visible')
+    .click();
+});</code></pre>
+
+    <p class="description">
+      Klíčová část je <code>.within(() =&gt; { ... })</code> nad overlay kontejnerem – vše uvnitř tohoto bloku hledá <strong>jen v overlayi</strong>,
+      ne v celé stránce.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití .within() a .find() pro omezení scope</h2>
+
+    <h3 class="h3">.within() – práce „uvnitř jednoho okna“</h3>
+    <pre><code>// Otevřu dropdown
+cy.dataCy('country-select').click();
+
+// Pracuji jen uvnitř overlay dropdownu
+cy.get('.cdk-overlay-container').within(() =&gt; {
+  cy.get('.dropdown-item')
+    .should('have.length.at.least', 1);
+
+  cy.contains('.dropdown-item', 'Česká republika')
+    .click();
+});</code></pre>
+
+    <h3 class="h3">.find() – zřetězené hledání potomků</h3>
+    <pre><code>cy.get('.cdk-overlay-container')
+  .find('.dropdown-item')
+  .contains('Česká republika')
+  .click();</code></pre>
+
+    <p class="description">
+      Rozdíl:
+    </p>
+    <ul>
+      <li><code>.within()</code> změní scope pro všechny příkazy uvnitř callbacku.</li>
+      <li><code>.find()</code> je chain příkaz, který hledá potomky od aktuálního elementu.</li>
+      <li>Oba přístupy jsou správné – vyber ten, který je pro tebe čitelnější.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Jak to řeší jiní testeři v externích aplikacích</h2>
+
+    <h3 class="h3">Vzor pro Material / CDK overlay (Angular)</h3>
+    <pre><code>// Otevřu select
+cy.get('[data-cy="country-select"]').click();
+
+// Overlay má classu .cdk-overlay-pane nebo .cdk-overlay-container
+cy.get('.cdk-overlay-container')
+  .find('.mat-option-text')
+  .contains('Česká republika')
+  .click();</code></pre>
+
+    <h3 class="h3">Vzor pro bootstrap/dropdown-menu (React/Vue)</h3>
+    <pre><code>cy.get('[data-cy="status-dropdown"]').click();
+
+cy.get('.dropdown-menu.show') // jen otevřené menu
+  .within(() =&gt; {
+    cy.contains('li', 'Aktivní').click();
+  });</code></pre>
+
+    <h3 class="h3">Vzor s ARIA role (obecnější a odolnější)</h3>
+    <pre><code>// Trigger
+cy.get('[aria-haspopup="listbox"]').click();
+
+// Overlay/listbox
+cy.get('[role="listbox"]').within(() =&gt; {
+  cy.contains('[role="option"]', 'Hodnota 1').click();
+});</code></pre>
+
+    <p class="description">
+      Časté doporučení z fór a GitHub issues:
+    </p>
+    <ul>
+      <li>Nespoléhat se na generované názvy tříd typu <code>.cdk-overlay-0</code>, ale na stabilnější selektory (role, <code>data-*</code>, sémantika).</li>
+      <li>Vždy nejprve otevřít dropdown (jinak overlay neexistuje a test padá).</li>
+      <li>Pracovat s <code>.within()</code> / <code>.find()</code>, aby se nevybíraly prvky z jiných částí stránky.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Jak si testy zjednodušit vlastními příkazy</h2>
+    <p class="description">
+      Pro časté patterny je dobré vytvořit si <strong>vlastní command</strong>, který skryje technické detaily (overlay, třídy) a v testu
+      pak používáš jen čitelnou akci.
+    </p>
+
+    <h3 class="h3">Praktický příklad: selectDropdownItem</h3>
+    <p class="description">
+      V naší aplikaci používáme vlastní command <code>cy.selectDropdownItem()</code>, který zjednodušuje práci s overlay dropdowny.
+    </p>
+
+    <h4 class="h4">TypeScript deklarace</h4>
+    <pre><code>interface Chainable {
+  selectDropdownItem(
+    dataCy: string,
+    itemText: string
+  ): Chainable&lt;JQuery&lt;HTMLElement&gt;&gt;;
+}</code></pre>
+
+    <h4 class="h4">Implementace</h4>
+    <pre><code>Cypress.Commands.add('selectDropdownItem', (dataCy: string, itemText: string) => {
+  cy.dataCy(dataCy).scrollIntoView().click();
+  cy.get('.cdk-overlay-container')
+    .find('.dropdown-item')
+    .contains(itemText)
+    .should('be.visible')
+    .click();
+});</code></pre>
+
+    <h4 class="h4">Použití v testu</h4>
+    <pre><code>// Místo několika řádků:
+// cy.dataCy('feed-type-select').click();
+// cy.get('.cdk-overlay-container').within(() => {
+//   cy.contains('.dropdown-item', 'Obecný XML').click();
+// });
+
+// Stačí jeden řádek:
+cy.selectDropdownItem('feed-type-select', 'Obecný XML');</code></pre>
+
+    <h3 class="h3">Co příkaz dělá?</h3>
+    <ol>
+      <li><strong>Najde trigger</strong> podle <code>data-cy</code> atributu a otevře dropdown.</li>
+      <li><strong>Najde overlay kontejner</strong> (<code>.cdk-overlay-container</code>).</li>
+      <li><strong>Omezí scope</strong> pomocí <code>.find('.dropdown-item')</code> – hledá jen uvnitř overlaye.</li>
+      <li><strong>Najde položku</strong> obsahující zadaný text.</li>
+      <li><strong>Ověří viditelnost</strong> a klikne na položku.</li>
+    </ol>
+
+    <p class="description">
+      Detailní popis tohoto příkazu najdeš v sekci <strong>"Pokročilé" → "Vlastní příkazy"</strong>.
+    </p>
+
+    <h3 class="h3">Obecný vzor pro vlastní command</h3>
+    <pre><code>// cypress/support/commands.ts
+Cypress.Commands.add('selectFromOverlay', (triggerSelector, optionText) => {
+  cy.get(triggerSelector).click();
+
+  cy.get('.cdk-overlay-container').within(() => {
+    cy.contains('.dropdown-item, [role=\"option\"]', optionText)
+      .should('be.visible')
+      .click();
+  });
+});
+
+// Použití v testu
+cy.selectFromOverlay('[data-cy=\"country-select\"]', 'Česká republika');</code></pre>
+
+    <p class="description">
+      Tímto způsobem můžeš mít v testech velmi čitelný kód a kdykoli se změní implementace dropdownu, opravíš jen jeden command.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Typické chyby a jak se jim vyhnout</h2>
+
+    <h3 class="h3">1. Hledání na celé stránce místo v overlayi</h3>
+    <pre><code>// ❌ Může najít položku jinde na stránce
+cy.contains('Česká republika').click();
+
+// ✅ Hledám jen uvnitř overlay dropdownu
+cy.get('.cdk-overlay-container')
+  .contains('.dropdown-item', 'Česká republika')
+  .click();</code></pre>
+
+    <h3 class="h3">2. Práce s dropdownem, který ještě není otevřený</h3>
+    <pre><code>// ❌ Overlay neexistuje
+cy.get('.cdk-overlay-container').find('.dropdown-item');
+
+// ✅ Nejprve dropdown otevřu
+cy.dataCy('country-select').click();
+cy.get('.cdk-overlay-container').find('.dropdown-item');</code></pre>
+
+    <h3 class="h3">3. Křehké selektory</h3>
+    <pre><code>// ❌ Křehký selektor
+cy.get('.cdk-overlay-0 .mat-option-3').click();
+
+// ✅ Stabilnější selektor
+cy.get('.cdk-overlay-container')
+  .contains('[role=\"option\"]', 'Česká republika')
+  .click();</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Shrnutí</h2>
+    <ul>
+      <li><strong>Vždy nejprve otevři dropdown</strong> (klik na trigger).</li>
+      <li><strong>Najdi overlay kontejner</strong> a používej <code>.within()</code> nebo <code>.find()</code> pro práci jen uvnitř něj.</li>
+      <li><strong>Používej stabilní selektory</strong> – <code>data-cy</code>, role (<code>role=\"listbox\"</code>, <code>role=\"option\"</code>), sémantika.</li>
+      <li><strong>Pro opakované vzory si vytvoř vlastní commands</strong> (např. <code>cy.selectFromOverlay()</code>).</li>
+      <li>Tím získáš <strong>čitelné a odolné testy</strong> i pro složité dropdown komponenty.</li>
+    </ul>
+  </section>
+</section>
+

@@ -1,0 +1,101 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">.parent()</h1>
+    <p class="description">
+      Výběr rodičovského elementu. Vrací přímého rodiče (parent) aktuálního elementu. Užitečné pro práci s kontejnery nebo wrapper elementy.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.parent()
+.parent(selector)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('span').parent().click()                      // Přímý rodič
+cy.get('input').parent('.form-group').should('exist') // Rodič s třídou
+cy.get('button').parent('form').submit()             // Rodič form</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.parent()                                          // Chyba, nelze řetězit z 'cy'
+cy.window().parent()                                 // Chyba, window nemá parent</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">selector (String, volitelné)</h3>
+    <p class="description">
+      CSS selektor pro ověření rodiče. Pokud je zadán, test selže, pokud rodič neodpovídá selektoru. Pokud není zadán, vrací přímého rodiče bez ověření.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s rodičovským elementem. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('span').parent().click()
+cy.get('input').parent().should('have.class', 'form-group')</code></pre>
+
+    <h3 class="h3">S selektorem</h3>
+    <pre><code>cy.get('span').parent('.container').should('exist')
+cy.get('button').parent('form').submit()</code></pre>
+
+    <h3 class="h3">Práce s checkboxy</h3>
+    <pre><code>cy.get('input[type="checkbox"]')
+  .parent('label')
+  .click()</code></pre>
+
+    <h3 class="h3">Vícenásobné parent()</h3>
+    <pre><code>cy.get('span')
+  .parent()
+  .parent()
+  .should('have.class', 'grandparent')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Přímý rodič</h3>
+    <p class="description">
+      <code>.parent()</code> vrací přímého rodiče (parent element), ne všechny předky. Pro hledání předka podle selektoru použijte <code>.closest()</code>.
+    </p>
+
+    <h3 class="h3">Řetězení</h3>
+    <p class="description">
+      Lze řetězit více <code>.parent()</code> za sebou pro přístup k vyšším úrovním v DOM stromu. Každé <code>.parent()</code> jde o jednu úroveň výše.
+    </p>
+
+    <h3 class="h3">Rozdíl od .closest()</h3>
+    <p class="description">
+      <code>.parent()</code> vrací přímého rodiče, zatímco <code>.closest()</code> hledá předka podle selektoru (může být i vyšší v DOM stromu).
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o rodičovském elementu. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/parent" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/parent →
+      </a>
+    </p>
+  </section>
+</section>

@@ -1,0 +1,98 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">.children()</h1>
+    <p class="description">
+      Výběr přímých potomků elementu. Vrací všechny přímé děti (children) aktuálního elementu. Užitečné pro práci s přímými potomky, ne vnořenými elementy.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.children()
+.children(selector)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('ul').children().should('have.length', 5)     // Všechny děti
+cy.get('ul').children('li').click()                  // Děti s třídou
+cy.get('form').children('input').type('text')        // Děti input</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.children()                                         // Chyba, nelze řetězit z 'cy'
+cy.window().children()                                // Chyba, window nemá děti</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">selector (String, volitelné)</h3>
+    <p class="description">
+      CSS selektor pro filtrování přímých potomků. Pokud je zadán, vrací pouze přímé potomky, které odpovídají selektoru.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s přímými potomky. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('ul').children().should('have.length', 5)
+cy.get('.container').children().first().click()</code></pre>
+
+    <h3 class="h3">S selektorem</h3>
+    <pre><code>cy.get('ul').children('li').should('have.length', 5)
+cy.get('form').children('input').type('text')</code></pre>
+
+    <h3 class="h3">Práce s tabulkou</h3>
+    <pre><code>cy.get('table tbody tr')
+  .first()
+  .children('td')
+  .should('have.length', 4)</code></pre>
+
+    <h3 class="h3">Rozdíl mezi children() a find()</h3>
+    <pre><code>// children() - jen přímé potomky
+cy.get('.parent').children('.child')
+
+// find() - všechny potomky (včetně vnořených)
+cy.get('.parent').find('.child')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Přímí potomci</h3>
+    <p class="description">
+      <code>.children()</code> vrací jen přímé potomky (children), ne vnořené elementy. Pokud má element vnořené potomky, <code>.children()</code> je nevrátí.
+    </p>
+
+    <h3 class="h3">Rozdíl od .find()</h3>
+    <p class="description">
+      <code>.children()</code> vrací jen přímé potomky, zatímco <code>.find()</code> hledá všechny potomky (včetně vnořených). Pro přímé potomky použijte <code>.children()</code>, pro všechny potomky použijte <code>.find()</code>.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o přímých potomcích. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/children" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/children →
+      </a>
+    </p>
+  </section>
+</section>

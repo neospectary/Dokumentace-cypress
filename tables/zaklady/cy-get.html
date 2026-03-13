@@ -1,0 +1,120 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.get()</h1>
+    <p class="description">
+      Výběr jednoho nebo více DOM elementů pomocí CSS selektorů nebo aliasů. Základní příkaz pro práci s elementy na stránce.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.get(selector)
+cy.get(alias)
+cy.get(selector, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('.btn')                      // CSS selektor
+cy.get('#submit-button')            // ID selektor
+cy.get('[data-cy="login"]')         // Data atribut
+cy.get('@aliasName')                // Alias
+cy.get('button', { timeout: 10000 }) // S options</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.get()                             // Chyba, chybí selector
+cy.window().get('.btn')              // Chyba, cy.get() nelze řetězit</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">selector (String)</h3>
+    <p class="description">
+      CSS selektor, ID, třída, data atribut nebo alias (s @). Cypress podporuje všechny standardní CSS selektory.
+    </p>
+
+    <h3 class="h3">alias (String)</h3>
+    <p class="description">
+      Název aliasu s @ prefixem (např. <code>'@todoList'</code>). Alias musí být dříve vytvořen pomocí <code>.as()</code>.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>timeout</strong> (Number, default: defaultCommandTimeout) - Čas čekání na element</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+      <li><strong>includeShadowDom</strong> (Boolean, default: false) - Zahrne Shadow DOM</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s nalezenými DOM elementy. Lze řetězit další příkazy (např. <code>.click()</code>, <code>.type()</code>, <code>.should()</code>).
+    </p>
+    <pre><code>cy.get('button')      // vrací všechny tlačítka
+  .first()            // vrací první
+  .click()            // klikne na něj</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní výběr</h3>
+    <pre><code>cy.get('.btn-primary')
+cy.get('#submit-button')
+cy.get('[data-cy="login"]')
+cy.get('button.btn-primary')</code></pre>
+
+    <h3 class="h3">Použití aliasu</h3>
+    <pre><code>cy.get('ul#todos').as('todoList')
+cy.get('@todoList').find('li')</code></pre>
+
+    <h3 class="h3">S vlastním timeoutem</h3>
+    <pre><code>cy.get('.slow-element', { timeout: 10000 })</code></pre>
+
+    <h3 class="h3">Složitější selektory</h3>
+    <pre><code>cy.get('form input[type="email"]')
+cy.get('.menu > li:first-child')
+cy.get('button:contains("Submit")')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Automatické čekání</h3>
+    <p class="description">
+      <code>cy.get()</code> automaticky čeká na existenci elementu (retry mechanismus). Element nemusí být okamžitě přítomen v DOM.
+    </p>
+
+    <h3 class="h3">Scope hledání</h3>
+    <p class="description">
+      <code>cy.get()</code> vždy hledá od root elementu (celý dokument). Pro hledání uvnitř elementu použijte <code>.find()</code> nebo <code>cy.within()</code>.
+    </p>
+
+    <h3 class="h3">Best practices</h3>
+    <ul>
+      <li>Preferujte data atributy (<code>data-cy</code>, <code>data-test</code>) před CSS třídami</li>
+      <li>Používejte specifické selektory pro stabilní testy</li>
+      <li>Vyhýbejte se selektorům závislým na pozici (např. <code>:nth-child(3)</code>)</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o nalezených elementech. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/get" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/get →
+      </a>
+    </p>
+  </section>
+</section>

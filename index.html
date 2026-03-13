@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cypress</title>
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+  <!-- Horní lišta -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <svg class="brand-logo" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="24" cy="24" r="24" fill="#04C38D"/>
+        <text x="24" y="32" font-family="monospace" font-size="20" font-weight="bold" fill="#FFF" text-anchor="middle">cy</text>
+      </svg>
+      <div class="brand-title">Cypress</div>
+
+      <!-- Theme toggle -->
+      <div class="theme-toggle">
+        <span class="theme-toggle-label">Theme mode</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="theme-toggle-checkbox" aria-label="Přepnout light/dark mode">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- Search -->
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text" class="search-input" id="search-input" placeholder="Hledat v učebnici..." autocomplete="off" />
+        </div>
+        <div class="search-dropdown" id="search-dropdown"></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- Levé menu -->
+    <aside class="sidebar">
+      <div class="brand">Obsah</div>
+      <nav class="nav-cats">
+        <a href="index.html?table=instalace"         data-cat="instalace">Instalace</a>
+        <a href="index.html?table=zaklady"           data-cat="zaklady">Cypress příkazy</a>
+        <a href="index.html?table=chain"             data-cat="chain">Chain příkazy</a>
+        <a href="index.html?table=assertions"         data-cat="assertions">Assertions</a>
+        <a href="index.html?table=mocha"            data-cat="mocha">Mocha syntaxe</a>
+        <a href="index.html?table=pokrocile"         data-cat="pokrocile">Pokročilé</a>
+        <a href="index.html?table=prakticke-sekce"   data-cat="prakticke-sekce">Praktické sekce</a>
+      </nav>
+    </aside>
+
+    <!-- Pravé menu (host) -->
+    <aside class="subsidebar">
+      <div class="subbrand">Kategorie</div>
+      <nav id="subnav" class="subnav"></nav>
+
+      <!-- Šablony kategorií (inertní) -->
+      <template class="subnav-tpl" data-table="zaklady" data-base="./tables/zaklady/">
+        <a href="index.html?table=zaklady&category=cy-get" data-category="cy-get" data-file="cy-get.html">cy.get()</a>
+        <a href="index.html?table=zaklady&category=cy-visit" data-category="cy-visit" data-file="cy-visit.html">cy.visit()</a>
+        <a href="index.html?table=zaklady&category=cy-click" data-category="cy-click" data-file="cy-click.html">cy.click()</a>
+        <a href="index.html?table=zaklady&category=cy-type" data-category="cy-type" data-file="cy-type.html">cy.type()</a>
+        <a href="index.html?table=zaklady&category=cy-contains" data-category="cy-contains" data-file="cy-contains.html">cy.contains()</a>
+        <a href="index.html?table=zaklady&category=cy-should" data-category="cy-should" data-file="cy-should.html">cy.should()</a>
+        <a href="index.html?table=zaklady&category=cy-url" data-category="cy-url" data-file="cy-url.html">cy.url()</a>
+        <a href="index.html?table=zaklady&category=cy-wait" data-category="cy-wait" data-file="cy-wait.html">cy.wait()</a>
+        <a href="index.html?table=zaklady&category=cy-intercept" data-category="cy-intercept" data-file="cy-intercept.html">cy.intercept()</a>
+        <a href="index.html?table=zaklady&category=cy-find" data-category="cy-find" data-file="cy-find.html">cy.find()</a>
+        <a href="index.html?table=zaklady&category=cy-then" data-category="cy-then" data-file="cy-then.html">cy.then()</a>
+        <a href="index.html?table=zaklady&category=cy-each" data-category="cy-each" data-file="cy-each.html">cy.each()</a>
+        <a href="index.html?table=zaklady&category=cy-clear" data-category="cy-clear" data-file="cy-clear.html">cy.clear()</a>
+        <a href="index.html?table=zaklady&category=cy-check" data-category="cy-check" data-file="cy-check.html">cy.check()</a>
+        <a href="index.html?table=zaklady&category=cy-select" data-category="cy-select" data-file="cy-select.html">cy.select()</a>
+        <a href="index.html?table=zaklady&category=cy-wrap" data-category="cy-wrap" data-file="cy-wrap.html">cy.wrap()</a>
+        <a href="index.html?table=zaklady&category=cy-fixture" data-category="cy-fixture" data-file="cy-fixture.html">cy.fixture()</a>
+        <a href="index.html?table=zaklady&category=cy-request" data-category="cy-request" data-file="cy-request.html">cy.request()</a>
+        <a href="index.html?table=zaklady&category=cy-viewport" data-category="cy-viewport" data-file="cy-viewport.html">cy.viewport()</a>
+        <a href="index.html?table=zaklady&category=cy-title" data-category="cy-title" data-file="cy-title.html">cy.title()</a>
+        <a href="index.html?table=zaklady&category=cy-reload" data-category="cy-reload" data-file="cy-reload.html">cy.reload()</a>
+        <a href="index.html?table=zaklady&category=cy-go" data-category="cy-go" data-file="cy-go.html">cy.go()</a>
+        <a href="index.html?table=zaklady&category=cy-within" data-category="cy-within" data-file="cy-within.html">cy.within()</a>
+        <a href="index.html?table=zaklady&category=cy-invoke" data-category="cy-invoke" data-file="cy-invoke.html">cy.invoke()</a>
+        <a href="index.html?table=zaklady&category=cy-its" data-category="cy-its" data-file="cy-its.html">cy.its()</a>
+        <a href="index.html?table=zaklady&category=cy-screenshot" data-category="cy-screenshot" data-file="cy-screenshot.html">cy.screenshot()</a>
+        <a href="index.html?table=zaklady&category=cy-scrollIntoView" data-category="cy-scrollIntoView" data-file="cy-scrollIntoView.html">.scrollIntoView()</a>
+        <a href="index.html?table=zaklady&category=cy-as" data-category="cy-as" data-file="cy-as.html">.as()</a>
+        <a href="index.html?table=zaklady&category=cy-task" data-category="cy-task" data-file="cy-task.html">cy.task()</a>
+        <a href="index.html?table=zaklady&category=cy-readFile" data-category="cy-readFile" data-file="cy-readFile.html">cy.readFile()</a>
+        <a href="index.html?table=zaklady&category=cy-writeFile" data-category="cy-writeFile" data-file="cy-writeFile.html">cy.writeFile()</a>
+        <a href="index.html?table=zaklady&category=cy-exec" data-category="cy-exec" data-file="cy-exec.html">cy.exec()</a>
+        <a href="index.html?table=zaklady&category=cy-log" data-category="cy-log" data-file="cy-log.html">cy.log()</a>
+        <a href="index.html?table=zaklady&category=cy-location" data-category="cy-location" data-file="cy-location.html">cy.location()</a>
+      </template>
+
+      <template class="subnav-tpl" data-table="pokrocile" data-base="./tables/pokrocile/">
+        <a href="index.html?table=pokrocile&category=sablona-testu" data-category="sablona-testu" data-file="sablona-testu.html">Šablona pro nové testy</a>
+        <a href="index.html?table=pokrocile&category=vlastni-prikazy" data-category="vlastni-prikazy" data-file="vlastni-prikazy.html">Vlastní příkazy (Custom Commands)</a>
+        <a href="index.html?table=pokrocile&category=angular-direktivy" data-category="angular-direktivy" data-file="angular-direktivy.html">Vlastní příkazy pro Angular direktivy</a>
+        <a href="index.html?table=pokrocile&category=prakticke-priklady" data-category="prakticke-priklady" data-file="prakticke-priklady.html">Praktické příklady z praxe</a>
+      </template>
+
+      <template class="subnav-tpl" data-table="mocha" data-base="./tables/mocha/">
+        <a href="index.html?table=mocha&category=prehled" data-category="prehled" data-file="prehled.html">Přehled Mocha v Cypressu</a>
+        <a href="index.html?table=mocha&category=describe-it" data-category="describe-it" data-file="describe-it.html">describe(), context(), it()</a>
+        <a href="index.html?table=mocha&category=before" data-category="before" data-file="before.html">before()</a>
+        <a href="index.html?table=mocha&category=beforeEach" data-category="beforeEach" data-file="beforeEach.html">beforeEach()</a>
+        <a href="index.html?table=mocha&category=afterEach" data-category="afterEach" data-file="afterEach.html">afterEach()</a>
+        <a href="index.html?table=mocha&category=after" data-category="after" data-file="after.html">after()</a>
+        <a href="index.html?table=mocha&category=only-skip" data-category="only-skip" data-file="only-skip.html">.only() a .skip()</a>
+      </template>
+
+      <template class="subnav-tpl" data-table="chain" data-base="./tables/chain/">
+        <a href="index.html?table=chain&category=first" data-category="first" data-file="first.html">.first()</a>
+        <a href="index.html?table=chain&category=last" data-category="last" data-file="last.html">.last()</a>
+        <a href="index.html?table=chain&category=eq" data-category="eq" data-file="eq.html">.eq()</a>
+        <a href="index.html?table=chain&category=filter" data-category="filter" data-file="filter.html">.filter()</a>
+        <a href="index.html?table=chain&category=not" data-category="not" data-file="not.html">.not()</a>
+        <a href="index.html?table=chain&category=parent" data-category="parent" data-file="parent.html">.parent()</a>
+        <a href="index.html?table=chain&category=children" data-category="children" data-file="children.html">.children()</a>
+        <a href="index.html?table=chain&category=siblings" data-category="siblings" data-file="siblings.html">.siblings()</a>
+        <a href="index.html?table=chain&category=next" data-category="next" data-file="next.html">.next()</a>
+        <a href="index.html?table=chain&category=prev" data-category="prev" data-file="prev.html">.prev()</a>
+        <a href="index.html?table=chain&category=closest" data-category="closest" data-file="closest.html">.closest()</a>
+        <a href="index.html?table=chain&category=and" data-category="and" data-file="and.html">.and()</a>
+        <a href="index.html?table=chain&category=trigger" data-category="trigger" data-file="trigger.html">.trigger()</a>
+        <a href="index.html?table=chain&category=focus" data-category="focus" data-file="focus.html">.focus()</a>
+        <a href="index.html?table=chain&category=blur" data-category="blur" data-file="blur.html">.blur()</a>
+        <a href="index.html?table=chain&category=submit" data-category="submit" data-file="submit.html">.submit()</a>
+        <a href="index.html?table=chain&category=uncheck" data-category="uncheck" data-file="uncheck.html">.uncheck()</a>
+        <a href="index.html?table=chain&category=find" data-category="find" data-file="find.html">.find()</a>
+      </template>
+
+      <template class="subnav-tpl" data-table="assertions" data-base="./tables/assertions/">
+        <a href="index.html?table=assertions&category=prehled" data-category="prehled" data-file="prehled.html">Přehled assertions</a>
+        <a href="index.html?table=assertions&category=implicit-explicit" data-category="implicit-explicit" data-file="implicit-explicit.html">Implicitní vs. explicitní assertions</a>
+        <a href="index.html?table=assertions&category=be-visible" data-category="be-visible" data-file="be-visible.html">be.visible</a>
+        <a href="index.html?table=assertions&category=be-enabled" data-category="be-enabled" data-file="be-enabled.html">be.enabled</a>
+        <a href="index.html?table=assertions&category=be-disabled" data-category="be-disabled" data-file="be-disabled.html">be.disabled</a>
+        <a href="index.html?table=assertions&category=have-text" data-category="have-text" data-file="have-text.html">have.text</a>
+        <a href="index.html?table=assertions&category=contain" data-category="contain" data-file="contain.html">contain</a>
+        <a href="index.html?table=assertions&category=have-attr" data-category="have-attr" data-file="have-attr.html">have.attr</a>
+        <a href="index.html?table=assertions&category=have-class" data-category="have-class" data-file="have-class.html">have.class</a>
+        <a href="index.html?table=assertions&category=have-value" data-category="have-value" data-file="have-value.html">have.value</a>
+        <a href="index.html?table=assertions&category=have-length" data-category="have-length" data-file="have-length.html">have.length</a>
+        <a href="index.html?table=assertions&category=exist" data-category="exist" data-file="exist.html">exist / not.exist</a>
+        <a href="index.html?table=assertions&category=be-hidden" data-category="be-hidden" data-file="be-hidden.html">be.hidden</a>
+        <a href="index.html?table=assertions&category=be-checked" data-category="be-checked" data-file="be-checked.html">be.checked</a>
+        <a href="index.html?table=assertions&category=have-css" data-category="have-css" data-file="have-css.html">have.css</a>
+      </template>
+
+      <template class="subnav-tpl" data-table="instalace" data-base="./tables/instalace/">
+        <a href="index.html?table=instalace&category=uvod" data-category="uvod" data-file="uvod.html">Úvod</a>
+        <a href="index.html?table=instalace&category=nodejs" data-category="nodejs" data-file="nodejs.html">Instalace Node.js</a>
+        <a href="index.html?table=instalace&category=cypress" data-category="cypress" data-file="cypress.html">Instalace Cypressu</a>
+        <a href="index.html?table=instalace&category=typescript" data-category="typescript" data-file="typescript.html">Nastavení TypeScriptu</a>
+        <a href="index.html?table=instalace&category=spusteni" data-category="spusteni" data-file="spusteni.html">Spuštění Cypressu</a>
+      </template>
+
+      <template class="subnav-tpl" data-table="prakticke-sekce" data-base="./tables/prakticke-sekce/">
+        <a href="index.html?table=prakticke-sekce&category=tabulky" data-category="tabulky" data-file="tabulky.html">Testování tabulek</a>
+        <a href="index.html?table=prakticke-sekce&category=formulare" data-category="formulare" data-file="formulare.html">Testování formulářů</a>
+        <a href="index.html?table=prakticke-sekce&category=modaly" data-category="modaly" data-file="modaly.html">Testování modálů</a>
+        <a href="index.html?table=prakticke-sekce&category=dropdown" data-category="dropdown" data-file="dropdown.html">Testování dropdownů</a>
+        <a href="index.html?table=prakticke-sekce&category=vyhledavani" data-category="vyhledavani" data-file="vyhledavani.html">Testování vyhledávání</a>
+        <a href="index.html?table=prakticke-sekce&category=filtrovani" data-category="filtrovani" data-file="filtrovani.html">Testování filtrování</a>
+        <a href="index.html?table=prakticke-sekce&category=upload" data-category="upload" data-file="upload.html">Testování uploadu souborů</a>
+        <a href="index.html?table=prakticke-sekce&category=notifikace" data-category="notifikace" data-file="notifikace.html">Testování notifikací</a>
+        <a href="index.html?table=prakticke-sekce&category=toast" data-category="toast" data-file="toast.html">Testování toastových hlášek</a>
+        <a href="index.html?table=prakticke-sekce&category=validace" data-category="validace" data-file="validace.html">Testování validace</a>
+        <a href="index.html?table=prakticke-sekce&category=tabs" data-category="tabs" data-file="tabs.html">Testování tabs</a>
+        <a href="index.html?table=prakticke-sekce&category=accordion" data-category="accordion" data-file="accordion.html">Testování accordionů</a>
+        <a href="index.html?table=prakticke-sekce&category=stepper" data-category="stepper" data-file="stepper.html">Testování stepperu</a>
+        <a href="index.html?table=prakticke-sekce&category=paginace" data-category="paginace" data-file="paginace.html">Testování paginace</a>
+        <a href="index.html?table=prakticke-sekce&category=breadcrumb" data-category="breadcrumb" data-file="breadcrumb.html">Testování breadcrumb</a>
+        <a href="index.html?table=prakticke-sekce&category=api" data-category="api" data-file="api.html">Testování API</a>
+        <a href="index.html?table=prakticke-sekce&category=localstorage" data-category="localstorage" data-file="localstorage.html">Testování localStorage</a>
+        <a href="index.html?table=prakticke-sekce&category=chyby" data-category="chyby" data-file="chyby.html">Testování chybových stavů</a>
+      </template>
+    </aside>
+
+    <!-- Obsah -->
+    <main id="content" class="content">
+      <!-- Vlastní scroll jen pro breadcrumbs + obsah -->
+      <div id="content-scroll" class="content-scroll">
+        <nav id="breadcrumbs" class="breadcrumbs" aria-label="breadcrumb"></nav>
+        <div id="content-slot">
+          <section class="card">
+            <h2 class="h2">Vítej v učebnici Cypress!</h2>
+            <p class="muted">Vyber v levém menu oblast a v pravém konkrétní lekci.</p>
+            <p>Všechna videa jsou dostupná na YouTube: <a href="https://www.youtube.com/watch?v=SVtlE_ED75M&list=PLQ8x_VWW6Akth1NzEawQDoj7WzzmIRMAU" target="_blank">Cypress kurz od Davida Šteka</a></p>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="./app.js"></script>
+
+  <!-- Theme toggle logic -->
+  <script>
+    (function() {
+      const html = document.documentElement;
+      const themeToggle = document.getElementById('theme-toggle-checkbox');
+
+      // Načti uloženou preferenci z localStorage
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        html.setAttribute('data-theme', 'light');
+        themeToggle.checked = true;
+      }
+
+      // Poslouchej změny toggle switche
+      themeToggle.addEventListener('change', function() {
+        if (this.checked) {
+          html.setAttribute('data-theme', 'light');
+          localStorage.setItem('theme', 'light');
+        } else {
+          html.removeAttribute('data-theme');
+          localStorage.setItem('theme', 'dark');
+        }
+      });
+    })();
+  </script>
+
+  <!-- Global search logic -->
+  <script>
+    (function() {
+      const searchInput = document.getElementById('search-input');
+      const searchDropdown = document.getElementById('search-dropdown');
+      let allCategories = [];
+      let selectedIndex = -1;
+
+      // Načti všechny kategorie z template elementů
+      function loadAllCategories() {
+        const templates = document.querySelectorAll('.subnav-tpl');
+        const categories = [];
+
+        templates.forEach(template => {
+          const tableName = template.getAttribute('data-table');
+          const links = template.content.querySelectorAll('a');
+
+          // Najdi hlavní kategorii v levém menu
+          const mainCategory = document.querySelector(`.nav-cats a[data-cat="${tableName}"]`);
+          const mainCategoryName = mainCategory ? mainCategory.textContent.trim() : tableName;
+
+          links.forEach(link => {
+            const title = link.textContent.trim();
+            const href = link.getAttribute('href');
+
+            categories.push({
+              title: title,
+              mainCategory: mainCategoryName,
+              tableName: tableName,
+              href: href,
+              searchText: (title + ' ' + mainCategoryName).toLowerCase()
+            });
+          });
+        });
+
+        return categories;
+      }
+
+      // Fuzzy search - najde i s překlepem
+      function fuzzyMatch(text, query) {
+        text = text.toLowerCase();
+        query = query.toLowerCase();
+
+        // Přesná shoda
+        if (text.includes(query)) return 3;
+
+        // Shoda začátku slova
+        const words = text.split(' ');
+        for (let word of words) {
+          if (word.startsWith(query)) return 2;
+        }
+
+        // Fuzzy match - všechny znaky v pořadí
+        let queryIndex = 0;
+        for (let i = 0; i < text.length && queryIndex < query.length; i++) {
+          if (text[i] === query[queryIndex]) {
+            queryIndex++;
+          }
+        }
+        if (queryIndex === query.length) return 1;
+
+        return 0;
+      }
+
+      // Filtruj kategorie podle dotazu
+      function filterCategories(query) {
+        if (!query.trim()) return [];
+
+        const results = allCategories
+          .map(cat => ({
+            ...cat,
+            score: fuzzyMatch(cat.searchText, query)
+          }))
+          .filter(cat => cat.score > 0)
+          .sort((a, b) => {
+            // Seřaď podle score, pak abecedně
+            if (b.score !== a.score) return b.score - a.score;
+            return a.title.localeCompare(b.title, 'cs');
+          });
+
+        return results;
+      }
+
+      // Vykreslí výsledky do dropdownu
+      function renderResults(results) {
+        if (results.length === 0) {
+          searchDropdown.innerHTML = '<div class="search-no-results">Žádné výsledky</div>';
+          return;
+        }
+
+        // Seskup podle hlavní kategorie
+        const grouped = {};
+        results.forEach(result => {
+          if (!grouped[result.mainCategory]) {
+            grouped[result.mainCategory] = [];
+          }
+          grouped[result.mainCategory].push(result);
+        });
+
+        let html = '';
+        Object.keys(grouped).forEach(mainCat => {
+          html += `<div class="search-result-group">`;
+          html += `<div class="search-group-title">${mainCat}</div>`;
+
+          grouped[mainCat].forEach((result, idx) => {
+            html += `
+              <a href="${result.href}" class="search-result-item" data-index="${results.indexOf(result)}">
+                <svg class="search-result-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <div class="search-result-text">
+                  <div class="search-result-title">${result.title}</div>
+                  <div class="search-result-breadcrumb">${result.mainCategory}</div>
+                </div>
+              </a>
+            `;
+          });
+
+          html += `</div>`;
+        });
+
+        searchDropdown.innerHTML = html;
+        selectedIndex = -1;
+      }
+
+      // Zobraz/skryj dropdown
+      function showDropdown() {
+        searchDropdown.classList.add('active');
+      }
+
+      function hideDropdown() {
+        searchDropdown.classList.remove('active');
+        selectedIndex = -1;
+      }
+
+      // Navigace klávesnicí
+      function updateSelectedItem() {
+        const items = searchDropdown.querySelectorAll('.search-result-item');
+        items.forEach((item, idx) => {
+          if (idx === selectedIndex) {
+            item.classList.add('selected');
+            item.scrollIntoView({ block: 'nearest' });
+          } else {
+            item.classList.remove('selected');
+          }
+        });
+      }
+
+      // Event listeners
+      searchInput.addEventListener('input', function() {
+        const query = this.value;
+
+        if (!query.trim()) {
+          hideDropdown();
+          return;
+        }
+
+        const results = filterCategories(query);
+        renderResults(results);
+        showDropdown();
+      });
+
+      searchInput.addEventListener('focus', function() {
+        if (this.value.trim() && searchDropdown.children.length > 0) {
+          showDropdown();
+        }
+      });
+
+      // Klávesnice - šipky a Enter
+      searchInput.addEventListener('keydown', function(e) {
+        const items = searchDropdown.querySelectorAll('.search-result-item');
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+          updateSelectedItem();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          selectedIndex = Math.max(selectedIndex - 1, -1);
+          updateSelectedItem();
+        } else if (e.key === 'Enter' && selectedIndex >= 0) {
+          e.preventDefault();
+          items[selectedIndex].click();
+        } else if (e.key === 'Escape') {
+          hideDropdown();
+          this.blur();
+        }
+      });
+
+      // Kliknutí mimo zavře dropdown
+      document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+          hideDropdown();
+        }
+      });
+
+      // Načti kategorie při startu
+      allCategories = loadAllCategories();
+    })();
+  </script>
+</body>
+</html>

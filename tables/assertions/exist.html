@@ -1,0 +1,54 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">exist / not.exist</h1>
+    <p class="description">
+      Ověření existence elementu v DOM. Element může být skrytý, ale musí existovat v DOM stromu.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Když potřebujete ověřit, že element existuje (i když je skrytý)</li>
+      <li>Pro kontrolu, že element byl přidán do DOM</li>
+      <li>Pro ověření, že element byl odstraněn z DOM</li>
+      <li>Když nezáleží na viditelnosti, jen na existenci</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.should('exist')
+cy.should('not.exist')
+cy.and('exist')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('form').should('exist')
+cy.get('.hidden-element').should('exist')</code></pre>
+
+    <h3 class="h3">Ověření odstranění</h3>
+    <pre><code>cy.get('.item').click()
+cy.get('.item').should('not.exist')</code></pre>
+
+    <h3 class="h3">Rozdíl oproti be.visible</h3>
+    <pre><code>// exist - element je v DOM (může být skrytý)
+cy.get('.hidden').should('exist')
+
+// be.visible - element je viditelný
+cy.get('.visible').should('be.visible')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li><code>exist</code> - element je v DOM (může být skrytý)</li>
+      <li><code>not.exist</code> - element není v DOM</li>
+      <li>Rozdíl oproti <code>be.visible</code> - exist ověřuje jen přítomnost v DOM</li>
+      <li>Element může existovat, ale být skrytý (display: none)</li>
+    </ul>
+  </section>
+</section>

@@ -1,0 +1,138 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.request()</h1>
+    <p class="description">
+      HTTP requesty. Umožňuje provádět HTTP požadavky přímo z testu, bez prohlížeče. Requesty probíhají v Node.js prostředí.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.request(url)
+cy.request(method, url)
+cy.request(method, url, body)
+cy.request(options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.request('GET', '/api/users')                 // GET request
+cy.request('POST', '/api/login', { body })      // POST request
+cy.request({ method: 'GET', url: '/api/data' }) // S options
+cy.request('https://api.example.com/data')      // Absolutní URL</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.request()                                     // Chyba, chybí URL
+cy.get('.btn').request('/api/data')             // Chyba, nelze řetězit</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">method (String)</h3>
+    <p class="description">
+      HTTP metoda: <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code>, <code>PATCH</code>, <code>HEAD</code>, <code>OPTIONS</code>. Pokud není zadána, výchozí je <code>GET</code>.
+    </p>
+
+    <h3 class="h3">url (String)</h3>
+    <p class="description">
+      URL endpointu. Může být absolutní URL nebo relativní k <code>baseUrl</code> z config.
+    </p>
+
+    <h3 class="h3">body (Object|String)</h3>
+    <p class="description">
+      Request body. Pro POST, PUT, PATCH requesty. Může být objekt (automaticky JSON stringify) nebo string.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>method</strong> (String) - HTTP metoda</li>
+      <li><strong>url</strong> (String) - URL endpointu</li>
+      <li><strong>body</strong> (Object|String) - Request body</li>
+      <li><strong>headers</strong> (Object) - HTTP hlavičky</li>
+      <li><strong>auth</strong> (Object) - HTTP authentication</li>
+      <li><strong>timeout</strong> (Number) - Čas čekání na response</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s response objektem obsahujícím <code>status</code>, <code>body</code>, <code>headers</code>, <code>duration</code>. Lze použít s <code>.then()</code> pro přístup k response.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">GET request</h3>
+    <pre><code>cy.request('GET', '/api/users')
+  .then((response) => {
+    expect(response.status).to.eq(200)
+    expect(response.body).to.have.length(10)
+  })</code></pre>
+
+    <h3 class="h3">POST request</h3>
+    <pre><code>cy.request('POST', '/api/login', {
+  username: 'admin',
+  password: 'password'
+}).then((response) => {
+  expect(response.status).to.eq(200)
+})</code></pre>
+
+    <h3 class="h3">S headers</h3>
+    <pre><code>cy.request({
+  method: 'GET',
+  url: '/api/data',
+  headers: {
+    'Authorization': 'Bearer token'
+  }
+})</code></pre>
+
+    <h3 class="h3">Přihlášení pomocí API</h3>
+    <pre><code>cy.request('POST', '/api/login', {
+  username: 'user',
+  password: 'pass'
+}).then((response) => {
+  window.localStorage.setItem('token', response.body.token)
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Node.js prostředí</h3>
+    <p class="description">
+      Requesty probíhají mimo prohlížeč v Node.js prostředí. Jsou rychlejší než UI interakce a užitečné pro setup a cleanup testů.
+    </p>
+
+    <h3 class="h3">Automatické cookies</h3>
+    <p class="description">
+      Cookies z prohlížeče nejsou automaticky přidány k requestům. Pokud potřebujete cookies, musíte je přidat ručně do headers.
+    </p>
+
+    <h3 class="h3">Base URL</h3>
+    <p class="description">
+      Relativní URL se kombinují s <code>baseUrl</code> z Cypress config. Pokud není <code>baseUrl</code> nastaven, musíte použít absolutní URL.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o requestu a response. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/request" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/request →
+      </a>
+    </p>
+  </section>
+</section>

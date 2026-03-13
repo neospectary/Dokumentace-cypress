@@ -1,0 +1,107 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">.as()</h1>
+    <p class="description">
+      Vytvoření aliasu. Umožňuje pojmenovat element nebo hodnotu pro pozdější použití. Alias lze použít pomocí <code>cy.get('@aliasName')</code>.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.as(aliasName)
+.as(aliasName, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('button').as('submitBtn')           // Alias elementu
+cy.wrap('value').as('myValue')             // Alias hodnoty
+cy.intercept('GET', '/api/users').as('getUsers') // Alias requestu
+cy.get('@submitBtn').click()               // Použití aliasu</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.as('alias')                              // Chyba, nelze řetězit z 'cy'
+cy.get('@alias').as('newAlias')            // Chyba, alias nemůže obsahovat @</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">aliasName (String)</h3>
+    <p class="description">
+      Název aliasu. Měl by být bez <code>@</code> prefixu (Cypress ho přidá automaticky při použití s <code>cy.get('@aliasName')</code>).
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>type</strong> (String) - Typ aliasu ('query', 'static')</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s elementem nebo hodnotou. Alias lze použít později pomocí <code>cy.get('@aliasName')</code>.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní alias</h3>
+    <pre><code>cy.get('button').as('submitBtn')
+cy.get('@submitBtn').click()</code></pre>
+
+    <h3 class="h3">S hodnotou</h3>
+    <pre><code>cy.wrap('value').as('myValue')
+cy.get('@myValue').should('eq', 'value')</code></pre>
+
+    <h3 class="h3">Více použití</h3>
+    <pre><code>cy.get('.user-list').as('users')
+cy.get('@users').find('.active')
+cy.get('@users').should('have.length', 10)</code></pre>
+
+    <h3 class="h3">S intercept</h3>
+    <pre><code>cy.intercept('GET', '/api/users').as('getUsers')
+cy.visit('/users')
+cy.wait('@getUsers')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Použití aliasu</h3>
+    <p class="description">
+      Alias použijte pomocí <code>cy.get('@aliasName')</code>. Alias je dostupný v celém testu (ne jen v rámci callback funkce).
+    </p>
+
+    <h3 class="h3">Typy aliasů</h3>
+    <p class="description">
+      Alias lze použít pro elementy, hodnoty i requesty. Pro requesty použijte s <code>cy.wait('@aliasName')</code>.
+    </p>
+
+    <h3 class="h3">Scope</h3>
+    <p class="description">
+      Aliasy jsou dostupné v celém testu. Pokud vytvoříte alias v <code>beforeEach</code>, je dostupný ve všech testech.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o vytvořeném aliasu. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/as" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/as →
+      </a>
+    </p>
+  </section>
+</section>

@@ -1,0 +1,127 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.then()</h1>
+    <p class="description">
+      Práce s výsledky příkazů. Umožňuje přístup k hodnotám z předchozích příkazů a provádění vlastní logiky pomocí callback funkce.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.then(callbackFn)
+.then(options, callbackFn)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('input').then(($input) => {          // Callback s elementem
+  const value = $input.val()
+  cy.log(`Hodnota: ${value}`)
+})
+cy.wrap(5).then((num) => num * 2)           // Callback s hodnotou</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.then(() => {})                             // Chyba, nelze řetězit z 'cy'
+cy.window().then(($el) => {})                // Chyba, window není DOM element</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">callbackFn (Function)</h3>
+    <p class="description">
+      Callback funkce, která dostane jako argument hodnotu z předchozího příkazu (jQuery element, hodnota, objekt, atd.).
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>timeout</strong> (Number) - Čas čekání</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s návratovou hodnotou callback funkce. Pokud callback vrací Cypress command, vrátí jeho výsledek. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Získání hodnoty</h3>
+    <pre><code>cy.get('input').then(($input) => {
+  const value = $input.val()
+  cy.log(`Hodnota je: ${value}`)
+})</code></pre>
+
+    <h3 class="h3">Práce s textem</h3>
+    <pre><code>cy.get('.price').then(($el) => {
+  const text = $el.text()
+  const number = parseFloat(text.replace('Kč', ''))
+  expect(number).to.be.greaterThan(0)
+})</code></pre>
+
+    <h3 class="h3">Vícenásobné then()</h3>
+    <pre><code>cy.get('input')
+  .then(($input) => $input.val())
+  .then((value) => {
+    cy.log(`Hodnota: ${value}`)
+  })</code></pre>
+
+    <h3 class="h3">S cy.wrap()</h3>
+    <pre><code>cy.get('input').then(($input) => {
+  const value = $input.val()
+  cy.wrap(value).should('eq', 'test')
+})</code></pre>
+
+    <h3 class="h3">Návrat do Cypress chainu</h3>
+    <pre><code>cy.get('input').then(($input) => {
+  const value = $input.val()
+  return cy.wrap(value)
+}).should('eq', 'test')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Callback funkce</h3>
+    <p class="description">
+      Callback dostává jako argument hodnotu z předchozího příkazu. Pro DOM elementy je to jQuery element, pro ostatní hodnoty je to přímo hodnota.
+    </p>
+
+    <h3 class="h3">Návrat do Cypress chainu</h3>
+    <p class="description">
+      Pro návrat do Cypress chainu použijte <code>cy.wrap()</code> nebo vraťte Cypress command. Vrácení hodnoty přímo ji předá dalšímu <code>.then()</code>.
+    </p>
+
+    <h3 class="h3">Async/await</h3>
+    <p class="description">
+      Nepoužívejte <code>async/await</code> uvnitř <code>.then()</code> callbacku. Cypress příkazy nejsou Promises a nelze na ně čekat pomocí await.
+    </p>
+
+    <h3 class="h3">Cyklické operace</h3>
+    <p class="description">
+      Pro cyklické operace přes kolekci elementů použijte <code>.each()</code> místo <code>.then()</code>.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/then" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/then →
+      </a>
+    </p>
+  </section>
+</section>

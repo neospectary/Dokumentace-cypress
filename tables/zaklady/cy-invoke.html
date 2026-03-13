@@ -1,0 +1,98 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.invoke()</h1>
+    <p class="description">
+      Volání jQuery metod na elementu. Umožňuje zavolat jQuery funkce jako <code>.show()</code>, <code>.hide()</code>, <code>.val()</code>, <code>.css()</code>, atd. Cypress používá jQuery pod kapotou.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.invoke(functionName)
+.invoke(functionName, ...args)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('input').invoke('val')                    // Získání hodnoty
+cy.get('div').invoke('show')                     // Zobrazení elementu
+cy.get('input').invoke('val', 'new value')       // Nastavení hodnoty
+cy.get('div').invoke('css', 'color', 'red')      // CSS vlastnost</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.invoke('val')                                  // Chyba, nelze řetězit z 'cy'
+cy.window().invoke('val')                         // Chyba, window není DOM element</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">functionName (String)</h3>
+    <p class="description">
+      Název jQuery metody k volání (např. <code>'val'</code>, <code>'show'</code>, <code>'hide'</code>, <code>'css'</code>, <code>'attr'</code>, atd.).
+    </p>
+
+    <h3 class="h3">args (Any)</h3>
+    <p class="description">
+      Argumenty pro jQuery metodu. Počet argumentů závisí na konkrétní metodě.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s návratovou hodnotou jQuery metody. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('input').invoke('val')
+cy.get('div').invoke('show')
+cy.get('div').invoke('hide')</code></pre>
+
+    <h3 class="h3">S argumenty</h3>
+    <pre><code>cy.get('input').invoke('val', 'new value')
+cy.get('div').invoke('css', 'color', 'red')
+cy.get('a').invoke('attr', 'href')</code></pre>
+
+    <h3 class="h3">Získání hodnoty</h3>
+    <pre><code>cy.get('input').invoke('val').then((value) => {
+  cy.log(`Hodnota: ${value}`)
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">jQuery metody</h3>
+    <p class="description">
+      <code>.invoke()</code> funguje jen s jQuery metodami. Cypress používá jQuery pod kapotou, takže všechny jQuery metody jsou dostupné.
+    </p>
+
+    <h3 class="h3">Kdy použít</h3>
+    <p class="description">
+      <code>.invoke()</code> je užitečné, když potřebujete použít jQuery API, které není přímo dostupné v Cypress. Pro většinu případů používejte nativní Cypress příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o volané metodě. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/invoke" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/invoke →
+      </a>
+    </p>
+  </section>
+</section>

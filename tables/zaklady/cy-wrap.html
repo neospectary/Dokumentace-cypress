@@ -1,0 +1,112 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.wrap()</h1>
+    <p class="description">
+      Obalení hodnoty do Cypress chainu. Umožňuje použít Cypress příkazy na hodnoty mimo chain (string, number, object, jQuery element).
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.wrap(subject)
+cy.wrap(subject, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.wrap('text').should('eq', 'text')         // String
+cy.wrap(5).should('eq', 5)                   // Number
+cy.wrap({ name: 'John' }).should('have.property', 'name') // Object
+cy.get('input').then(($input) => {           // Z then()
+  cy.wrap($input.val()).should('eq', 'test')
+})</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.wrap()                                     // Chyba, chybí hodnota
+cy.get('.btn').wrap('text')                  // Chyba, nelze řetězit</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">subject (Any)</h3>
+    <p class="description">
+      Hodnota k obalení. Může být string, number, object, array, jQuery element nebo jakákoli jiná hodnota.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>timeout</strong> (Number) - Čas čekání</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s obalenou hodnotou. Lze řetězit další Cypress příkazy (např. <code>.should()</code>, <code>.then()</code>).
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Obalení hodnoty z then()</h3>
+    <pre><code>cy.get('input').then(($input) => {
+  const value = $input.val()
+  cy.wrap(value).should('eq', 'test')
+})</code></pre>
+
+    <h3 class="h3">Obalení primitivní hodnoty</h3>
+    <pre><code>cy.wrap('text').should('eq', 'text')
+cy.wrap(5).should('eq', 5)
+cy.wrap(true).should('be.true')</code></pre>
+
+    <h3 class="h3">Obalení jQuery elementu</h3>
+    <pre><code>cy.get('li').each(($li) => {
+  cy.wrap($li).should('be.visible')
+})</code></pre>
+
+    <h3 class="h3">Obalení objektu</h3>
+    <pre><code>cy.wrap({ name: 'John', age: 30 })
+  .should('have.property', 'name')
+  .and('have.property', 'age')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Návrat do Cypress chainu</h3>
+    <p class="description">
+      <code>cy.wrap()</code> je užitečný pro návrat do Cypress chainu z callback funkcí (např. <code>.then()</code>, <code>.each()</code>). Umožňuje použít Cypress příkazy na hodnoty mimo chain.
+    </p>
+
+    <h3 class="h3">Typ hodnoty</h3>
+    <p class="description">
+      <code>cy.wrap()</code> může obalit jakoukoli hodnotu - string, number, object, array, jQuery element, atd. Cypress příkazy pak fungují na obalené hodnotě.
+    </p>
+
+    <h3 class="h3">Použití v each()</h3>
+    <p class="description">
+      Uvnitř <code>.each()</code> použijte <code>cy.wrap()</code> pro práci s elementem - umožní použít Cypress příkazy na element z callback funkce.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o obalené hodnotě. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/wrap" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/wrap →
+      </a>
+    </p>
+  </section>
+</section>

@@ -1,0 +1,101 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování uploadu souborů</h1>
+    <p class="description">
+      Kompletní průvodce testováním uploadu souborů v Cypressu. Zahrnuje nahrávání souborů pomocí cypress-file-upload pluginu.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Instalace pluginu</h2>
+    <pre><code>npm install --save-dev cypress-file-upload</code></pre>
+
+    <h3 class="h3">Nastavení v support/e2e.ts</h3>
+    <pre><code>import 'cypress-file-upload';
+
+// Nebo v commands.ts
+import 'cypress-file-upload';</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Základní upload</h2>
+    
+    <h3 class="h3">Upload pomocí attachFile</h3>
+    <pre><code>cy.get('input[type="file"]').attachFile('fixtures/file.csv');
+
+// Nebo s data-cy
+cy.dataCy('file-input').attachFile('fixtures/file.csv');</code></pre>
+
+    <h3 class="h3">Upload s vlastním příkazem</h3>
+    <pre><code>// Definice custom příkazu
+Cypress.Commands.add('insertFile', (filePath) => {
+  cy.get('input[type="file"]').attachFile(filePath);
+});
+
+// Použití
+cy.insertFile('import/users_single_line.csv');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Ověření uploadu</h2>
+    
+    <h3 class="h3">Ověření zobrazení souboru</h3>
+    <pre><code>cy.dataCy('file-name')
+  .should('be.visible')
+  .and('contain.text', 'users_single_line.csv');
+
+cy.dataCy('file-size')
+  .should('be.visible')
+  .and('contain.text', '123.0 B');</code></pre>
+
+    <h3 class="h3">Ověření preview tabulky</h3>
+    <pre><code>cy.dataCy('data-preview-table').should('exist');
+cy.dataCy('data-preview-header')
+  .should('be.visible')
+  .and('contain.text', 'Náhled dat');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odebrání souboru</h2>
+    <pre><code>cy.dataCy('remove-file').click();
+cy.dataCy('file-name').should('not.exist');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('Upload souboru', () => {
+  const FILE_NAME = 'users_single_line';
+
+  before(() => {
+    cy.tokenAuth('/import');
+  });
+
+  it('otevře upload formulář', () => {
+    cy.dataCy('upload-button').click();
+  });
+
+  it('nahraje CSV soubor', () => {
+    cy.insertFile(`import/${FILE_NAME}.csv`);
+  });
+
+  it('zobrazí informace o souboru', () => {
+    cy.dataCy('file-name')
+      .should('be.visible')
+      .and('contain.text', `${FILE_NAME}.csv`);
+    cy.dataCy('file-size').should('be.visible');
+  });
+
+  it('zobrazí preview tabulku', () => {
+    cy.dataCy('data-preview-table').should('exist');
+    cy.dataCy('data-preview-header')
+      .should('be.visible')
+      .and('contain.text', 'Náhled dat');
+  });
+
+  it('odebere soubor', () => {
+    cy.dataCy('remove-file').click();
+    cy.dataCy('file-name').should('not.exist');
+  });
+});</code></pre>
+  </section>
+</section>

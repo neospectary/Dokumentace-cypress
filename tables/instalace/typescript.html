@@ -1,0 +1,72 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Nastavení TypeScriptu</h1>
+    <p class="description">
+      TypeScript přidává type safety do Cypress testů. Doporučeno pro lepší vývojovou zkušenost a autocomplete.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Pro lepší autocomplete a type checking</li>
+      <li>Pro větší projekty s více testy</li>
+      <li>Když chcete type safety</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Instalace</h2>
+    
+    <h3 class="h3">1. Instalace TypeScriptu</h3>
+    <pre><code>npm install --save-dev typescript
+npm install --save-dev @types/node</code></pre>
+
+    <h3 class="h3">2. Vytvoření tsconfig.json</h3>
+    <pre><code>{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["es5", "dom"],
+    "types": ["cypress", "node"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
+  },
+  "include": ["cypress/**/*.ts"],
+  "exclude": ["node_modules"]
+}</code></pre>
+
+    <h3 class="h3">3. Přejmenování souborů</h3>
+    <pre><code># Přejmenujte .js soubory na .ts
+cypress/e2e/example.cy.js → cypress/e2e/example.cy.ts</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Konfigurace Cypressu pro TypeScript</h2>
+    
+    <h3 class="h3">cypress.config.ts</h3>
+    <pre><code>import { defineConfig } from 'cypress';
+
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      // implement node event listeners here
+    },
+    baseUrl: 'http://localhost:4200',
+  },
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>TypeScript je volitelný, ale doporučený</li>
+      <li>Umožňuje autocomplete a type checking</li>
+      <li>Soubory musí mít příponu .ts nebo .tsx</li>
+    </ul>
+  </section>
+</section>

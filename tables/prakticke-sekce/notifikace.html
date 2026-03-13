@@ -1,0 +1,78 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování notifikací</h1>
+    <p class="description">
+      Kompletní průvodce testováním notifikací a toast zpráv v Cypressu. Zahrnuje ověření zobrazení, obsahu a zavření notifikací.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Ověření zobrazení notifikace</h2>
+    
+    <h3 class="h3">Základní ověření</h3>
+    <pre><code>cy.get('se-toasts-hosting')
+  .should('be.visible');
+
+// Nebo pomocí data-cy
+cy.dataCy('toast-message')
+  .should('be.visible')
+  .and('contain.text', 'Úspěšně uloženo');</code></pre>
+
+    <h3 class="h3">Zavření notifikace</h3>
+    <pre><code>cy.get('se-toasts-hosting')
+  .find('button')
+  .click({ force: true });</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Notifikační centrum</h2>
+    
+    <h3 class="h3">Otevření dropdown</h3>
+    <pre><code>cy.dataCy('notification-dropdown')
+  .should('be.visible')
+  .click();
+
+cy.dataCy('notification-dropdown-overlay')
+  .should('be.visible');</code></pre>
+
+    <h3 class="h3">Navigace do notifikačního centra</h3>
+    <pre><code>cy.intercept({ method: 'GET', url: '**/onboarding/application-settings' }).as('getNotifications');
+cy.dataCy('notification-dropdown-title')
+  .should('be.visible')
+  .contains('Notifikační centrum')
+  .click();
+cy.wait('@getNotifications').its('response.statusCode').should('eq', 200);</code></pre>
+
+    <h3 class="h3">Ověření stránky notifikací</h3>
+    <pre><code>cy.dataCy('page-header')
+  .should('be.visible')
+  .and('contain.text', 'Přehled notifikací');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('Notifikace', () => {
+  before(() => {
+    cy.tokenAuth('/dashboard');
+  });
+
+  it('zobrazí toast po úspěšné akci', () => {
+    cy.dataCy('save-button').click();
+    cy.get('se-toasts-hosting')
+      .should('be.visible')
+      .and('contain.text', 'Úspěšně uloženo');
+  });
+
+  it('zavře toast zprávu', () => {
+    cy.get('se-toasts-hosting')
+      .find('button')
+      .click({ force: true });
+  });
+
+  it('otevře notifikační centrum', () => {
+    cy.dataCy('notification-dropdown').click();
+    cy.dataCy('notification-dropdown-overlay').should('be.visible');
+  });
+});</code></pre>
+  </section>
+</section>

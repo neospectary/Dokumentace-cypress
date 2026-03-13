@@ -1,0 +1,99 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">describe(), context() a it()</h1>
+    <p class="description">
+      Základní stavební kameny Mocha BDD syntaxe. Pomocí <code>describe()</code> / <code>context()</code> strukturuješ testy do skupin a pomocí
+      <code>it()</code> definuješ jednotlivé scénáře.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">describe() – skupina (suite) testů</h2>
+    <p class="description">
+      <code>describe()</code> vytvoří skupinu testů pro jednu oblast (feature, stránku, modul). Uvnitř bývají hooky a <code>it()</code> testy.
+    </p>
+
+    <h3 class="h3">Syntaxe</h3>
+    <pre><code>describe(title, fn)</code></pre>
+
+    <h3 class="h3">Použití</h3>
+    <pre><code>describe('Dashboard', () => {
+  it('zobrazí souhrnné statistiky', () => {
+    // ...
+  });
+
+  it('umožní přejít do detailu', () => {
+    // ...
+  });
+});</code></pre>
+
+    <p class="description">
+      V Cypressu můžeš mít v jednom souboru více <code>describe()</code> bloků (např. pro různé části aplikace), ale obvykle je lepší držet se
+      jedné větší oblasti na soubor.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">context() – alias pro describe()</h2>
+    <p class="description">
+      <code>context()</code> je jen alias pro <code>describe()</code>. Používá se často pro slovní vyjádření „když…“ (when), aby byl test čitelnější.
+    </p>
+
+    <h3 class="h3">Použití</h3>
+    <pre><code>describe('Mailing list', () => {
+  context('když je uživatel přihlášený', () => {
+    it('vidí seznam mailing listů', () => {
+      // ...
+    });
+  });
+
+  context('když není přihlášený', () => {
+    it('je přesměrován na login', () => {
+      // ...
+    });
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">it() – jednotlivý test</h2>
+    <p class="description">
+      <code>it()</code> definuje jeden konkrétní test – scénář chování, které chceš ověřit. V názvu testu popiš očekávání (co by se mělo stát).
+    </p>
+
+    <h3 class="h3">Syntaxe</h3>
+    <pre><code>it(title, fn)</code></pre>
+
+    <h3 class="h3">Použití v naší aplikaci</h3>
+    <pre><code>describe('Mailing list', () => {
+  beforeEach(() => {
+    cy.tokenAuth('/mailing-list');
+  });
+
+  it('vytvoří nový mailing list', () => {
+    cy.dataCy('create-mailing-list').click();
+    cy.dataCy('notification')
+      .should('be.visible')
+      .and('contain.text', 'Mailing list byl vytvořen');
+  });
+
+  it('smaže existující mailing list', () => {
+    cy.dataCy('mailing-list-row').first().within(() => {
+      cy.dataCy('delete-button').click();
+    });
+    cy.dataCy('confirm-delete').click();
+
+    cy.dataCy('notification')
+      .should('be.visible')
+      .and('contain.text', 'Mailing list byl smazán');
+  });
+});</code></pre>
+
+    <h3 class="h3">Doporučení pro psaní názvů</h3>
+    <ul>
+      <li>Používej popisný text: <strong>„uloží formulář při validních datech“</strong>, ne jen <strong>„formulář 1“</strong>.</li>
+      <li>Kombinuj s <code>context()</code> pro různé stavy (přihlášený, nepřihlášený, prázdná data…).</li>
+    </ul>
+  </section>
+</section>
+

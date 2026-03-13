@@ -1,0 +1,109 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.wait()</h1>
+    <p class="description">
+      Čekání na HTTP requesty (s aliasem) nebo časový interval. Pro requesty čeká na dokončení. Pro časový interval čeká zadaný počet milisekund.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.wait(ms)
+cy.wait(alias)
+cy.wait(aliases)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.wait('@getUsers')                       // Čekání na request
+cy.wait(['@getUsers', '@getPosts'])        // Čekání na více requestů
+cy.wait(1000)                              // Čekání na čas (používejte opatrně)</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.get('.btn').wait(1000)                  // Chyba, cy.wait() nelze řetězit
+cy.wait()                                  // Chyba, chybí parametr</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">ms (Number)</h3>
+    <p class="description">
+      Počet milisekund k čekání. <strong>Poznámka:</strong> <code>cy.wait(ms)</code> je anti-pattern - preferujte implicitní čekání nebo čekání na requesty.
+    </p>
+
+    <h3 class="h3">alias (String)</h3>
+    <p class="description">
+      Alias requestu (s @ prefixem). Request musí být dříve zachycen pomocí <code>cy.intercept()</code> a označen aliasem pomocí <code>.as()</code>.
+    </p>
+
+    <h3 class="h3">aliases (Array)</h3>
+    <p class="description">
+      Pole aliasů requestů. Cypress počká na všechny requesty v poli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Pro requesty vrací Chainable s response objektem. Pro časový interval vrací Chainable bez hodnoty. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Čekání na request</h3>
+    <pre><code>cy.intercept('GET', '/api/users').as('getUsers')
+cy.visit('/users')
+cy.wait('@getUsers')</code></pre>
+
+    <h3 class="h3">Více requestů</h3>
+    <pre><code>cy.wait(['@getUsers', '@getPosts'])</code></pre>
+
+    <h3 class="h3">S ověřením response</h3>
+    <pre><code>cy.wait('@getUsers').then((interception) => {
+  expect(interception.response.statusCode).to.eq(200)
+})</code></pre>
+
+    <h3 class="h3">Čekání na čas (používejte opatrně)</h3>
+    <pre><code>cy.wait(1000)  // čeká 1 sekundu (anti-pattern)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Implicitní čekání</h3>
+    <p class="description">
+      Cypress automaticky čeká na elementy v příkazech (např. <code>cy.get()</code>, <code>.click()</code>). Preferujte implicitní čekání místo <code>cy.wait(ms)</code>.
+    </p>
+
+    <h3 class="h3">Čekání na requesty</h3>
+    <p class="description">
+      <code>cy.wait('@alias')</code> je v pořádku a doporučený způsob, jak čekat na API requesty. Zajišťuje, že test pokračuje až po dokončení requestu.
+    </p>
+
+    <h3 class="h3">Anti-pattern</h3>
+    <p class="description">
+      <code>cy.wait(ms)</code> pro čekání na čas je anti-pattern. Místo toho čekejte na konkrétní element nebo stav pomocí <code>.should()</code> nebo assertions.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o čekání. Pro requesty zobrazí detaily requestu. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/wait" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/wait →
+      </a>
+    </p>
+  </section>
+</section>

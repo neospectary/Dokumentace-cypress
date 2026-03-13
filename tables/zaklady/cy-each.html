@@ -1,0 +1,124 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.each()</h1>
+    <p class="description">
+      Iterace přes kolekci elementů. Prochází každý element v kolekci a provádí akce pomocí callback funkce.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.each(callbackFn)
+.each(options, callbackFn)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('li').each(($li) => {                // Iterace přes elementy
+  cy.wrap($li).should('be.visible')
+})
+cy.get('tr').each(($tr, index) => {         // S indexem
+  if (index > 0) {
+    cy.wrap($tr).find('td').first()
+  }
+})</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.each(() => {})                            // Chyba, nelze řetězit z 'cy'
+cy.window().each(() => {})                   // Chyba, window není kolekce</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">callbackFn (Function)</h3>
+    <p class="description">
+      Callback funkce, která je volána pro každý element v kolekci. Dostává jQuery element a index jako argumenty.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>timeout</strong> (Number) - Čas čekání</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s původní kolekcí elementů. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní iterace</h3>
+    <pre><code>cy.get('li').each(($li) => {
+  cy.wrap($li).should('be.visible')
+})</code></pre>
+
+    <h3 class="h3">S indexem</h3>
+    <pre><code>cy.get('tr').each(($tr, index) => {
+  if (index > 0) {  // přeskočit hlavičku
+    cy.wrap($tr).find('td').first().should('contain', 'text')
+  }
+})</code></pre>
+
+    <h3 class="h3">Ověření všech elementů</h3>
+    <pre><code>cy.get('.item').each(($item) => {
+  cy.wrap($item)
+    .should('be.visible')
+    .and('contain.text', 'required')
+})</code></pre>
+
+    <h3 class="h3">S interakcí</h3>
+    <pre><code>cy.get('button').each(($btn) => {
+  cy.wrap($btn).click()
+  cy.get('.modal').should('be.visible')
+  cy.get('.close').click()
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Callback funkce</h3>
+    <p class="description">
+      Callback dostává jQuery element jako první argument a index jako druhý argument. Pro práci s elementem použijte <code>cy.wrap()</code>.
+    </p>
+
+    <h3 class="h3">cy.wrap()</h3>
+    <p class="description">
+      Pro práci s elementem uvnitř callbacku použijte <code>cy.wrap($element)</code>, aby se element dostal zpět do Cypress chainu.
+    </p>
+
+    <h3 class="h3">Nepoužívejte return</h3>
+    <p class="description">
+      Nepoužívejte <code>return</code> uvnitř callbacku. Každá iterace je samostatný Cypress command.
+    </p>
+
+    <h3 class="h3">Synchronní operace</h3>
+    <p class="description">
+      Každá iterace je samostatný Cypress command a je provedena synchronně v rámci Cypress queue. Nepokoušejte se o asynchronní operace.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/each" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/each →
+      </a>
+    </p>
+  </section>
+</section>

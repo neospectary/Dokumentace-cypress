@@ -1,0 +1,135 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování formulářů</h1>
+    <p class="description">
+      Kompletní průvodce testováním formulářů v Cypressu. Zahrnuje vyplňování polí, validaci, odesílání a ověření stavu formuláře.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Základní vyplňování formuláře</h2>
+    
+    <h3 class="h3">Text input</h3>
+    <pre><code>cy.fillInput('name-container', 'Hodnota', {
+  required: true,
+  type: 'text',
+  clear: true
+});
+
+cy.checkInputValue('name-container', 'Hodnota');</code></pre>
+
+    <h3 class="h3">Textarea</h3>
+    <pre><code>cy.fillTextarea('description-container', 'Popis textu', {
+  required: false,
+  clear: true
+});
+
+cy.checkTextareaValue('description-container', 'Popis textu');</code></pre>
+
+    <h3 class="h3">Checkbox</h3>
+    <pre><code>cy.fillCheckbox('terms-container', 'Souhlasím s podmínkami', {
+  required: true
+});
+
+// Ověření zaškrtnutí
+cy.get('[data-cy="terms-container"] input[type="checkbox"]')
+  .should('be.checked');</code></pre>
+
+    <h3 class="h3">Select/Dropdown</h3>
+    <pre><code>cy.selectFromList('Hodnota', 0);
+
+// Ověření výběru
+cy.checkSelectValue('Hodnota', 0);</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Validace formuláře</h2>
+    
+    <h3 class="h3">Ověření chybové zprávy</h3>
+    <pre><code>// Pokus o odeslání prázdného formuláře
+cy.dataCy('submit-button').click();
+
+// Ověření chybové zprávy
+cy.dataCy('error-validation')
+  .should('be.visible')
+  .and('contain.text', 'Toto pole je povinné.');</code></pre>
+
+    <h3 class="h3">Ověření povinných polí</h3>
+    <pre><code>// Pole by mělo mít required atribut
+cy.get('[data-cy="name-container"] input')
+  .should('have.attr', 'required');
+
+// Nebo pomocí vlastního příkazu
+cy.checkLabel('name-container', {
+  labelValue: 'Název',
+  tooltipValue: 'Tooltip text'
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odesílání formuláře</h2>
+    
+    <h3 class="h3">Základní odeslání</h3>
+    <pre><code>cy.intercept({ method: 'POST', url: '**/api/endpoint' }).as('submit');
+cy.dataCy('submit-button').click();
+cy.wait('@submit').its('response.statusCode').should('eq', 200);</code></pre>
+
+    <h3 class="h3">Ověření úspěšného odeslání</h3>
+    <pre><code>cy.wait('@submit').then((interception) => {
+  expect(interception.response.statusCode).to.eq(200);
+  expect(interception.response.body).to.have.property('id');
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Komplexní formulář s více kroky</h2>
+    <pre><code>describe('Vytvoření kontaktu', () => {
+  const HASH = (+new Date()).toString(36);
+
+  before(() => {
+    cy.tokenAuth('/contacts/create');
+  });
+
+  it('vyplní základní údaje', () => {
+    cy.fillInput('email-container', `${HASH}@example.com`, {
+      required: true,
+      type: 'email'
+    });
+    cy.fillInput('name-container', `Name_${HASH}`, {
+      type: 'text'
+    });
+  });
+
+  it('vyplní osobní údaje', () => {
+    cy.dataCy('personal-info-accordion-item').click();
+    cy.fillInput('phone-container', '123456789', {
+      type: 'tel'
+    });
+  });
+
+  it('odešle formulář', () => {
+    cy.intercept({ method: 'POST', url: '**/api/contact' }).as('create');
+    cy.dataCy('submit-button').click();
+    cy.wait('@create');
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Ověření stavu formuláře</h2>
+    
+    <h3 class="h3">Ověření vyplněných hodnot</h3>
+    <pre><code>cy.checkInputValue('name-container', 'Očekávaná hodnota');
+cy.checkTextareaValue('description-container', 'Očekávaný text');</code></pre>
+
+    <h3 class="h3">Ověření disabled stavu</h3>
+    <pre><code>// Tlačítko by mělo být disabled, dokud není formulář validní
+cy.dataCy('submit-button')
+  .should('be.visible')
+  .and('be.disabled');
+
+// Po vyplnění by mělo být enabled
+cy.fillInput('name-container', 'Hodnota');
+cy.dataCy('submit-button').should('be.enabled');</code></pre>
+  </section>
+</section>

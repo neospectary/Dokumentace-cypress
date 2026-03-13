@@ -1,0 +1,111 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.readFile()</h1>
+    <p class="description">
+      Čtení souboru z filesystému. Načte obsah souboru z projektu. Užitečné pro čtení konfiguračních souborů nebo ověření obsahu souboru.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.readFile(filePath)
+cy.readFile(filePath, encoding)
+cy.readFile(filePath, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.readFile('cypress/fixtures/data.json')     // JSON soubor
+cy.readFile('config.json', 'utf8')            // S encoding
+cy.readFile('data.txt')                        // Textový soubor</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.readFile()                                  // Chyba, chybí filePath
+cy.get('.btn').readFile('file.json')          // Chyba, nelze řetězit</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">filePath (String)</h3>
+    <p class="description">
+      Cesta k souboru. Relativní k root projektu nebo absolutní cesta.
+    </p>
+
+    <h3 class="h3">encoding (String)</h3>
+    <p class="description">
+      Encoding pro soubor: <code>'utf8'</code> (výchozí), <code>'base64'</code>, <code>'hex'</code>.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>encoding</strong> (String) - Encoding pro soubor</li>
+      <li><strong>timeout</strong> (Number) - Čas čekání na načtení</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s obsahem souboru. Pro JSON automaticky parsuje data. Lze použít s <code>.then()</code> pro přístup k datům.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní čtení</h3>
+    <pre><code>cy.readFile('cypress/fixtures/data.json')
+  .then((data) => {
+    cy.log(data)
+  })</code></pre>
+
+    <h3 class="h3">JSON soubor</h3>
+    <pre><code>cy.readFile('config.json').then((config) => {
+  expect(config).to.have.property('baseUrl')
+})</code></pre>
+
+    <h3 class="h3">Textový soubor</h3>
+    <pre><code>cy.readFile('data.txt', 'utf8').then((text) => {
+  cy.log(text)
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Cesta k souboru</h3>
+    <p class="description">
+      Cesta je relativní k root projektu. Pro JSON soubory automaticky parsuje data do objektu.
+    </p>
+
+    <h3 class="h3">Encoding</h3>
+    <p class="description">
+      Výchozí encoding je <code>'utf8'</code>. Pro binární soubory použijte <code>'base64'</code> nebo <code>'hex'</code>.
+    </p>
+
+    <h3 class="h3">Rozdíl od cy.fixture()</h3>
+    <p class="description">
+      <code>cy.readFile()</code> čte soubory z libovolné cesty v projektu, zatímco <code>cy.fixture()</code> čte jen z <code>cypress/fixtures/</code> složky.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o načteném souboru. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/readfile" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/readfile →
+      </a>
+    </p>
+  </section>
+</section>

@@ -1,0 +1,60 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Mocha v Cypressu – přehled</h1>
+    <p class="description">
+      Cypress používá jako testovací „motor“ knihovnu <strong>Mocha</strong> v BDD syntaxi. Díky tomu máš k dispozici známé funkce
+      jako <code>describe()</code>, <code>context()</code>, <code>it()</code>, <code>before()</code>, <code>beforeEach()</code>, <code>afterEach()</code>, <code>after()</code>,
+      a také <code>.only()</code> a <code>.skip()</code> pro filtrování testů.
+    </p>
+    <p class="muted">
+      Oficiální dokumentace: <a href="https://docs.cypress.io/app/references/bundled-libraries#Mocha" target="_blank" rel="noopener">Bundled Libraries – Mocha →</a>
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Co Mocha v Cypressu řeší</h2>
+    <ul>
+      <li><strong>Struktura testů</strong> – skupiny a jednotlivé testy (<code>describe()</code>, <code>it()</code>).</li>
+      <li><strong>Lifecycle</strong> – nastavení a úklid před/po testech (<code>before()</code>, <code>beforeEach()</code>, <code>afterEach()</code>, <code>after()</code>).</li>
+      <li><strong>Filtrování testů</strong> – spouštění jen vybraných testů (<code>.only</code>, <code>.skip</code>).</li>
+    </ul>
+    <p class="description">
+      Mocha se stará o <strong>strukturu a běh testů</strong>, zatímco Cypress se stará o samotné příkazy (<code>cy.*</code>) a retry-ability.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Základní BDD struktura</h2>
+    <pre><code>describe('Mailing list', () => {
+  beforeEach(() => {
+    cy.tokenAuth('/mailing-list');
+  });
+
+  it('vytvoří nový mailing list', () => {
+    cy.dataCy('create-mailing-list').click();
+    cy.dataCy('notification')
+      .should('be.visible')
+      .and('contain.text', 'Mailing list byl vytvořen');
+  });
+});</code></pre>
+
+    <ul>
+      <li><strong>describe()</strong> – skupina testů pro jednu oblast (feature, stránku).</li>
+      <li><strong>beforeEach()</strong> – opakovaný setup před každým testem.</li>
+      <li><strong>it()</strong> – jeden konkrétní scénář, který něco ověřuje.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Jak Mocha zapadá do Cypress ekosystému</h2>
+    <ul>
+      <li><strong>Mocha</strong> – struktura testů a lifecycle (describe/it/hooky).</li>
+      <li><strong>Chai + Chai-jQuery</strong> – assertions (např. <code>.should('be.visible')</code>, <code>.should('have.text', ...)</code>).</li>
+      <li><strong>Cypress</strong> – příkazy (<code>cy.get()</code>, <code>cy.request()</code>, <code>cy.intercept()</code>, …) a chytré čekání.</li>
+    </ul>
+    <p class="description">
+      V dalších kapitolách této sekce najdeš detailní vysvětlení každé klíčové Mocha funkce zvlášť (struktura testů, hooky, filtrování).
+    </p>
+  </section>
+</section>
+

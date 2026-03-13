@@ -1,0 +1,94 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.clear()</h1>
+    <p class="description">
+      Vymazání hodnoty z input nebo textarea pole. Odstraní veškerý text z pole před vyplněním nové hodnoty.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.clear()
+.clear(options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('input').clear()                     // Vymazání input pole
+cy.get('textarea').clear()                  // Vymazání textarea
+cy.get('input').clear().type('nová hodnota') // S následným vyplněním</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.clear()                                   // Chyba, nelze řetězit z 'cy'
+cy.window().clear()                          // Chyba, window není input</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>force</strong> (Boolean, default: false) - Vynutí vymazání, přeskočí kontrolu actionability</li>
+      <li><strong>timeout</strong> (Number) - Čas čekání na element</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací stejný element, ze kterého byla hodnota vymazána. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('input[name="email"]').clear()
+cy.get('textarea').clear()</code></pre>
+
+    <h3 class="h3">S následným vyplněním</h3>
+    <pre><code>cy.get('input').clear().type('nová hodnota')</code></pre>
+
+    <h3 class="h3">S force</h3>
+    <pre><code>cy.get('input').clear({ force: true })</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Actionability</h3>
+    <p class="description">
+      <code>.clear()</code> je "action command", který čeká na actionability elementu. Element musí být viditelný, nepřekrytý a focusable.
+    </p>
+
+    <h3 class="h3">Typ elementu</h3>
+    <p class="description">
+      <code>.clear()</code> funguje jen pro input a textarea elementy. Pro ostatní typy elementů použijte jiný přístup.
+    </p>
+
+    <h3 class="h3">Placeholder</h3>
+    <p class="description">
+      <code>.clear()</code> vymaže veškerý text včetně placeholder (pokud je editovatelný). Po vymazání zůstane pole prázdné.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o vymazaném elementu. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/clear" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/clear →
+      </a>
+    </p>
+  </section>
+</section>

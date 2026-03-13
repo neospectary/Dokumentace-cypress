@@ -1,0 +1,57 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">contain</h1>
+    <p class="description">
+      Ověření, že element obsahuje text (částečná shoda). Užitečné když nepotřebujete ověřit přesný text.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Když potřebujete ověřit, že element obsahuje část textu</li>
+      <li>Pro flexibilnější testování (nezávislé na přesném formátování)</li>
+      <li>Když text může obsahovat dynamické části</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.should('contain', text)
+cy.and('contain', text)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Parametry</h2>
+    <ul>
+      <li><strong>text</strong> (String) - Text, který má element obsahovat</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('h1').should('contain', 'Vítejte')
+cy.get('.message').should('contain', 'úspěšně')</code></pre>
+
+    <h3 class="h3">S dynamickým obsahem</h3>
+    <pre><code>cy.get('.user-name').should('contain', 'David')
+// Funguje i když text je "Vítejte, David!"</code></pre>
+
+    <h3 class="h3">Kombinace</h3>
+    <pre><code>cy.get('button')
+  .should('be.visible')
+  .and('contain', 'Odeslat')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Částečná shoda - element musí obsahovat zadaný text</li>
+      <li>Case-sensitive (rozlišuje velká/malá písmena)</li>
+      <li>Pro přesnou shodu použijte <code>have.text</code></li>
+      <li>Alias: <code>include.text</code> funguje stejně</li>
+    </ul>
+  </section>
+</section>

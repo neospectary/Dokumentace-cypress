@@ -1,0 +1,55 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Instalace Node.js</h1>
+    <p class="description">
+      Node.js je runtime prostředí pro JavaScript. Cypress vyžaduje Node.js verze 18 nebo vyšší.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Před instalací Cypressu</li>
+      <li>Když nemáte Node.js nainstalovaný</li>
+      <li>Když potřebujete aktualizovat verzi</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Instalace</h2>
+    
+    <h3 class="h3">1. Stáhnutí Node.js</h3>
+    <p class="description">
+      Navštivte <a href="https://nodejs.org/" target="_blank">nodejs.org</a> a stáhněte LTS verzi (doporučeno).
+    </p>
+
+    <h3 class="h3">2. Ověření instalace</h3>
+    <pre><code>node --version
+npm --version</code></pre>
+    <p class="description">
+      Měli byste vidět verzi Node.js (např. v20.x.x) a npm (např. 10.x.x).
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Alternativa: nvm (Node Version Manager)</h2>
+    <p class="description">
+      Pro správu více verzí Node.js použijte nvm:
+    </p>
+    <pre><code># Instalace nvm (Mac/Linux)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+
+# Instalace Node.js přes nvm
+nvm install 20
+nvm use 20</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Cypress vyžaduje Node.js 18+</li>
+      <li>LTS verze je doporučená (Long Term Support)</li>
+      <li>npm je automaticky součástí Node.js</li>
+    </ul>
+  </section>
+</section>

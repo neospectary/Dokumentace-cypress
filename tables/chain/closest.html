@@ -1,0 +1,93 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">.closest()</h1>
+    <p class="description">
+      Výběr nejbližšího předka (ancestor), který odpovídá selektoru. Hledá směrem nahoru v DOM stromu od aktuálního elementu. Užitečné pro nalezení wrapper elementu nebo kontejneru.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.closest(selector)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('span').closest('.container').click()    // Nejbližší .container
+cy.get('input').closest('form').submit()        // Nejbližší form
+cy.get('button').closest('.card').find('.title') // Nejbližší .card</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.closest('.container')                         // Chyba, nelze řetězit z 'cy'
+cy.window().closest('.container')                // Chyba, window nemá předky
+cy.get('span').closest()                         // Chyba, chybí selector</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">selector (String)</h3>
+    <p class="description">
+      CSS selektor pro hledání předka. Hledá směrem nahoru v DOM stromu od aktuálního elementu a vrací nejbližší předka, který odpovídá selektoru.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s nejbližším předkem, který odpovídá selektoru. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('span').closest('.container').click()
+cy.get('input').closest('form').submit()</code></pre>
+
+    <h3 class="h3">Práce s modálem</h3>
+    <pre><code>cy.get('.modal-content')
+  .closest('.modal')
+  .find('.close-button')
+  .click()</code></pre>
+
+    <h3 class="h3">Práce s kartou</h3>
+    <pre><code>cy.get('button')
+  .closest('.card')
+  .find('.card-title')
+  .should('contain', 'Název')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Hledání směrem nahoru</h3>
+    <p class="description">
+      <code>.closest()</code> hledá směrem nahoru v DOM stromu (od elementu k předkům). Vrací nejbližší předka, který odpovídá selektoru. Pokud předek neexistuje, test selže.
+    </p>
+
+    <h3 class="h3">Rozdíl od .parent()</h3>
+    <p class="description">
+      <code>.parent()</code> vrací přímého rodiče, zatímco <code>.closest()</code> hledá předka podle selektoru (může být i vyšší v DOM stromu). <code>.closest()</code> je užitečnější, když potřebujete najít konkrétní wrapper element.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o nalezeném předkovi. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/closest" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/closest →
+      </a>
+    </p>
+  </section>
+</section>

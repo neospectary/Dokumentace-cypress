@@ -1,0 +1,51 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">have.css</h1>
+    <p class="description">
+      Ověření CSS vlastnosti elementu. Umožňuje kontrolovat styling elementu.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Pro ověření CSS vlastností (color, background, display, atd.)</li>
+      <li>Pro kontrolu styling po změně</li>
+      <li>Pro testování responzivního designu</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.should('have.css', propertyName)
+cy.should('have.css', propertyName, value)
+cy.and('have.css', propertyName, value)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Parametry</h2>
+    <ul>
+      <li><strong>propertyName</strong> (String) - Název CSS vlastnosti</li>
+      <li><strong>value</strong> (String, volitelné) - Očekávaná hodnota</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('button').should('have.css', 'background-color')
+cy.get('div').should('have.css', 'display', 'flex')</code></pre>
+
+    <h3 class="h3">Barvy</h3>
+    <pre><code>cy.get('.error').should('have.css', 'color', 'rgb(255, 0, 0)')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Důležité poznámky</h2>
+    <ul>
+      <li>Hodnoty jsou vráceny v computed formátu (např. rgb() místo hex)</li>
+      <li>Pro barvy použijte rgb() nebo rgba() formát</li>
+    </ul>
+  </section>
+</section>

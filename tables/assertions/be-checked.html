@@ -1,0 +1,34 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">be.checked</h1>
+    <p class="description">
+      Ověření, že checkbox nebo radio button je zaškrtnutý.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít</h2>
+    <ul>
+      <li>Po zaškrtnutí checkboxu</li>
+      <li>Pro ověření výchozího stavu</li>
+      <li>Pro kontrolu, že checkbox zůstal zaškrtnutý</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.should('be.checked')
+cy.and('be.checked')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('input[type="checkbox"]').check()
+cy.get('input[type="checkbox"]').should('be.checked')</code></pre>
+
+    <h3 class="h3">Negace</h3>
+    <pre><code>cy.get('input[type="checkbox"]').should('not.be.checked')</code></pre>
+  </section>
+</section>

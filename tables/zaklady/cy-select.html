@@ -1,0 +1,106 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.select()</h1>
+    <p class="description">
+      Výběr hodnoty z HTML select (dropdown) elementu. Vybere option podle hodnoty, textu nebo indexu.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.select(value)
+.select(values)
+.select(value, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('select').select('cz')                    // Podle hodnoty
+cy.get('select').select('Česká republika')       // Podle textu
+cy.get('select[multiple]').select(['opt1', 'opt2']) // Více hodnot</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.select('value')                                // Chyba, nelze řetězit z 'cy'
+cy.window().select('value')                       // Chyba, window není select</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">value (String|Number)</h3>
+    <p class="description">
+      Hodnota, text nebo index option k výběru. Cypress najde option podle hodnoty, textu nebo indexu.
+    </p>
+
+    <h3 class="h3">values (Array)</h3>
+    <p class="description">
+      Pole hodnot pro multiple select. Použijte pro výběr více hodnot v select elementu s <code>multiple</code> atributem.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>force</strong> (Boolean, default: false) - Vynutí výběr, přeskočí kontrolu actionability</li>
+      <li><strong>timeout</strong> (Number) - Čas čekání na element</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací stejný select element. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Podle hodnoty</h3>
+    <pre><code>cy.get('select').select('cz')
+cy.get('select[name="country"]').select('us')</code></pre>
+
+    <h3 class="h3">Podle textu</h3>
+    <pre><code>cy.get('select').select('Česká republika')
+cy.get('select').select('United States')</code></pre>
+
+    <h3 class="h3">Více hodnot (multiple select)</h3>
+    <pre><code>cy.get('select[multiple]').select(['option1', 'option2'])</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">HTML select elementy</h3>
+    <p class="description">
+      <code>.select()</code> funguje jen s HTML <code>&lt;select&gt;</code> elementy. Pro custom dropdowny (Angular Material, React Select, atd.) použijte jiný přístup.
+    </p>
+
+    <h3 class="h3">Actionability</h3>
+    <p class="description">
+      <code>.select()</code> je "action command", který čeká na actionability elementu. Element musí být viditelný, nepřekrytý a selectable.
+    </p>
+
+    <h3 class="h3">Výběr option</h3>
+    <p class="description">
+      Cypress najde option podle hodnoty (<code>value</code> atribut), textu (textový obsah) nebo indexu. Pokud najde více shod, vybere první.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o vybrané hodnotě a elementu. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/select" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/select →
+      </a>
+    </p>
+  </section>
+</section>

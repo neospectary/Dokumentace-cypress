@@ -1,0 +1,69 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Testování tabs</h1>
+    <p class="description">
+      Kompletní průvodce testováním tabů v Cypressu. Zahrnuje přepínání mezi taby, ověření aktivního tabu a obsahu.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Základní práce s taby</h2>
+    
+    <h3 class="h3">Kliknutí na tab</h3>
+    <pre><code>cy.dataCy('tab-1')
+  .should('be.visible')
+  .and('contain.text', 'Název tabu')
+  .click();</code></pre>
+
+    <h3 class="h3">Ověření aktivního tabu</h3>
+    <pre><code>cy.dataCy('tab-1')
+  .should('have.class', 'active');
+
+cy.dataCy('tab-0')
+  .should('not.have.class', 'active');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Ověření obsahu tabu</h2>
+    <pre><code>cy.dataCy('tab-1').click();
+cy.dataCy('tab-content')
+  .should('be.visible')
+  .and('contain.text', 'Obsah tabu');</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Procházení všech tabů</h2>
+    <pre><code>cy.dataCy('tab-container')
+  .find('[data-cy^="tab-"]')
+  .each(($tab, index) => {
+    const tabName = $tab.text().trim();
+    cy.wrap($tab).click();
+    cy.dataCy('tab-content')
+      .eq(index)
+      .within(() => {
+        cy.contains('h3', tabName).should('be.visible');
+      });
+  });</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad</h2>
+    <pre><code>describe('Tabs', () => {
+  before(() => {
+    cy.tokenAuth('/page');
+  });
+
+  it('zobrazí všechny taby', () => {
+    cy.dataCy('tab-container').should('be.visible');
+    cy.dataCy('tab-0').should('be.visible').and('contain.text', 'Tab 1');
+    cy.dataCy('tab-1').should('be.visible').and('contain.text', 'Tab 2');
+  });
+
+  it('přepne na druhý tab', () => {
+    cy.dataCy('tab-1').click();
+    cy.dataCy('tab-1').should('have.class', 'active');
+    cy.dataCy('tab-content').should('contain.text', 'Obsah Tab 2');
+  });
+});</code></pre>
+  </section>
+</section>

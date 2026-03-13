@@ -1,0 +1,107 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.writeFile()</h1>
+    <p class="description">
+      Zápis do souboru. Uloží data do souboru v projektu. Užitečné pro vytváření testovacích dat, logování výsledků nebo ukládání dočasných souborů.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.writeFile(filePath, contents)
+cy.writeFile(filePath, contents, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.writeFile('data.json', { name: 'John' })  // JSON objekt
+cy.writeFile('log.txt', 'Text')              // Textový obsah
+cy.writeFile('data.json', '{"key": "value"}') // JSON string</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.writeFile()                                // Chyba, chybí parametry
+cy.get('.btn').writeFile('file.txt', 'text') // Chyba, nelze řetězit</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">filePath (String)</h3>
+    <p class="description">
+      Cesta k souboru. Relativní k root projektu nebo absolutní cesta.
+    </p>
+
+    <h3 class="h3">contents (String|Object)</h3>
+    <p class="description">
+      Obsah k zápisu. Může být string nebo objekt. Pro JSON objekty automaticky převede na JSON string.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>flag</strong> (String) - Flag pro fs.writeFile ('w', 'a', atd.)</li>
+      <li><strong>encoding</strong> (String) - Encoding pro soubor</li>
+      <li><strong>timeout</strong> (Number) - Čas čekání</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable. Soubor je uložen po dokončení příkazu.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní zápis</h3>
+    <pre><code>cy.writeFile('cypress/fixtures/data.json', {
+  name: 'John',
+  age: 30
+})</code></pre>
+
+    <h3 class="h3">Textový soubor</h3>
+    <pre><code>cy.writeFile('log.txt', 'Test dokončen')</code></pre>
+
+    <h3 class="h3">S append</h3>
+    <pre><code>cy.writeFile('log.txt', 'Nový řádek\n', { flag: 'a' })</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">JSON formátování</h3>
+    <p class="description">
+      Pro JSON objekty automaticky převede na JSON string a formátuje. Pro vlastní formátování předajte string.
+    </p>
+
+    <h3 class="h3">Cesta k souboru</h3>
+    <p class="description">
+      Cesta je relativní k root projektu. Pokud soubor neexistuje, bude vytvořen. Pokud existuje, bude přepsán (pokud není použita flag 'a').
+    </p>
+
+    <h3 class="h3">Encoding</h3>
+    <p class="description">
+      Výchozí encoding je <code>'utf8'</code>. Pro binární soubory použijte <code>'base64'</code>.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o zapsaném souboru. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/writefile" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/writefile →
+      </a>
+    </p>
+  </section>
+</section>

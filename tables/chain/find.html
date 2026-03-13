@@ -1,0 +1,126 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">.find()</h1>
+    <p class="description">
+      Hledání potomků uvnitř aktuálně vybraného elementu. Chain příkaz, který hledá jen uvnitř scope vybraného elementu (na rozdíl od <code>cy.get()</code>, který hledá všude v dokumentu). Užitečné pro zúžení scope hledání na konkrétní kontejner.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.find(selector)
+.find(selector, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('.container').find('.item')              // Hledá jen uvnitř .container
+cy.get('table').find('tr')                      // Hledá jen uvnitř table
+cy.get('form').find('input[name="email"]')      // Hledá jen uvnitř form</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.find('.item')                                 // Chyba, nelze řetězit z 'cy'
+cy.window().find('.item')                        // Chyba, window není DOM element</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    
+    <h3 class="h3">selector (String)</h3>
+    <p class="description">
+      CSS selektor pro hledání uvnitř vybraného elementu. Hledá všechny potomky (včetně vnořených), které odpovídají selektoru.
+    </p>
+
+    <h3 class="h3">options (Object, volitelné)</h3>
+    <ul>
+      <li><strong>timeout</strong> (Number) - Čas čekání na element</li>
+      <li><strong>log</strong> (Boolean, default: true) - Zobrazí příkaz v Command Log</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s nalezenými potomky. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('.container').find('.item')
+cy.get('table').find('tr')
+cy.get('form').find('input[name="email"]')</code></pre>
+
+    <h3 class="h3">Práce s tabulkou</h3>
+    <pre><code>cy.get('table')
+  .find('tbody')
+  .find('tr')
+  .first()
+  .find('td')
+  .eq(0)
+  .should('contain.text', 'Hodnota')</code></pre>
+
+    <h3 class="h3">Práce s modálem</h3>
+    <pre><code>cy.dataCy('modal-window')
+  .find('input')
+  .type('Hodnota')
+
+cy.dataCy('modal-window')
+  .find('button')
+  .contains('Uložit')
+  .click()</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Rozdíl mezi cy.get() a .find()</h2>
+    <pre><code>// ❌ cy.get() hledá všude v dokumentu
+cy.get('.parent').get('.child')  // Hledá .child všude
+
+// ✅ .find() hledá jen uvnitř parent
+cy.get('.parent').find('.child')  // Hledá .child jen uvnitř .parent
+
+// ✅ cy.within() také zúží scope
+cy.get('.parent').within(() => {
+  cy.get('.child')  // Hledá jen uvnitř .parent
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Scope hledání</h3>
+    <p class="description">
+      <code>.find()</code> hledá jen uvnitř aktuálně vybraného elementu, ne v celém dokumentu. Na rozdíl od <code>cy.get()</code>, který hledá všude, <code>.find()</code> zúží scope hledání.
+    </p>
+
+    <h3 class="h3">Všechny potomky</h3>
+    <p class="description">
+      <code>.find()</code> hledá všechny potomky (včetně vnořených), zatímco <code>.children()</code> vrací jen přímé potomky. Pro přímé potomky použijte <code>.children()</code>.
+    </p>
+
+    <h3 class="h3">Alternativa</h3>
+    <p class="description">
+      Alternativou k <code>.find()</code> je <code>cy.within()</code>, které také zúží scope hledání. Volba závisí na preferenci a čitelnosti kódu.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o nalezených potomcích. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/find" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/find →
+      </a>
+    </p>
+  </section>
+</section>

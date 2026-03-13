@@ -1,0 +1,95 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">.last()</h1>
+    <p class="description">
+      Výběr posledního elementu z kolekce. Vrací poslední element z nalezených elementů. Užitečné pro práci s posledním prvkem v seznamu nebo tabulce.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>.last()</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+    
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>cy.get('li').last().click()                  // Poslední element
+cy.get('button').last().should('be.visible') // Ověření posledního
+cy.get('table tbody tr').last().find('td')   // Poslední řádek</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>cy.last()                                     // Chyba, nelze řetězit z 'cy'
+cy.window().last()                            // Chyba, window není kolekce</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+    <p class="description">
+      <code>.last()</code> nemá žádné argumenty. Vybírá vždy poslední element z kolekce.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s posledním elementem z kolekce. Lze řetězit další příkazy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+    
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>cy.get('li').last().click()
+cy.get('button').last().should('be.visible')</code></pre>
+
+    <h3 class="h3">S dalšími příkazy</h3>
+    <pre><code>cy.get('table tbody tr')
+  .last()
+  .find('td')
+  .last()
+  .should('contain', 'Text')</code></pre>
+
+    <h3 class="h3">Práce s formulářem</h3>
+    <pre><code>cy.get('input[type="checkbox"]')
+  .last()
+  .check()</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+    
+    <h3 class="h3">Kolekce elementů</h3>
+    <p class="description">
+      <code>.last()</code> funguje jen na kolekcích elementů. Pokud je jen jeden element, vrátí ho. Pokud nejsou žádné elementy, test selže.
+    </p>
+
+    <h3 class="h3">Index</h3>
+    <p class="description">
+      <code>.last()</code> vrací poslední element z kolekce (index length - 1). Ekvivalentní k <code>.eq(-1)</code>, ale čitelnější.
+    </p>
+
+    <h3 class="h3">Řetězení</h3>
+    <p class="description">
+      Lze kombinovat s dalšími chain příkazy. Často se používá s <code>.find()</code>, <code>.click()</code>, <code>.should()</code>, atd.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s informacemi o posledním elementu. Kliknutím na příkaz v logu uvidíte detaily v konzoli.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/last" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/last →
+      </a>
+    </p>
+  </section>
+</section>

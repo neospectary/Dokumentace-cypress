@@ -1,0 +1,54 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">beforeEach()</h1>
+    <p class="description">
+      <code>beforeEach()</code> je Mocha hook, který se spustí <strong>před každým testem</strong> v daném <code>describe()</code> bloku. V Cypressu je to
+      nejpoužívanější hook – slouží pro nastavení opakujícího se stavu před každým testem.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>beforeEach(fn)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kdy použít beforeEach()</h2>
+    <ul>
+      <li>Když chceš mít <strong>každý test ve stejném výchozím stavu</strong>.</li>
+      <li>Typicky: otevření konkrétní URL, vyčištění dat, nastavení výchozího filtru, reset formuláře.</li>
+      <li>Pomáhá udržet testy <strong>nezávislé</strong> – každý test začíná „na čisto“.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklad z praxe – stránka mailing listu</h2>
+    <pre><code>describe('Mailing list', () => {
+  beforeEach(() => {
+    // Přihlášení + otevření stránky před KAŽDÝM testem
+    cy.tokenAuth('/mailing-list');
+  });
+
+  it('zobrazí seznam mailing listů', () => {
+    cy.dataCy('mailing-list-row').should('have.length.at.least', 1);
+  });
+
+  it('umožní vytvořit nový mailing list', () => {
+    cy.dataCy('create-mailing-list').click();
+    cy.dataCy('notification')
+      .should('be.visible')
+      .and('contain.text', 'Mailing list byl vytvořen');
+  });
+});</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">beforeEach() vs before()</h2>
+    <ul>
+      <li><strong>before()</strong> – spustí se JEDNOU před všemi testy.</li>
+      <li><strong>beforeEach()</strong> – spustí se PŘED KAŽDÝM testem.</li>
+      <li>Pro čistý a opakovatelný stav testů preferuj <code>beforeEach()</code> na úrovni konkrétního <code>describe()</code>.</li>
+    </ul>
+  </section>
+</section>
+

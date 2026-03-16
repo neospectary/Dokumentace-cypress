@@ -1,0 +1,223 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Dynamické čekání pomocí interceptů</h1>
+    <p class="description">
+      Cypress automaticky čeká na elementy, animace a HTTP requesty. Nejspolehlivějším způsobem synchronizace testu s backendem je <code>cy.intercept()</code> + <code>cy.wait('@alias')</code> — zejména v Angular aplikacích, kde komponenty tahají data z API při inicializaci.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Proč nepoužívat cy.wait(ms)</h2>
+    <p class="description">
+      Pevné čekání je anti-pattern. Cypress to říká explicitně ve své dokumentaci Best Practices. Problém je, že číslo, které zvolíš, je vždy špatně — buď zbytečně zpomaluje testy, nebo selže na pomalejším CI.
+    </p>
+
+    <h3 class="h3">❌ Anti-pattern</h3>
+    <pre><code>cy.visit('/segments')
+cy.wait(3000)                         // čeká vždy 3 s, i když data přijdou za 200 ms
+cy.get('.segment-table').should('be.visible')</code></pre>
+
+    <h3 class="h3">✅ Správně — čekej na skutečný HTTP request</h3>
+    <pre><code>cy.intercept('GET', '/api/segments').as('getSegments')
+cy.visit('/segments')
+cy.wait('@getSegments')               // pokračuje přesně ve chvíli, kdy data dorazí
+cy.get('.segment-table').should('be.visible')</code></pre>
+
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th><code>cy.wait(3000)</code></th>
+          <th><code>cy.wait('@alias')</code></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Rychlost</td><td>Vždy čeká plnou dobu</td><td>Skončí hned po odpovědi</td></tr>
+        <tr><td>Spolehlivost</td><td>Flaky na pomalém CI</td><td>Synchronizováno se sítí</td></tr>
+        <tr><td>Chybová zpráva</td><td>„Timed out" — bez kontextu</td><td>„No request matched @alias" — přesné</td></tr>
+        <tr><td>Přístup k datům</td><td>Žádný</td><td>Plný request + response objekt</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe intercept — string vs. objekt</h2>
+    <p class="description">
+      <code>cy.intercept()</code> lze volat třemi způsoby. Objekt se hodí, když potřebuješ větší přesnost nebo čitelnější zápis.
+    </p>
+
+    <h3 class="h3">String forma — rychlá a jednoduchá</h3>
+    <pre><code>cy.intercept('GET', '/api/users').as('getUsers')
+cy.intercept('POST', '/api/users').as('createUser')</code></pre>
+
+    <h3 class="h3">Objekt forma — přesnější matching</h3>
+    <pre><code>// Stejný výsledek jako výše, ale explicitnější
+cy.intercept({ method: 'GET', url: '/api/users' }).as('getUsers')
+
+// Wildcard v URL — zachytí libovolné ID nebo segment
+cy.intercept({ method: 'GET', url: '**/contact/grid-fields/v2/contact-list/**' }).as('getContactList')</code></pre>
+
+    <h3 class="h3">Wildcard pravidla</h3>
+    <pre><code>cy.intercept('GET', '/api/**')              // ** = libovolný počet segmentů
+cy.intercept('GET', '/api/users/*/posts')   //  * = právě jeden segment
+cy.intercept('GET', /\/api\/users\/\d+/)    // regex — pro složitější patterny</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Základní vzor: intercept → akce → wait</h2>
+    <p class="description">
+      Klíčové pravidlo: <strong><code>cy.intercept()</code> musí být definováno před akcí, která request spustí.</strong>
+      V Angular aplikaci spouští komponenta HTTP volání při <code>ngOnInit</code> — tedy hned při navigaci.
+    </p>
+
+    <h3 class="h3">✅ Správné pořadí</h3>
+    <pre><code>// 1. Registrace interceptu PŘED navigací
+cy.intercept({ method: 'GET', url: '**/contact/grid-fields/v2/contact-list/**' }).as('getContactList')
+
+// 2. Akce, která spustí request (Angular komponenta ho volá v ngOnInit)
+cy.gridCell(0, 'name').click()
+
+// 3. Počkej na dokončení requestu
+cy.wait('@getContactList')
+
+// 4. Teprve teď asertuj — data jsou zaručeně načtena
+cy.url().should('include', '/detail/')
+cy.dataCy('edit-segment-button').should('be.visible')</code></pre>
+
+    <h3 class="h3">❌ Špatné pořadí — intercept po akci</h3>
+    <pre><code>cy.visit('/users')
+cy.intercept('GET', '/api/users').as('getUsers')   // příliš pozdě, request již odešel
+cy.wait('@getUsers')                                // timeout!</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Čekání na více requestů najednou</h2>
+    <p class="description">
+      Pokud stránka při načtení volá více API endpointů paralelně, počkej na všechny najednou.
+    </p>
+    <pre><code>cy.intercept('GET', '/api/user').as('getUser')
+cy.intercept('GET', '/api/notifications').as('getNotifications')
+cy.intercept('GET', '/api/settings').as('getSettings')
+
+cy.visit('/home')
+cy.wait(['@getUser', '@getNotifications', '@getSettings'])   // čeká na všechny tři
+
+cy.get('[data-cy="home-content"]').should('be.visible')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Opakované čekání na stejný alias</h2>
+    <p class="description">
+      Každé <code>cy.wait('@alias')</code> čeká na <em>další</em> výskyt requestu. Skvělé pro paginaci nebo akce, které stejný endpoint volají vícekrát.
+    </p>
+    <pre><code>cy.intercept('GET', '/api/items*').as('getItems')
+
+cy.visit('/items')
+cy.wait('@getItems')                        // 1. request — strana 1
+
+cy.get('[data-cy="next-page"]').click()
+cy.wait('@getItems')                        // 2. request — strana 2 (automaticky další)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Asertace na request a response</h2>
+    <p class="description">
+      <code>cy.wait('@alias')</code> vrací celý interception objekt — můžeš asertovat na status kód, tělo odpovědi nebo tělo requestu.
+    </p>
+
+    <h3 class="h3">Status kód</h3>
+    <pre><code>cy.wait('@getUsers').its('response.statusCode').should('eq', 200)</code></pre>
+
+    <h3 class="h3">Tělo odpovědi</h3>
+    <pre><code>cy.wait('@getUsers')
+  .its('response.body')
+  .should('have.length', 3)</code></pre>
+
+    <h3 class="h3">Tělo requestu (POST)</h3>
+    <pre><code>cy.intercept('POST', '/api/orders').as('createOrder')
+cy.get('[data-cy="submit-order"]').click()
+
+cy.wait('@createOrder')
+  .its('request.body')
+  .should('deep.include', { productId: 42, quantity: 2 })</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Vzor: beforeEach s interceptem</h2>
+    <p class="description">
+      Nejčastější pattern v reálných projektech — intercept a návštěva stránky v <code>beforeEach</code>, jednotlivé testy se starají jen o aserce.
+    </p>
+    <pre><code>describe('User list page', () => {
+  beforeEach(() => {
+    cy.intercept('GET', '/api/users', { fixture: 'users.json' }).as('getUsers')
+    cy.visit('/users')
+    cy.wait('@getUsers')
+  })
+
+  it('zobrazí tabulku uživatelů', () => {
+    cy.get('table tbody tr').should('have.length', 3)
+  })
+
+  it('zobrazí jméno prvního uživatele', () => {
+    cy.get('table tbody tr').first().contains('Alice')
+  })
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Časté chyby</h2>
+
+    <h3 class="h3">❌ Intercept registrován příliš pozdě</h3>
+    <pre><code>cy.visit('/users')
+cy.intercept('GET', '/api/users').as('getUsers')   // request již proběhl!
+cy.wait('@getUsers')                                // timeout</code></pre>
+
+    <h3 class="h3">❌ Příliš obecný matcher překrývá specifický</h3>
+    <pre><code>cy.intercept('*').as('catchAll')   // zachytí vše — i requesty, které nechceš čekat
+
+// Vždy buď specifický — rozlišuj metodu i URL
+cy.intercept('GET', '/api/users').as('getUsers')
+cy.intercept('POST', '/api/users').as('createUser')</code></pre>
+
+    <h3 class="h3">❌ Přístup k aliasu po wait()</h3>
+    <pre><code>cy.wait('@getUsers')
+cy.get('@getUsers')   // vrátí null — wait() alias spotřeboval
+
+// Správně — použij hodnotu přímo z wait()
+cy.wait('@getUsers').then((interception) => {
+  expect(interception.response.body).to.have.length(3)
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Shrnutí — kdy použít co</h2>
+    <table>
+      <thead>
+        <tr><th>Situace</th><th>Přístup</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Stránka/komponenta načítá data z API</td><td><code>cy.intercept().as()</code> + <code>cy.wait('@alias')</code></td></tr>
+        <tr><td>Navigace spouští více API volání</td><td><code>cy.wait(['@alias1', '@alias2'])</code></td></tr>
+        <tr><td>Stejný endpoint volaný opakovaně</td><td>Každé <code>cy.wait('@alias')</code> čeká na další výskyt</td></tr>
+        <tr><td>Ověření dat z API</td><td><code>cy.wait('@alias').its('response.body')</code></td></tr>
+        <tr><td>Ověření odeslaných dat</td><td><code>cy.wait('@alias').its('request.body')</code></td></tr>
+        <tr><td>Element se zobrazí / zmizí</td><td><code>.should('be.visible')</code> / <code>.should('not.exist')</code></td></tr>
+        <tr><td>Pevné čekání</td><td>❌ Vyhni se <code>cy.wait(ms)</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/intercept" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/intercept →
+      </a>
+    </p>
+    <p>
+      <a href="https://docs.cypress.io/app/core-concepts/best-practices#Unnecessary-Waiting" target="_blank" rel="noopener">
+        https://docs.cypress.io/app/core-concepts/best-practices#Unnecessary-Waiting →
+      </a>
+    </p>
+  </section>
+</section>

@@ -1,0 +1,419 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Stop on Fail — zastavení testů při selhání</h1>
+    <p class="description">
+      Cypress nabízí několik způsobů, jak zastavit provádění testů ve chvíli, kdy jeden selže. Technika se hodí hlavně v CI/CD prostředích, kde chceš ušetřit čas a prostředky, nebo u testů, kde pozdější kroky nedávají smysl bez úspěchu kroků předchozích. Zároveň má svá úskalí — musíš vědět, kdy ji použít a kdy naopak nechat testy běžet dál.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Přehled dostupných řešení</h2>
+    <p class="description">
+      Cypress nenabízí jednoduchý globální přepínač <code>bail: true</code>. Existují ale čtyři různé přístupy podle toho, na jaké úrovni chceš zastavení aplikovat.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Řešení</th>
+          <th>Úroveň zastavení</th>
+          <th>Instalace</th>
+          <th>Kdy použít</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>Cypress.stop()</code></td><td>Aktuální spec soubor</td><td>Vestavěné, bez instalace</td><td>Jednoduchá potřeba zastavit spec</td></tr>
+        <tr><td><code>cypress-fail-fast</code></td><td>Spec nebo celý run</td><td>npm plugin</td><td>Flexibilní konfigurace na úrovni describe/it</td></tr>
+        <tr><td><code>cypress-skip-this-test</code></td><td>Zbývající testy v describe</td><td>npm plugin</td><td>Záměrně závislé testy (step-by-step flow)</td></tr>
+        <tr><td>Cypress Cloud Auto Cancellation</td><td>Celý run (i paralelní)</td><td>Cypress Cloud (placený plán)</td><td>Velké parallelizované CI sady</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Cypress.stop() — vestavěné zastavení</h2>
+    <p class="description">
+      <code>Cypress.stop()</code> je nativní příkaz bez nutnosti instalace pluginu. Zastaví provádění zbývajících testů v aktuálním spec souboru. V <code>cypress open</code> nechá Test Runner otevřený pro ladění, v <code>cypress run</code> spec přeskočí.
+    </p>
+
+    <h3 class="h3">Základní použití — zastavit po prvním selhání</h3>
+    <pre><code>// cypress/support/e2e.ts
+afterEach(function () {
+  if (this.currentTest.state === 'failed') {
+    Cypress.stop()
+  }
+})</code></pre>
+
+    <h3 class="h3">Zastavení při nesplněné podmínce prostředí</h3>
+    <pre><code>// Zastav celý spec, pokud není dostupný API token
+beforeEach(() => {
+  cy.task('getApiToken').then((token) => {
+    if (!token) {
+      cy.log('❌ API token není dostupný — spec se zastaví')
+      Cypress.stop()
+    }
+  })
+})</code></pre>
+
+    <h3 class="h3">Zastavení při špatném prostředí</h3>
+    <pre><code>// Zastav, pokud testy běží na špatném prostředí
+before(() => {
+  const env = Cypress.env('TEST_ENV')
+  if (env !== 'staging' && env !== 'production') {
+    cy.log(`❌ Neplatné prostředí: ${env}`)
+    Cypress.stop()
+  }
+})</code></pre>
+
+    <h3 class="h3">Omezení Cypress.stop()</h3>
+    <pre><code">// ✅ Zastaví zbývající testy v aktuálním spec souboru
+// ❌ Nezastaví ostatní spec soubory v runu
+// ❌ Nezastaví parallelizované rony na jiných strojích
+
+// Pokud potřebuješ zastavit celý run → použij cypress-fail-fast</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">cypress-fail-fast — flexibilní zastavení</h2>
+    <p class="description">
+      Plugin <code>cypress-fail-fast</code> od Javiera Brey je nejpopulárnější komunitní řešení. Umožňuje konfigurovat zastavení na úrovni celého runu, konkrétního <code>describe</code> bloku nebo jednotlivého <code>it</code> testu. Podporuje také nastavení počtu selhání před zastavením.
+    </p>
+
+    <h3 class="h3">Instalace</h3>
+    <pre><code>npm install --save-dev cypress-fail-fast</code></pre>
+
+    <h3 class="h3">Konfigurace pluginu (cypress.config.ts)</h3>
+    <pre><code>import { defineConfig } from 'cypress'
+import cypressFailFast from 'cypress-fail-fast/plugin'
+
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      cypressFailFast(on, config)
+      return config
+    },
+  },
+})</code></pre>
+
+    <h3 class="h3">Import do support souboru (cypress/support/e2e.ts)</h3>
+    <pre><code>import 'cypress-fail-fast'</code></pre>
+
+    <h3 class="h3">Globální zapnutí — zastaví celý run při prvním selhání</h3>
+    <pre><code"># Spuštění z příkazové řádky s env proměnnou
+CYPRESS_FAIL_FAST_ENABLED=true npx cypress run
+
+# Nebo v cypress.config.ts
+export default defineConfig({
+  env: {
+    FAIL_FAST_ENABLED: true,
+    FAIL_FAST_STRATEGY: 'run',   // 'spec' nebo 'run'
+  },
+})</code></pre>
+
+    <h3 class="h3">Zapnutí jen pro kritické describe bloky</h3>
+    <pre><code>// Fail-fast ZAPNUTO — kritická autentizační suite
+describe('Přihlašovací flow', { failFast: { enabled: true } }, () => {
+  it('zobrazí přihlašovací formulář', () => {
+    cy.visit('/login')
+    cy.getBySel('login-form').should('be.visible')
+  })
+
+  it('přihlásí uživatele se správnými údaji', () => {
+    cy.getBySel('email-input').type('jan@test.cz')
+    cy.getBySel('password-input').type('heslo123')
+    cy.getBySel('submit-button').click()
+    cy.url().should('include', '/dashboard')
+  })
+
+  it('zobrazí uvítací zprávu', () => {
+    // Tento test se přeskočí, pokud předchozí selže
+    cy.getBySel('welcome-message').should('be.visible')
+  })
+})
+
+// Fail-fast VYPNUTO — nezávislé smoke testy
+describe('Smoke testy stránek', { failFast: { enabled: false } }, () => {
+  it('homepage je dostupná', () => { cy.visit('/') })
+  it('produkty jsou dostupné', () => { cy.visit('/products') })
+  it('kontakt je dostupný', () => { cy.visit('/contact') })
+})</code></pre>
+
+    <h3 class="h3">Zastavení až po N selháních</h3>
+    <pre><code">export default defineConfig({
+  env: {
+    FAIL_FAST_ENABLED: true,
+    FAIL_FAST_BAIL: 3,           // zastav až po 3 selháních, ne po prvním
+    FAIL_FAST_STRATEGY: 'run',
+  },
+})</code></pre>
+
+    <h3 class="h3">Přehled environment proměnných</h3>
+    <table>
+      <thead>
+        <tr><th>Proměnná</th><th>Výchozí hodnota</th><th>Popis</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>FAIL_FAST_ENABLED</code></td><td><code>true</code></td><td>Zapne/vypne celý plugin</td></tr>
+        <tr><td><code>FAIL_FAST_STRATEGY</code></td><td><code>spec</code></td><td><code>spec</code> = zastaví spec, <code>run</code> = zastaví celý run</td></tr>
+        <tr><td><code>FAIL_FAST_BAIL</code></td><td><code>1</code></td><td>Počet selhání před zastavením</td></tr>
+        <tr><td><code>FAIL_FAST_PLUGIN</code></td><td><code>true</code></td><td>Kompletně deaktivuje plugin</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">cypress-skip-this-test — přeskočení závislých testů</h2>
+    <p class="description">
+      Plugin od Gleba Bahmutova řeší specifický případ: záměrně závislé testy, kde každý krok navazuje na předchozí. Místo úplného zastavení runu přeskočí zbývající testy v <code>describe</code> bloku — v reportu se zobrazí jako <em>skipped</em>, ne jako <em>failed</em>.
+    </p>
+
+    <h3 class="h3">Instalace</h3>
+    <pre><code>npm install --save-dev cypress-skip-this-test</code></pre>
+
+    <h3 class="h3">Použití pro step-by-step flow</h3>
+    <pre><code>import { skipIfPreviousTestsFailed } from 'cypress-skip-this-test'
+
+// testIsolation: false — sdílíme stav mezi testy (nutné pro step flow)
+describe('Checkout flow', { testIsolation: false }, () => {
+  beforeEach(skipIfPreviousTestsFailed)
+
+  it('krok 1 — přidá produkt do košíku', () => {
+    cy.visit('/shop')
+    cy.getBySel('product-card').first().click()
+    cy.getBySel('add-to-cart').click()
+    cy.getBySel('cart-count').should('contain', '1')
+  })
+
+  it('krok 2 — přejde do košíku', () => {
+    // Přeskočí se, pokud krok 1 selhal
+    cy.getBySel('cart-icon').click()
+    cy.url().should('include', '/cart')
+  })
+
+  it('krok 3 — vyplní doručovací adresu', () => {
+    // Přeskočí se, pokud krok 2 selhal
+    cy.getBySel('shipping-address').type('Václavské náměstí 1, Praha')
+    cy.getBySel('next-step-button').click()
+  })
+
+  it('krok 4 — dokončí objednávku', () => {
+    // Přeskočí se, pokud krok 3 selhal
+    cy.getBySel('confirm-order-button').click()
+    cy.getBySel('order-success-message').should('be.visible')
+  })
+})</code></pre>
+
+    <h3 class="h3">Rozdíl oproti cypress-fail-fast</h3>
+    <table>
+      <thead>
+        <tr><th></th><th>cypress-fail-fast</th><th>cypress-skip-this-test</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Zbývající testy</td><td>Označeny jako <em>failed/skipped</em></td><td>Označeny jako <em>pending/skipped</em></td></tr>
+        <tr><td>Rozsah</td><td>Spec nebo celý run</td><td>Jen aktuální describe blok</td></tr>
+        <tr><td>Ideální pro</td><td>CI/CD optimalizaci</td><td>Step-by-step user flows</td></tr>
+        <tr><td>Sdílený stav</td><td>Nevyžaduje</td><td>Obvykle kombinuje s <code>testIsolation: false</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kdy stop-on-fail použít a kdy ne</h2>
+
+    <h3 class="h3">✅ Použij stop-on-fail, když…</h3>
+    <pre><code">// 1. Testy jsou záměrně závislé — pozdější kroky nedávají smysl bez předchozích
+//    Příklad: login → přidání do košíku → platba
+
+// 2. Selže kritická podmínka prostředí
+//    Příklad: API server nedostupný, chybí autentizační token
+
+// 3. Chceš šetřit čas a prostředky v CI/CD
+//    Příklad: velká sada testů na placené CI infrastruktuře
+
+// 4. Chceš rychlou zpětnou vazbu
+//    Příklad: developer chce vědět, jestli jeho PR prošlo, co nejdřív</code></pre>
+
+    <h3 class="h3">❌ Nepoužívej stop-on-fail, když…</h3>
+    <pre><code">// 1. Testy jsou nezávislé a chceš vidět všechna selhání najednou
+//    Příklad: smoke testy pro 20 různých stránek
+
+// 2. Ladíš flaky testy
+//    Zastavení při prvním selhání ti ukryje ostatní problémy
+
+// 3. Máš nestabilní test suite
+//    Jeden flaky test zastaví všechno ostatní
+
+// 4. Potřebuješ kompletní report o zdraví aplikace
+//    Příklad: release QA — chceš seznam VŠECH chyb, ne jen první</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Proč Cypress nemá nativní --bail přepínač</h2>
+    <p class="description">
+      PR číslo 7892 navrhoval přidat <code>--bail</code> flag přímo do Cypress CLI. Byl ale uzavřen bez sloučení. Cypress tým se místo toho rozhodl pro sofistikovanější řešení přes Cypress Cloud — <strong>Auto Cancellation</strong>.
+    </p>
+
+    <h3 class="h3">Proč Cloud Auto Cancellation místo --bail?</h3>
+    <pre><code">// Jednoduchý --bail flag má problém v paralelním prostředí:
+// Stroj A selže → zastaví svůj run
+// Stroj B, C, D stále běží → plýtvají prostředky
+
+// Cypress Cloud Auto Cancellation řeší koordinaci přes všechny stroje:
+// Stroj A selže → Cloud pošle signál strojům B, C, D → všichni se zastaví
+
+// Spuštění s Auto Cancellation:
+npx cypress run \
+  --record \
+  --parallel \
+  --ci-build-id $CI_BUILD_ID \
+  --auto-cancel-after-failures 1
+
+// Vypnutí pro konkrétní run:
+npx cypress run --record --auto-cancel-after-failures false</code></pre>
+
+    <p class="description">
+      Auto Cancellation je dostupné v Business a Enterprise plánech Cypress Cloud od verze 6.8.0.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kompletní příklad — kombinace přístupů</h2>
+    <p class="description">
+      Reálný projekt obvykle kombinuje více technik: globální zastavení pro kritické chyby prostředí, <code>cypress-fail-fast</code> pro důležité flow sady a běžné nezávislé testy bez omezení.
+    </p>
+
+    <h3 class="h3">cypress/support/e2e.ts — globální guard</h3>
+    <pre><code">import 'cypress-fail-fast'
+
+// Zastav celý spec, pokud selže předpoklad prostředí
+before(() => {
+  cy.request({ url: '/health', failOnStatusCode: false }).then((response) => {
+    if (response.status !== 200) {
+      cy.log('❌ Aplikace není dostupná — zastavuji spec')
+      Cypress.stop()
+    }
+  })
+})</code></pre>
+
+    <h3 class="h3">cypress.config.ts</h3>
+    <pre><code">import { defineConfig } from 'cypress'
+import cypressFailFast from 'cypress-fail-fast/plugin'
+
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      cypressFailFast(on, config)
+      return config
+    },
+    // Fail-fast je vypnutý globálně — zapíná se selektivně v describe
+    env: {
+      FAIL_FAST_ENABLED: false,
+    },
+    // Šetři paměť při dlouhých runech
+    numTestsKeptInMemory: 0,
+  },
+})</code></pre>
+
+    <h3 class="h3">cypress/e2e/auth.cy.ts — fail-fast pro kritický flow</h3>
+    <pre><code">import { skipIfPreviousTestsFailed } from 'cypress-skip-this-test'
+
+// Fail-fast: selhání přihlášení zastaví celý describe
+describe('Autentizační flow', { failFast: { enabled: true } }, () => {
+  beforeEach(() => {
+    cy.clearCookies()
+    cy.clearLocalStorage()
+  })
+
+  it('zobrazí přihlašovací stránku', () => {
+    cy.visit('/login')
+    cy.getBySel('login-form').should('be.visible')
+  })
+
+  it('přihlásí uživatele', () => {
+    cy.visit('/login')
+    cy.getBySel('email-input').type('jan@test.cz')
+    cy.getBySel('password-input').type('heslo123')
+    cy.getBySel('submit-button').click()
+    cy.url().should('include', '/dashboard')
+  })
+
+  it('zobrazí profil přihlášeného uživatele', () => {
+    cy.getBySel('user-avatar').should('be.visible')
+    cy.getBySel('user-name').should('contain', 'Jan')
+  })
+})
+
+// Nezávislé testy — fail-fast vypnutý, chceme vidět všechna selhání
+describe('Smoke testy veřejných stránek', { failFast: { enabled: false } }, () => {
+  const pages = ['/', '/about', '/contact', '/pricing', '/blog']
+
+  pages.forEach((path) => {
+    it(`stránka ${path} je dostupná`, () => {
+      cy.visit(path)
+      cy.getBySel('main-content').should('be.visible')
+    })
+  })
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Doporučení Cypress komunity</h2>
+    <p class="description">
+      Gleb Bahmutov (bývalý VP Engineering v Cypress) opakovaně zdůrazňuje základní filosofii: <strong>testy by měly být nezávislé</strong>. Stop-on-fail je pragmatický kompromis, ne ideální stav.
+    </p>
+
+    <h3 class="h3">Kdy je závislost testů přijatelná</h3>
+    <pre><code">// Záměrný step-by-step flow je OK, pokud:
+// 1. Je jasně dokumentovaný
+// 2. Každý krok má smysl jako samostatný test
+// 3. Celý flow testuje jednu ucelenou user journey
+
+// Použij cypress-data-session pro sdílení stavu bez závislostí
+// (lepší než testIsolation: false)
+cy.dataSession('loggedInUser', () => {
+  cy.loginAsAdmin()
+  return cy.getCookie('session')
+}, {
+  validate: (session) => session !== null,
+})</code></pre>
+
+    <h3 class="h3">Shrnutí doporučení</h3>
+    <table>
+      <thead>
+        <tr><th>Situace</th><th>Doporučení</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Nový projekt, lokální vývoj</td><td>Žádné stop-on-fail — chceš vidět vše</td></tr>
+        <tr><td>Kritický user flow (login → checkout)</td><td><code>cypress-skip-this-test</code> nebo <code>failFast: true</code></td></tr>
+        <tr><td>CI/CD na placené infrastruktuře</td><td><code>cypress-fail-fast</code> s <code>FAIL_FAST_STRATEGY: run</code></td></tr>
+        <tr><td>Parallelizovaný run v cloudu</td><td>Cypress Cloud Auto Cancellation</td></tr>
+        <tr><td>Chybí podmínka prostředí</td><td><code>Cypress.stop()</code> v <code>before()</code></td></tr>
+        <tr><td>Ladění flaky testů</td><td>Stop-on-fail VYPNOUT — potřebuješ vidět vzor selhání</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/cypress-api/stop" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/cypress-api/stop →
+      </a>
+    </p>
+    <p>
+      <a href="https://github.com/javierbrea/cypress-fail-fast" target="_blank" rel="noopener">
+        https://github.com/javierbrea/cypress-fail-fast →
+      </a>
+    </p>
+    <p>
+      <a href="https://github.com/bahmutov/cypress-skip-this-test" target="_blank" rel="noopener">
+        https://github.com/bahmutov/cypress-skip-this-test →
+      </a>
+    </p>
+    <p>
+      <a href="https://docs.cypress.io/cloud/features/smart-orchestration/run-cancellation" target="_blank" rel="noopener">
+        https://docs.cypress.io/cloud/features/smart-orchestration/run-cancellation →
+      </a>
+    </p>
+  </section>
+</section>

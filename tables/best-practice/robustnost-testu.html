@@ -1,0 +1,389 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Robustnost testů — opakované spouštění a odhalování flaky testů</h1>
+    <p class="description">
+      Robustní test musí projít nejen jednou, ale opakovaně za sebou — bez pádu, bez úniku paměti, bez závislosti na náhodném načasování. Technika, kdy záměrně spustíš celý <code>describe</code> blok 10–15× v cyklu, odhalí chyby, které při jednorázovém běhu nikdy neuvidíš. Do produkční sady testů to nepatří, ale jako vývojářský nástroj kvality je to neocenitelné.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Co je flaky test a proč vzniká</h2>
+    <p class="description">
+      Flaky test je test, který někdy projde a jindy selže — přestože se kód ani aplikace nezměnily. Při jednorázovém spuštění vypadá jako spolehlivý. Teprve opakované spouštění odhalí latentní problém.
+    </p>
+
+    <h3 class="h3">Nejčastější příčiny flaky testů</h3>
+    <table>
+      <thead>
+        <tr><th>Příčina</th><th>Projev</th><th>Řešení</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Pevné čekání <code>cy.wait(ms)</code></td><td>Na pomalém CI nestačí čas</td><td>Dynamické čekání s <code>cy.intercept()</code></td></tr>
+        <tr><td>Race condition</td><td>DOM se mění v okamžiku aserce</td><td><code>.should()</code> s retrym</td></tr>
+        <tr><td>Závislost na pořadí testů</td><td>Test funguje jen po jiném testu</td><td>Izolovaný stav v <code>beforeEach</code></td></tr>
+        <tr><td>Únava paměti</td><td>Pozdější testy padají, dřívější ne</td><td><code>numTestsKeptInMemory: 0</code></td></tr>
+        <tr><td>Křehké selektory</td><td>Stačí přejmenovat CSS třídu</td><td><code>data-cy</code> atributy</td></tr>
+        <tr><td>Neočištěný stav</td><td>Data z předchozího testu ovlivňují další</td><td>Cleanup v <code>afterEach</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Metoda 1 — Cypress._.times() uvnitř spec souboru</h2>
+    <p class="description">
+      Lodash utilita <code>Cypress._.times(n, fn)</code> vygeneruje <em>n</em> samostatných <code>it</code> bloků se stejným obsahem. Každý běží jako nezávislý test — Cypress reporter ukáže všechny najednou. Ideální pro lokální ověření stability.
+    </p>
+
+    <h3 class="h3">Základní použití</h3>
+    <pre><code>// Spustí stejný test 15× za sebou
+Cypress._.times(15, (index) => {
+  it(`[${index + 1}/15] uživatel se přihlásí a odhlásí`, () => {
+    cy.visit('/login')
+    cy.getBySel('email-input').type('jan@test.cz')
+    cy.getBySel('password-input').type('heslo123')
+    cy.getBySel('submit-button').click()
+
+    cy.url().should('include', '/dashboard')
+    cy.getBySel('logout-button').click()
+    cy.url().should('include', '/login')
+  })
+})</code></pre>
+
+    <h3 class="h3">Stress-test celého describe bloku</h3>
+    <pre><code">// Zabalíš existující describe do Cypress._.times()
+// — POUZE lokálně, před commitem do produkce odstraň!
+Cypress._.times(15, (i) => {
+  describe(`[Cyklus ${i + 1}/15] Správa uživatelů`, () => {
+    beforeEach(() => {
+      cy.intercept('GET', '/api/users').as('getUsers')
+      cy.visit('/users')
+      cy.wait('@getUsers')
+    })
+
+    it('zobrazí seznam uživatelů', () => {
+      cy.getBySel('users-table').should('be.visible')
+      cy.getBySel('users-table').find('tr').should('have.length.gt', 0)
+    })
+
+    it('otevře detail uživatele', () => {
+      cy.getBySel('user-row').first().click()
+      cy.url().should('include', '/users/')
+      cy.getBySel('user-detail-name').should('be.visible')
+    })
+
+    afterEach(() => {
+      // Vždy vyčisti stav po každém cyklu
+      cy.clearCookies()
+      cy.clearLocalStorage()
+    })
+  })
+})</code></pre>
+
+    <h3 class="h3">Přístup k číslu iterace uvnitř testu</h3>
+    <pre><code">Cypress._.times(10, (k) => {
+  it(`iterace ${k + 1}`, () => {
+    cy.log(`Spouštím iteraci číslo ${k + 1}`)
+    // ... test logic
+  })
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Metoda 2 — for cyklus uvnitř it bloku</h2>
+    <p class="description">
+      Místo generování více <code>it</code> bloků lze cyklus vložit přímo dovnitř jednoho testu. Cypress příkazy se zařadí do fronty a provedou se sekvenčně. Vhodné pro testování opakované interakce (paginace, opakované vyhledávání, CRUD operace).
+    </p>
+
+    <h3 class="h3">for cyklus v testu</h3>
+    <pre><code">it('opakovaně přidá a odebere položku z košíku', () => {
+  cy.visit('/shop')
+
+  for (let i = 0; i < 10; i++) {
+    cy.log(`--- Cyklus ${i + 1}/10 ---`)
+
+    // Přidej do košíku
+    cy.getBySel('add-to-cart-button').first().click()
+    cy.getBySel('cart-count').should('contain', '1')
+
+    // Odeber z košíku
+    cy.getBySel('remove-from-cart').click()
+    cy.getBySel('cart-count').should('contain', '0')
+  }
+})</code></pre>
+
+    <h3 class="h3">forEach s polem hodnot</h3>
+    <pre><code">it('vyhledá různé výrazy a vždy zobrazí výsledky', () => {
+  const searchTerms = ['Jan', 'Marie', 'novák', 'test@test.cz', '123']
+
+  cy.visit('/users')
+
+  searchTerms.forEach((term) => {
+    cy.getBySel('search-input').clear().type(term)
+    cy.getBySel('search-button').click()
+    cy.getBySel('results-list').should('be.visible')
+    cy.getBySel('search-input').clear()
+  })
+})</code></pre>
+
+    <h3 class="h3">Cyklus pro test paginace</h3>
+    <pre><code">it('projde prvních 5 stránek bez chyby', () => {
+  cy.intercept('GET', '/api/users*').as('getUsers')
+  cy.visit('/users')
+  cy.wait('@getUsers')
+
+  for (let page = 1; page <= 5; page++) {
+    cy.log(`Stránka ${page}`)
+    cy.getBySel('users-table').should('be.visible')
+    cy.getBySel('pagination-info').should('contain', page)
+
+    if (page < 5) {
+      cy.getBySel('next-page-button').click()
+      cy.wait('@getUsers')
+    }
+  }
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Metoda 3 — cypress-repeat (celý test run)</h2>
+    <p class="description">
+      Nástroj <code>cypress-repeat</code> od Gleba Bahmutova spouští celý Cypress run <em>n</em>× za sebou z příkazové řádky. Nemusíš měnit žádný kód v testech — ideální pro CI ověření nebo jednorázové stress testy celé sady.
+    </p>
+
+    <h3 class="h3">Instalace</h3>
+    <pre><code>npm install --save-dev cypress-repeat</code></pre>
+
+    <h3 class="h3">Použití z příkazové řádky</h3>
+    <pre><code"># Spustí testy 10× — zastaví se při prvním selhání
+npx cypress-repeat run -n 10 --spec "cypress/e2e/login.cy.ts"
+
+# Spustí testy 15× — dokud všechny neprojdou
+npx cypress-repeat run -n 15 --until-passes --spec "cypress/e2e/users.cy.ts"
+
+# Opakuje pouze dříve selhané spec soubory
+npx cypress-repeat run -n 10 --until-passes --rerun-failed-only
+
+# Debug výstup
+DEBUG=cypress-repeat npx cypress-repeat run -n 5</code></pre>
+
+    <h3 class="h3">Přístup k číslu běhu uvnitř testu</h3>
+    <pre><code>it('test zná číslo svého běhu', () => {
+  const totalRuns = Cypress.env('cypress_repeat_n')    // celkový počet
+  const currentRun = Cypress.env('cypress_repeat_k')  // aktuální (1 až n)
+
+  cy.log(`Běh ${currentRun} z ${totalRuns}`)
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Konfigurace Cypress retries — reaktivní přístup</h2>
+    <p class="description">
+      Retries jsou opak opakovaného spouštění — nejde o proaktivní ověření stability, ale o reaktivní záchrannou síť při náhodném selhání. Vhodné pro CI prostředí, kde infrastructure občas zlobí.
+    </p>
+
+    <h3 class="h3">Globální konfigurace v cypress.config.ts</h3>
+    <pre><code">import { defineConfig } from 'cypress'
+
+export default defineConfig({
+  e2e: {
+    retries: {
+      runMode: 2,   // 2 pokusy navíc při cypress run (CI)
+      openMode: 0,  // žádné opakování při cypress open (lokálně)
+    },
+  },
+})</code></pre>
+
+    <h3 class="h3">Retries pro konkrétní test nebo describe</h3>
+    <pre><code">// Jen pro jeden test
+it('načte data ze slabé sítě', { retries: { runMode: 3, openMode: 1 } }, () => {
+  cy.visit('/dashboard')
+  cy.getBySel('data-table').should('be.visible')
+})
+
+// Pro celý describe blok
+describe('Integrace s externím API', { retries: { runMode: 2, openMode: 0 } }, () => {
+  it('vrátí správný status', () => { ... })
+  it('zobrazí data', () => { ... })
+})</code></pre>
+
+    <h3 class="h3">Rozdíl: retry vs. repeat</h3>
+    <table>
+      <thead>
+        <tr><th></th><th>Retry</th><th>Repeat (Cypress._.times)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Účel</td><td>Reaktivní záchrana při selhání</td><td>Proaktivní ověření stability</td></tr>
+        <tr><td>Kdy se aktivuje</td><td>Jen při pádu testu</td><td>Vždy, bez ohledu na výsledek</td></tr>
+        <tr><td>Patří do produkce</td><td>Ano</td><td>Ne — jen lokálně při vývoji</td></tr>
+        <tr><td>Odhalí flaky testy</td><td>Ne — maskuje je</td><td>Ano — ukáže nestabilitu</td></tr>
+        <tr><td>Konfigurace</td><td><code>retries</code> v config</td><td><code>Cypress._.times()</code> v kódu</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Únava paměti při opakovaných bězích</h2>
+    <p class="description">
+      Pokud testy padají až v pozdějších cyklech (např. cyklus 12 z 15 selže, ale 1–11 projde), jde nejspíš o únik paměti. Cypress si v paměti drží snapshoty pro debugování — při stovkách testů to může způsobit pád celého prohlížeče.
+    </p>
+
+    <h3 class="h3">Symptomy úniku paměti</h3>
+    <pre><code">// Test prochází v cyklech 1-10, ale v cyklu 11+ padá s chybou:
+// "Aw Snap! Out of Memory" nebo "Browser tab crashed"
+// Nebo jednoduše zpomaluje — test, který trval 5 s, trvá 60 s</code></pre>
+
+    <h3 class="h3">Řešení 1 — omez počet testů držených v paměti</h3>
+    <pre><code">// cypress.config.ts
+export default defineConfig({
+  e2e: {
+    numTestsKeptInMemory: 0,  // nulová hodnota = žádné snapshoty v paměti
+  },
+})</code></pre>
+
+    <h3 class="h3">Řešení 2 — zvýšení heap paměti pro prohlížeč</h3>
+    <pre><code">// cypress.config.ts
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      on('before:browser:launch', (browser, launchOptions) => {
+        if (browser.family === 'chromium') {
+          launchOptions.args.push('--js-flags=--max-old-space-size=3500')
+        }
+        return launchOptions
+      })
+    },
+  },
+})</code></pre>
+
+    <h3 class="h3">Řešení 3 — cleanup po každém testu</h3>
+    <pre><code">afterEach(() => {
+  cy.clearCookies()
+  cy.clearLocalStorage()
+
+  // Odstraň event listenery zaregistrované v testu
+  cy.window().then((win) => {
+    win.removeEventListener('resize', win.__testResizeHandler)
+  })
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Jak správně napsat robustní test — checklist</h2>
+    <p class="description">
+      Než spustíš cyklický stress test, zkontroluj tyto body. Pokud test cykly neprojde, hledej chybu v tomto seznamu.
+    </p>
+
+    <h3 class="h3">✅ Checklist robustního testu</h3>
+    <pre><code">// 1. Izolovaný stav — test nesmí záviset na předchozím testu
+beforeEach(() => {
+  cy.clearCookies()
+  cy.clearLocalStorage()
+  // nebo API reset stavu:
+  cy.request('POST', '/api/test/reset')
+})
+
+// 2. Dynamické čekání — žádné cy.wait(ms)
+cy.intercept('GET', '/api/data').as('getData')
+cy.visit('/page')
+cy.wait('@getData')              // ✅ čeká na reálný request
+
+// 3. Stabilní selektory
+cy.getBySel('submit-button')    // ✅ data-cy atribut
+// cy.get('.btn.primary')       // ❌ CSS třída se může změnit
+
+// 4. Aserce před interakcí
+cy.getBySel('submit-button').should('be.visible').click()   // ✅
+// cy.getBySel('submit-button').click()                     // ❌ může kliknout na skrytý element
+
+// 5. Cleanup po testu
+afterEach(() => {
+  cy.clearCookies()
+  cy.clearLocalStorage()
+})</code></pre>
+
+    <h3 class="h3">Vzor kompletního stress testu</h3>
+    <pre><code">// stress-test.cy.ts — POUZE lokálně, necommitovat!
+const CYCLES = 15
+
+Cypress._.times(CYCLES, (i) => {
+  describe(`[${i + 1}/${CYCLES}] Login flow — stress test`, () => {
+    beforeEach(() => {
+      cy.clearCookies()
+      cy.clearLocalStorage()
+      cy.intercept('POST', '/api/auth/login').as('loginRequest')
+    })
+
+    it('přihlásí uživatele a přesměruje na dashboard', () => {
+      cy.visit('/login')
+      cy.getBySel('email-input').type('jan@test.cz')
+      cy.getBySel('password-input').type('heslo123')
+      cy.getBySel('submit-button').click()
+
+      cy.wait('@loginRequest').its('response.statusCode').should('eq', 200)
+      cy.url().should('include', '/dashboard')
+      cy.getBySel('welcome-message').should('be.visible')
+    })
+
+    afterEach(() => {
+      cy.clearCookies()
+      cy.clearLocalStorage()
+    })
+  })
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Reálný příklad z praxe — případ cy.route vs cy.intercept</h2>
+    <p class="description">
+      Gleb Bahmutov (hlavní přispěvatel Cypressu) popsal případ, kdy test procházel stovky spuštění, ale občas selhal. Teprve po spuštění 1 000 iterací v cyklu (100 testů × 10 opakování) se ukázalo, že deprecated <code>cy.route()</code> občas nestačilo zachytit rychlé HTTP requesty. Migrace na <code>cy.intercept()</code> problém zcela odstranila — všech 1 000 iterací prošlo.
+    </p>
+
+    <h3 class="h3">Poučení</h3>
+    <pre><code">// ❌ Deprecated — může občas selhat na zachycení rychlých requestů
+cy.server()
+cy.route('GET', '/api/users').as('getUsers')
+
+// ✅ Moderní — spolehlivé i při rychlých requestech
+cy.intercept('GET', '/api/users').as('getUsers')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Shrnutí — kdy použít jakou techniku</h2>
+    <table>
+      <thead>
+        <tr><th>Technika</th><th>Kdy použít</th><th>Patří do CI?</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>Cypress._.times(15, ...)</code></td><td>Lokální ověření stability nového testu</td><td>Ne</td></tr>
+        <tr><td><code>for</code> cyklus uvnitř <code>it</code></td><td>Test opakované interakce (paginace, CRUD)</td><td>Ano</td></tr>
+        <tr><td><code>cypress-repeat -n 10</code></td><td>Jednorázový stress test celé sady z příkazové řádky</td><td>Volitelně</td></tr>
+        <tr><td><code>retries: { runMode: 2 }</code></td><td>Záchranná síť pro CI při infrastructure flakes</td><td>Ano</td></tr>
+        <tr><td><code>numTestsKeptInMemory: 0</code></td><td>Prevence únavy paměti při velkých suitách</td><td>Ano</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/app/guides/test-retries" target="_blank" rel="noopener">
+        https://docs.cypress.io/app/guides/test-retries →
+      </a>
+    </p>
+    <p>
+      <a href="https://docs.cypress.io/cloud/features/flaky-test-management" target="_blank" rel="noopener">
+        https://docs.cypress.io/cloud/features/flaky-test-management →
+      </a>
+    </p>
+    <p>
+      <a href="https://github.com/bahmutov/cypress-repeat" target="_blank" rel="noopener">
+        https://github.com/bahmutov/cypress-repeat →
+      </a>
+    </p>
+    <p>
+      <a href="https://glebbahmutov.com/blog/repeat-to-fight-flake/" target="_blank" rel="noopener">
+        https://glebbahmutov.com/blog/repeat-to-fight-flake/ →
+      </a>
+    </p>
+  </section>
+</section>

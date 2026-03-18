@@ -1,0 +1,241 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Popisné pojmenování funkcí, helperů a custom commandů</h1>
+    <p class="description">
+      Dobrý název funkce nebo příkazu nahradí komentář. Čtenář by měl z názvu okamžitě pochopit, <em>co</em> funkce dělá — bez toho, aby musel číst její tělo. Platí to dvojnásob v Cypressu, kde testy čte celý tým včetně QA, vývojářů i product ownerů.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Proč na názvu záleží</h2>
+    <p class="description">
+      Špatně pojmenovaná funkce zvyšuje kognitivní zátěž — každý, kdo test čte, musí dohledávat, co funkce vlastně dělá. Dobře pojmenovaná funkce se stává živou dokumentací a usnadňuje údržbu i onboarding nových členů týmu.
+    </p>
+
+    <h3 class="h3">❌ Anti-pattern — název nic neříká</h3>
+    <pre><code>// Co tohle dělá? Musím číst implementaci.
+cy.doStuff()
+cy.handleUser()
+cy.process()
+cy.action('submit')</code></pre> 
+
+    <h3 class="h3">✅ Správně — název je samopopisný</h3>
+    <pre><code>// Jasné na první pohled.
+cy.loginAsAdmin()
+cy.fillRegistrationForm({ name: 'Jan', email: 'jan@test.cz' })
+cy.submitOrderForm()
+cy.verifySuccessToast('Uloženo')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Pravidla pro pojmenování custom commandů</h2>
+    <p class="description">
+      Custom commandy jsou veřejné API tvého test-suite. Název musí být <strong>camelCase</strong>, začínat slovesem a vystihovat akci — ne implementaci.
+    </p>
+
+    <h3 class="h3">Vzor: sloveso + objekt (+ kontext)</h3>
+    <pre><code>// Sloveso + objekt
+cy.login()
+cy.logout()
+cy.fillForm()
+cy.submitForm()
+cy.openMenu()
+cy.closeModal()
+
+// Sloveso + objekt + kontext (kdy existuje více variant)
+cy.loginAsAdmin()
+cy.loginAsGuest()
+cy.fillShippingForm()
+cy.fillBillingForm()
+
+// get + selector type — pro helper selektory
+cy.getBySel('submit-button')        // hledá [data-cy="submit-button"]
+cy.getBySelLike('user-row')         // hledá [data-cy*="user-row"]</code></pre>
+
+    <h3 class="h3">Délka názvu — kdy přidat detail</h3>
+    <pre><code>// Příliš obecné — co přesně otevírá?
+cy.open()
+
+// Příliš dlouhé — zbytečné slovo "the"
+cy.openTheUserProfileSettingsPage()
+
+// Správná míra — jasné, úsporné
+cy.openUserProfile()
+cy.navigateToSettings()</code></pre>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Špatný název</th>
+          <th>Dobrý název</th>
+          <th>Proč?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>cy.auth()</code></td><td><code>cy.login()</code></td><td>Sloveso jasně říká akci</td></tr>
+        <tr><td><code>cy.doSearch()</code></td><td><code>cy.searchFor(query)</code></td><td>Parametr je součástí názvu</td></tr>
+        <tr><td><code>cy.populateData()</code></td><td><code>cy.fillContactForm(data)</code></td><td>Specifikuje, který formulář</td></tr>
+        <tr><td><code>cy.proceed()</code></td><td><code>cy.confirmDeleteDialog()</code></td><td>Říká, co se potvrzuje</td></tr>
+        <tr><td><code>cy.check()</code></td><td><code>cy.verifyUserIsLoggedIn()</code></td><td>Popisuje konkrétní aserce</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Pravidla pro helper funkce</h2>
+    <p class="description">
+      Helper funkce jsou zpravidla čisté JS/TS funkce (nikoli Cypress příkazy). Stejné pravidlo: <strong>sloveso + objekt</strong>, camelCase, žádné zkratky.
+    </p>
+
+    <h3 class="h3">✅ Dobře pojmenované helpery</h3>
+    <pre><code>// Gettery — vrací hodnotu
+function getUserFullName(user) { ... }
+function getFormattedDate(date) { ... }
+function getActiveFiltersCount(filters) { ... }
+
+// Akce — provádějí operaci
+function generateRandomEmail() { ... }
+function buildApiUrl(endpoint, params) { ... }
+function parseErrorMessage(response) { ... }
+
+// Predikáty — vrací boolean, název začíná is/has/can
+function isValidEmail(email) { ... }
+function hasAdminRole(user) { ... }
+function canUserEditRecord(user, record) { ... }</code></pre>
+
+    <h3 class="h3">❌ Špatně pojmenované helpery</h3>
+    <pre><code>function data() { ... }          // Co za data?
+function process(x) { ... }      // Co zpracovává?
+function util(type, val) { ... } // Universální název = žádný název
+function fn() { ... }            // Absolutně nic neříká</code></pre>
+
+    <h3 class="h3">Vzor pro helpery v beforeEach</h3>
+    <pre><code>// helpers/user.ts
+export function createTestUser(overrides = {}) {
+  return {
+    name: 'Test User',
+    email: 'test@example.com',
+    role: 'viewer',
+    ...overrides,
+  }
+}
+
+// Ve spec souboru
+beforeEach(() => {
+  const user = createTestUser({ role: 'admin' })
+  cy.setupUser(user)
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Pojmenování describe() a it() bloků</h2>
+    <p class="description">
+      Test runner zobrazuje názvy bloků jako věty. Kombinace <code>describe</code> + <code>it</code> by měla dávat smysl přečtená za sebou.
+    </p>
+
+    <h3 class="h3">✅ Správně — čte se jako věta</h3>
+    <pre><code>describe('Přihlašovací formulář', () => {
+  context('když uživatel zadá neplatné heslo', () => {
+    it('zobrazí chybovou hlášku', () => { ... })
+    it('neodešle formulář', () => { ... })
+  })
+
+  context('když uživatel zadá správné údaje', () => {
+    it('přesměruje na dashboard', () => { ... })
+    it('uloží session token', () => { ... })
+  })
+})</code></pre>
+
+    <h3 class="h3">❌ Špatně — technický popis bez kontextu</h3>
+    <pre><code">describe('test login', () => {
+  it('should should work', () => { ... })       // duplicitní "should"
+  it('test1', () => { ... })                    // čísla nic neříkají
+  it('checks the thing', () => { ... })         // co je "the thing"?
+  it('should redirect to the landing page', () => { ... })  // "should" je zbytečné
+})</code></pre>
+
+    <table>
+      <thead>
+        <tr><th>Blok</th><th>Doporučení</th><th>Příklad</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>describe()</code></td><td>Název stránky nebo komponenty</td><td><code>'Stránka uživatelů'</code></td></tr>
+        <tr><td><code>context()</code></td><td>Začínej "když" nebo "pokud"</td><td><code>'když uživatel není přihlášen'</code></td></tr>
+        <tr><td><code>it()</code></td><td>Imperativ bez "should"</td><td><code>'zobrazí přihlašovací formulář'</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Pojmenování Page Object metod</h2>
+    <p class="description">
+      Page Object třídy seskupují selektory a akce jedné stránky. Metody by měly být pojmenovány stejně jako custom commandy — sloveso + objekt.
+    </p>
+
+    <h3 class="h3">✅ Správný Page Object</h3>
+    <pre><code">// pages/LoginPage.ts
+export class LoginPage {
+  // Gettery — vracejí element (getter pattern)
+  getEmailInput()    { return cy.get('[data-cy="email-input"]') }
+  getPasswordInput() { return cy.get('[data-cy="password-input"]') }
+  getSubmitButton()  { return cy.get('[data-cy="submit-button"]') }
+  getErrorMessage()  { return cy.get('[data-cy="error-message"]') }
+
+  // Akce — provádějí sekvenci kroků
+  fillEmail(email: string)       { this.getEmailInput().type(email) }
+  fillPassword(password: string) { this.getPasswordInput().type(password) }
+  submit()                       { this.getSubmitButton().click() }
+
+  // Kompozitní akce — kombinují více kroků
+  loginWith(email: string, password: string) {
+    this.fillEmail(email)
+    this.fillPassword(password)
+    this.submit()
+  }
+}</code></pre>
+
+    <h3 class="h3">Pojmenování souborů Page Object</h3>
+    <pre><code>// ✅ kebab-case pro soubory, PascalCase pro třídy
+pages/login-page.ts        → class LoginPage
+pages/user-list-page.ts    → class UserListPage
+pages/checkout-page.ts     → class CheckoutPage
+
+// ❌ nekonzistentní
+pages/LoginPage.ts
+pages/userList.ts
+pages/checkout_page.ts</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Shrnutí — zlatá pravidla pojmenování</h2>
+    <table>
+      <thead>
+        <tr><th>Pravidlo</th><th>Příklad</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Začínej slovesem (akce)</td><td><code>fillForm</code>, <code>openMenu</code>, <code>verifyError</code></td></tr>
+        <tr><td>Používej camelCase</td><td><code>loginAsAdmin</code>, ne <code>login_as_admin</code></td></tr>
+        <tr><td>Buď konkrétní, ne obecný</td><td><code>submitOrderForm</code>, ne <code>submit</code></td></tr>
+        <tr><td>Vyhni se zkratkám</td><td><code>getUserEmail</code>, ne <code>getUsrEml</code></td></tr>
+        <tr><td>Predikáty začínají is/has/can</td><td><code>isLoggedIn</code>, <code>hasAdminRole</code></td></tr>
+        <tr><td>Gettery začínají get</td><td><code>getSubmitButton</code>, <code>getErrorMessage</code></td></tr>
+        <tr><td>Název popisuje záměr, ne implementaci</td><td><code>loginAsAdmin</code>, ne <code>setAuthCookie</code></td></tr>
+        <tr><td>Zvol konvenci a drž se jí</td><td>Celý projekt stejný styl</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/app/core-concepts/best-practices" target="_blank" rel="noopener">
+        https://docs.cypress.io/app/core-concepts/best-practices →
+      </a>
+    </p>
+    <p>
+      <a href="https://docs.cypress.io/app/core-concepts/writing-and-organizing-tests" target="_blank" rel="noopener">
+        https://docs.cypress.io/app/core-concepts/writing-and-organizing-tests →
+      </a>
+    </p>
+  </section>
+</section>

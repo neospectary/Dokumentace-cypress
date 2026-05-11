@@ -1,0 +1,221 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">cy.env()</h1>
+    <p class="description">
+      Bezpečné čtení proměnných prostředí (environment variables) nastavených v Cypress konfiguraci, souboru <code>cypress.env.json</code> nebo přes <code>CYPRESS_*</code> proměnné systému. Na rozdíl od <code>Cypress.env()</code> vrací pouze explicitně vyžádané proměnné — citlivá data tak nejsou zbytečně vystavena.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>cy.env(keys)
+cy.env(keys, options)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+
+    <h3 class="h3">keys (String[])</h3>
+    <p class="description">
+      Pole názvů proměnných, které chceš načíst. Pokud proměnná není nastavena, vrátí se pro ni <code>undefined</code>. Názvy jsou case-sensitive — musí přesně odpovídat konfiguraci.
+    </p>
+
+    <h3 class="h3">options (Object)</h3>
+    <ul>
+      <li><strong>log</strong> (Boolean, default: <code>true</code>) — Zobrazí příkaz v Command Log. Hodnoty proměnných se do logu nikdy nezapisují, jen jejich názvy.</li>
+      <li><strong>timeout</strong> (Number, default: <code>4000</code>) — Čas v ms, po který příkaz čeká, než vyprší.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co vrací (Yields)</h2>
+    <p class="description">
+      Vrací Chainable s objektem obsahujícím vyžádané proměnné a jejich hodnoty. Nedefinované proměnné mají hodnotu <code>undefined</code>.
+    </p>
+    <pre><code>cy.env(['apiUrl', 'apiKey']).then((env) => {
+  // env = { apiUrl: 'https://api.example.com', apiKey: 'secret-key-123' }
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Nastavení proměnných</h2>
+
+    <h3 class="h3">V cypress.config.ts</h3>
+    <pre><code>import { defineConfig } from 'cypress'
+
+export default defineConfig({
+  e2e: {
+    baseUrl: 'http://localhost:4200',
+  },
+  env: {
+    apiUrl: 'https://api.example.com',
+    apiKey: 'secret-key-123',
+    timeout: 5000,
+  },
+})</code></pre>
+
+    <h3 class="h3">V souboru cypress.env.json (gitignore!)</h3>
+    <pre><code>{
+  "apiKey": "secret-key-123",
+  "dbPassword": "super-secret"
+}</code></pre>
+
+    <h3 class="h3">Přes systémové proměnné (CYPRESS_ prefix)</h3>
+    <pre><code>CYPRESS_apiKey=secret-key-123 cypress run
+CYPRESS_apiUrl=https://api.example.com cypress run</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití</h2>
+
+    <h3 class="h3">✅ Správné použití</h3>
+    <pre><code>// Načtení jedné proměnné
+cy.env(['apiUrl']).then(({ apiUrl }) => {
+  cy.visit(apiUrl)
+})
+
+// Načtení více proměnných najednou
+cy.env(['apiUrl', 'apiKey', 'timeout']).then(({ apiUrl, apiKey, timeout }) => {
+  cy.request({
+    url: `${apiUrl}/users`,
+    headers: { Authorization: `Bearer ${apiKey}` },
+    timeout: timeout || 5000,
+  })
+})</code></pre>
+
+    <h3 class="h3">❌ Nesprávné použití</h3>
+    <pre><code>// Chyba — cy.env() je read-only, nelze nastavovat hodnoty
+cy.env('apiKey', 'new-value')           // Nelze — pro zápis použij Cypress.env()
+
+// Chyba — argument musí být pole, ne string
+cy.env('apiUrl').then(...)              // Nesprávný typ argumentu</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+
+    <h3 class="h3">Přihlášení přes API s tajným klíčem</h3>
+    <pre><code>it('přihlásí uživatele přes API', () => {
+  cy.env(['apiUrl', 'apiKey']).then(({ apiUrl, apiKey }) => {
+    cy.request({
+      method: 'POST',
+      url: `${apiUrl}/auth/login`,
+      headers: { Authorization: `Bearer ${apiKey}` },
+      body: { username: 'testuser', password: 'testpass' },
+    }).then((response) => {
+      expect(response.status).to.eq(200)
+    })
+  })
+})</code></pre>
+
+    <h3 class="h3">Vlastní command s cy.env()</h3>
+    <pre><code>// cypress/support/commands.ts
+Cypress.Commands.add('apiRequest', (endpoint, options = {}) => {
+  cy.env(['apiUrl', 'apiKey']).then(({ apiUrl, apiKey }) => {
+    cy.request({
+      url: `${apiUrl}${endpoint}`,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        ...options.headers,
+      },
+      ...options,
+    })
+  })
+})
+
+// Použití v testu
+cy.apiRequest('/users').its('body').should('have.length.gt', 0)</code></pre>
+
+    <h3 class="h3">Ošetření nepovinných proměnných</h3>
+    <pre><code>cy.env(['required', 'optional']).then(({ required, optional }) => {
+  if (required === undefined) {
+    throw new Error('Proměnná "required" musí být nastavena v cypress.env.json')
+  }
+  if (optional) {
+    cy.log(`Volitelná hodnota: ${optional}`)
+  }
+})</code></pre>
+
+    <h3 class="h3">Přizpůsobení testu podle prostředí</h3>
+    <pre><code>cy.env(['environment']).then(({ environment }) => {
+  if (environment === 'staging') {
+    cy.get('[data-cy="env-badge"]').should('have.text', 'STAGING')
+  } else {
+    cy.get('[data-cy="env-badge"]').should('not.exist')
+  }
+})</code></pre>
+
+    <h3 class="h3">Nastavení základní URL dynamicky</h3>
+    <pre><code>beforeEach(() => {
+  cy.env(['apiUrl']).then(({ apiUrl }) => {
+    Cypress.config('baseUrl', apiUrl)
+  })
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">cy.env() vs Cypress.env() vs Cypress.expose()</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Vlastnost</th>
+          <th><code>cy.env()</code></th>
+          <th><code>Cypress.env()</code></th>
+          <th><code>Cypress.expose()</code></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Přístup</td><td>Asynchronní (chain)</td><td>Synchronní</td><td>Synchronní</td></tr>
+        <tr><td>Čtení</td><td>✅ Ano</td><td>✅ Ano</td><td>✅ Ano</td></tr>
+        <tr><td>Zápis</td><td>❌ Read-only</td><td>✅ Ano</td><td>✅ Ano</td></tr>
+        <tr><td>Bezpečnost</td><td>Vysoká — jen vyžádané proměnné</td><td>Střední — přistupuje ke všem</td><td>Nízká — viditelné v prohlížeči</td></tr>
+        <tr><td>Vhodné pro</td><td>API klíče, tokeny, hesla</td><td>Veřejné config hodnoty</td><td>Feature flagy, veřejná nastavení</td></tr>
+        <tr><td>Log hodnot</td><td>❌ Hodnoty se nezapisují</td><td>Závisí na použití</td><td>Závisí na použití</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+
+    <h3 class="h3">Read-only příkaz</h3>
+    <p class="description">
+      <code>cy.env()</code> je pouze pro čtení — runtime změny nejsou možné. Pokud potřebuješ hodnotu za běhu testu přepsat, použij starší <code>Cypress.env('key', value)</code>.
+    </p>
+
+    <h3 class="h3">Hodnoty se nezapisují do logu</h3>
+    <p class="description">
+      V Command Log se zobrazují pouze názvy vyžádaných proměnných, nikdy jejich hodnoty. Citlivá data tak nejsou viditelná ve výstupu testů ani ve screenshotech.
+    </p>
+
+    <h3 class="h3">Soubor cypress.env.json patří do .gitignore</h3>
+    <p class="description">
+      Soubor <code>cypress.env.json</code> slouží pro lokální tajná data. Vždy ho přidej do <code>.gitignore</code> — nesmí být commitován do repozitáře.
+    </p>
+
+    <h3 class="h3">Vypnutí starého Cypress.env() API</h3>
+    <p class="description">
+      Pokud chceš vynutit používání nového <code>cy.env()</code> a zakázat přímý přístup přes <code>Cypress.env()</code>, nastav v konfiguraci:
+    </p>
+    <pre><code>// cypress.config.ts
+export default defineConfig({
+  allowCypressEnv: false,
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Command Log</h2>
+    <p class="description">
+      Příkaz je zobrazen v Command Log s názvy vyžádaných proměnných. Hodnoty se z bezpečnostních důvodů nikdy nezobrazují — ani při kliknutí na příkaz v logu.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/commands/env" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/commands/env →
+      </a>
+    </p>
+  </section>
+</section>

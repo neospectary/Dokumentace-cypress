@@ -1,0 +1,173 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Cypress.expose()</h1>
+    <p class="description">
+      Synchronní přístup k veřejným konfiguračním hodnotám v testech — feature flagy, verze API, nastavení pluginů a jiná nečitelná data, která potřebuješ sdílet napříč testy. Není to Cypress příkaz v chainu, ale globální metoda dostupná kdykoliv. Přidáno v Cypress <strong>15.10.0</strong>.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Syntaxe</h2>
+    <pre><code>Cypress.expose()               // Vrátí všechny hodnoty jako objekt
+Cypress.expose(key)            // Vrátí hodnotu pro daný klíč
+Cypress.expose(key, value)     // Nastaví jednu hodnotu
+Cypress.expose(object)         // Nastaví více hodnot najednou</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Argumenty</h2>
+
+    <h3 class="h3">key (String)</h3>
+    <p class="description">
+      Název konfigurační proměnné, kterou chceš číst nebo nastavit.
+    </p>
+
+    <h3 class="h3">value (Any)</h3>
+    <p class="description">
+      Serializovatelná hodnota — string, number, boolean, objekt, pole. Nesmí obsahovat citlivá data (hesla, tokeny, API klíče).
+    </p>
+
+    <h3 class="h3">object (Object)</h3>
+    <p class="description">
+      Více klíč–hodnota párů, které se sloučí s existujícími hodnotami.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Nastavení hodnot</h2>
+
+    <h3 class="h3">V konfiguračním souboru (cypress.config.ts)</h3>
+    <pre><code>import { defineConfig } from 'cypress'
+
+export default defineConfig({
+  e2e: {
+    baseUrl: 'http://localhost:4200',
+  },
+  expose: {
+    pluginConfig: 'production',
+    featureFlag: true,
+    apiVersion: 2,
+  },
+})</code></pre>
+
+    <h3 class="h3">Přes CLI při spuštění</h3>
+    <pre><code>cypress run --expose pluginConfig=staging,featureFlag=false
+cypress run -x apiVersion=3,betaMode=true</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Použití v testech</h2>
+
+    <h3 class="h3">Čtení všech hodnot</h3>
+    <pre><code>const config = Cypress.expose()
+cy.log(JSON.stringify(config))   // { pluginConfig: 'production', featureFlag: true, apiVersion: 2 }</code></pre>
+
+    <h3 class="h3">Čtení jedné hodnoty</h3>
+    <pre><code>const flag = Cypress.expose('featureFlag')   // true
+const version = Cypress.expose('apiVersion') // 2</code></pre>
+
+    <h3 class="h3">Nastavení jedné hodnoty za běhu</h3>
+    <pre><code>Cypress.expose('featureFlag', false)
+Cypress.expose('environment', 'staging')</code></pre>
+
+    <h3 class="h3">Nastavení více hodnot najednou</h3>
+    <pre><code>Cypress.expose({
+  featureFlag: false,
+  apiVersion: 3,
+  betaMode: true,
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Příklady</h2>
+
+    <h3 class="h3">Podmíněný test podle feature flagu</h3>
+    <pre><code>it('zobrazí beta sekci pouze, když je flag zapnutý', () => {
+  if (Cypress.expose('betaMode')) {
+    cy.get('[data-cy="beta-section"]').should('be.visible')
+  } else {
+    cy.get('[data-cy="beta-section"]').should('not.exist')
+  }
+})</code></pre>
+
+    <h3 class="h3">Přizpůsobení URL podle verze API</h3>
+    <pre><code>it('volá správný API endpoint', () => {
+  const version = Cypress.expose('apiVersion')
+  cy.intercept('GET', `/api/v${version}/users`).as('getUsers')
+  cy.visit('/users')
+  cy.wait('@getUsers')
+})</code></pre>
+
+    <h3 class="h3">Nastavení hodnoty v beforeEach</h3>
+    <pre><code>describe('testy v staging prostředí', () => {
+  beforeEach(() => {
+    Cypress.expose('environment', 'staging')
+  })
+
+  it('zobrazí staging banner', () => {
+    cy.visit('/')
+    cy.get('[data-cy="env-badge"]').should('have.text', 'staging')
+  })
+})</code></pre>
+
+    <h3 class="h3">Sdílení konfigurace pluginu</h3>
+    <pre><code>// cypress.config.ts
+expose: { reportingEnabled: true, reportUrl: 'https://reports.example.com' }
+
+// V testu
+afterEach(() => {
+  if (Cypress.expose('reportingEnabled')) {
+    const url = Cypress.expose('reportUrl')
+    cy.task('sendReport', { url, title: Cypress.currentTest.title })
+  }
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Cypress.expose() vs cy.env()</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Vlastnost</th>
+          <th><code>Cypress.expose()</code></th>
+          <th><code>Cypress.env()</code></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Přístup</td><td>Synchronní — volatelné kdekoliv</td><td>Synchronní — volatelné kdekoliv</td></tr>
+        <tr><td>Viditelnost v prohlížeči</td><td>✅ Dostupné i pro kód aplikace</td><td>❌ Chráněné před aplikačním kódem</td></tr>
+        <tr><td>Vhodné pro</td><td>Feature flagy, verze API, veřejná nastavení</td><td>API klíče, tokeny, hesla, citlivá data</td></tr>
+        <tr><td>Bezpečnost</td><td>Pouze veřejná data!</td><td>Bezpečné i pro citlivé hodnoty</td></tr>
+        <tr><td>Nastavení v configu</td><td>Klíč <code>expose: {}</code></td><td>Klíč <code>env: {}</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Poznámky</h2>
+
+    <h3 class="h3">⚠️ Bezpečnostní upozornění</h3>
+    <p class="description">
+      Hodnoty nastavené přes <code>Cypress.expose()</code> jsou dostupné v kontextu prohlížeče — včetně kódu aplikace, třetích stran a rozšíření prohlížeče. <strong>Nikdy sem nedávej citlivá data</strong> jako API klíče, hesla nebo tokeny. Pro citlivé hodnoty použij <code>Cypress.env()</code>.
+    </p>
+
+    <h3 class="h3">Platnost hodnot</h3>
+    <p class="description">
+      Hodnoty přetrvávají pouze po dobu, kdy je prohlížeč otevřený. Změny provedené za běhu testu platí jen pro aktuální spec soubor — do Node.js kontextu (<code>setupNodeEvents</code>) se nepropagují.
+    </p>
+
+    <h3 class="h3">Dostupnost od verze</h3>
+    <p class="description">
+      <code>Cypress.expose()</code> bylo přidáno v <strong>Cypress 15.10.0</strong>. Ve starších verzích tato metoda neexistuje.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odkaz na dokumentaci</h2>
+    <p>
+      <a href="https://docs.cypress.io/api/cypress-api/expose" target="_blank" rel="noopener">
+        https://docs.cypress.io/api/cypress-api/expose →
+      </a>
+    </p>
+  </section>
+</section>

@@ -1,0 +1,186 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Co je test a jak funguje testování</h1>
+    <p class="description">
+      Než začneš psát Cypress testy, musíš rozumět tomu, <em>proč</em> testy existují, co přesně dělají a jak se test liší od assertion. Bez tohoto základu budeš kopírovat příkazy bez pochopení.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Co je test</h2>
+    <p class="description">
+      Test je automatická kontrola, která ověřuje, že aplikace funguje tak, jak má. Místo aby člověk ručně klikal po webu a koukal, jestli vše funguje, napíše kód, který to udělá za něj — rychleji, přesněji a opakovaně.
+    </p>
+
+    <h3 class="h3">Analogie — výrobní linka s kontrolou kvality</h3>
+    <p class="description">
+      Představ si továrnu na žárovky. Na konci výrobní linky je stroj, který každou žárovku otestuje — zapne ji, změří jas, zkontroluje napětí. Pokud žárovka nevyhoví, stroj ji vyřadí. Bez tohoto stroje by museli zaměstnanci kontrolovat každou žárovku ručně.
+    </p>
+    <p class="description">
+      Cypress je takový stroj pro tvoji webovou aplikaci. Pokaždé, kdy se změna kódu „vyrobí", Cypress projde aplikaci a zkontroluje, že všechno stále funguje.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Kdy test projde a kdy selže</h2>
+
+    <h3 class="h3">Test projde (pass) ✅</h3>
+    <p class="description">
+      Test projde, pokud všechna ověření (assertions) v testu jsou pravdivá — aplikace se chová přesně tak, jak test očekává.
+    </p>
+    <pre><code>it('přihlášení funguje', () => {
+  cy.visit('/login')
+  cy.get('[data-cy="email"]').type('test@test.cz')
+  cy.get('[data-cy="password"]').type('heslo123')
+  cy.get('[data-cy="submit"]').click()
+  cy.url().should('include', '/dashboard')    // ← assertion: URL obsahuje /dashboard
+  // Pokud URL skutečně obsahuje /dashboard → test PROJDE ✅
+})</code></pre>
+
+    <h3 class="h3">Test selže (fail) ❌</h3>
+    <p class="description">
+      Test selže, pokud jakékoliv ověření není splněno — aplikace se chová jinak, než test očekává.
+    </p>
+    <pre><code>it('přihlášení funguje', () => {
+  cy.visit('/login')
+  cy.get('[data-cy="email"]').type('test@test.cz')
+  cy.get('[data-cy="password"]').type('spatne-heslo')
+  cy.get('[data-cy="submit"]').click()
+  cy.url().should('include', '/dashboard')    // ← assertion selže!
+  // URL je stále /login, ne /dashboard → test SELŽE ❌
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co je assertion (ověření, tvrzení)</h2>
+    <p class="description">
+      Assertion je konkrétní tvrzení o tom, jaký stav má mít aplikace. Je to <strong>srdce každého testu</strong>. Bez assertion test nic neověřuje — jen projde stránku a nic nekontroluje.
+    </p>
+
+    <h3 class="h3">Assertion v Cypressu — .should()</h3>
+    <pre><code>cy.get('[data-cy="title"]').should('be.visible')
+//                           ↑ assertion: element musí být viditelný
+
+cy.get('[data-cy="error"]').should('have.text', 'Nesprávné heslo')
+//                           ↑ assertion: element musí mít tento text
+
+cy.url().should('include', '/dashboard')
+//        ↑ assertion: URL musí obsahovat /dashboard
+
+cy.get('[data-cy="items"]').should('have.length', 5)
+//                           ↑ assertion: musí existovat právě 5 elementů</code></pre>
+
+    <h3 class="h3">Test bez assertion — k ničemu</h3>
+    <pre><code>// ❌ Tento test vždy projde — nic neověřuje!
+it('navštívím login stránku', () => {
+  cy.visit('/login')
+  cy.get('[data-cy="email"]').type('test@test.cz')
+  // žádná assertion → test nikdy nespadne → nemá smysl
+})
+
+// ✅ Správně — s assertion
+it('login stránka zobrazí formulář', () => {
+  cy.visit('/login')
+  cy.get('[data-cy="login-form"]').should('be.visible')    // assertion!
+  cy.get('[data-cy="submit"]').should('be.enabled')        // assertion!
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Struktura testu — describe a it</h2>
+    <p class="description">
+      Cypress používá strukturu z testovacího frameworku Mocha: <code>describe()</code> je skupina testů (test suite), <code>it()</code> je jeden konkrétní test (test case).
+    </p>
+
+    <pre><code>describe('Login stránka', () => {               // skupina testů
+  it('zobrazí přihlašovací formulář', () => {   // jeden test
+    cy.visit('/login')
+    cy.get('[data-cy="login-form"]').should('be.visible')
+  })
+
+  it('přihlásí uživatele se správnými údaji', () => {  // druhý test
+    cy.visit('/login')
+    cy.get('[data-cy="email"]').type('test@test.cz')
+    cy.get('[data-cy="password"]').type('heslo123')
+    cy.get('[data-cy="submit"]').click()
+    cy.url().should('include', '/dashboard')
+  })
+
+  it('zobrazí chybu při špatném hesle', () => {    // třetí test
+    cy.visit('/login')
+    cy.get('[data-cy="email"]').type('test@test.cz')
+    cy.get('[data-cy="password"]').type('spatne')
+    cy.get('[data-cy="submit"]').click()
+    cy.get('[data-cy="error-message"]').should('be.visible')
+  })
+})</code></pre>
+
+    <h3 class="h3">Proč takhle strukturovat?</h3>
+    <ul>
+      <li><strong>describe()</strong> — sdružuje testy, které testují stejnou část aplikace. Jméno popisuje, <em>co</em> testujeme (stránku, komponentu, funkci).</li>
+      <li><strong>it()</strong> — jeden konkrétní scénář. Jméno popisuje, <em>co má aplikace dělat</em>. Čti ho jako větu: „Mělo by... (it should...)"</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Jak pojmenovat test</h2>
+    <p class="description">
+      Název testu musí být tak jasný, že při selhání okamžitě víš, co se rozbilo — bez čtení kódu.
+    </p>
+    <table>
+      <thead>
+        <tr><th>❌ Špatný název</th><th>✅ Dobrý název</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>test 1</code></td><td><code>zobrazí formulář po načtení stránky</code></td></tr>
+        <tr><td><code>login</code></td><td><code>přihlásí uživatele se správnými údaji</code></td></tr>
+        <tr><td><code>chyba</code></td><td><code>zobrazí chybovou hlášku při prázdném emailu</code></td></tr>
+        <tr><td><code>funguje</code></td><td><code>odešle formulář a přesměruje na dashboard</code></td></tr>
+        <tr><td><code>modal test</code></td><td><code>zavře modal po kliknutí na tlačítko Zavřít</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Druhy testů — co je e2e</h2>
+    <p class="description">
+      Existují různé druhy testů — Cypress se zaměřuje hlavně na <strong>e2e (end-to-end) testy</strong>.
+    </p>
+    <table>
+      <thead>
+        <tr><th>Druh testu</th><th>Co testuje</th><th>Příklad</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Unit test</strong></td>
+          <td>Jednu izolovanou funkci nebo třídu</td>
+          <td>Funkce <code>secti(2, 3)</code> vrátí 5</td>
+        </tr>
+        <tr>
+          <td><strong>Integration test</strong></td>
+          <td>Spolupráci více částí systému</td>
+          <td>Service správně zavolá API a zpracuje odpověď</td>
+        </tr>
+        <tr>
+          <td><strong>E2E test</strong></td>
+          <td>Celý průchod aplikací jako uživatel</td>
+          <td>Uživatel se přihlásí, najde produkt, přidá do košíku, zaplatí</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="description">
+      E2e test simuluje skutečného uživatele — otevře prohlížeč, kliká, vyplňuje formuláře, čeká na odpovědi serveru. Cypress je navržený přesně pro tento typ testů.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Proč vůbec psát testy?</h2>
+    <ul>
+      <li><strong>Zachytí chyby dříve</strong> — test selže při každém buildu, ne až u zákazníka</li>
+      <li><strong>Nebojíš se změn</strong> — po refaktoringu víš, že nic nerozbíjíš</li>
+      <li><strong>Dokumentace chování</strong> — testy popisují, jak má aplikace fungovat</li>
+      <li><strong>Rychlejší vývoj</strong> — nemusíš ručně proklikat celou aplikaci po každé změně</li>
+      <li><strong>Klid před releasem</strong> — zelené testy = sebejistota při nasazení</li>
+    </ul>
+  </section>
+</section>

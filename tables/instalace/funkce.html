@@ -1,0 +1,197 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Funkce a arrow functions</h1>
+    <p class="description">
+      V Cypressu narazíš na závorky, šipky a složené závorky doslova v každém druhém řádku. Toto je zápis funkcí v JavaScriptu. Bez pochopení funkcí budeš Cypress příkazy kopírovat, aniž bys věděl, co píšeš.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Co je funkce</h2>
+    <p class="description">
+      Funkce je pojmenovaný blok kódu, který můžeš spustit kdykoliv chceš — a opakovaně. Místo abys psal stejný kód na deseti místech, napíšeš ho jednou jako funkci a pak ji jen voláš.
+    </p>
+
+    <h3 class="h3">Analogie z reálného světa</h3>
+    <p class="description">
+      Recept na palačinky je funkce. Napíšeš ho jednou. Kdykoli chceš palačinky, „zavoláš" recept — postupuješ podle kroků, dostaneš výsledek. Recept může mít parametry: „udělej palačinky <em>pro 4 osoby</em>" — číslo 4 je argument.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Klasická funkce</h2>
+    <pre><code>// Definice funkce
+function pozdrav() {
+  console.log('Ahoj!')
+}
+
+// Volání funkce
+pozdrav()    // vypíše: Ahoj!</code></pre>
+
+    <h3 class="h3">Funkce s parametrem</h3>
+    <pre><code>// Parametr = proměnná, která dostane hodnotu při volání
+function pozdrav(jmeno) {
+  console.log('Ahoj, ' + jmeno + '!')
+}
+
+pozdrav('Pavle')    // vypíše: Ahoj, Pavle!
+pozdrav('Mario')    // vypíše: Ahoj, Mario!</code></pre>
+
+    <h3 class="h3">Funkce s návratovou hodnotou</h3>
+    <pre><code>function secti(a, b) {
+  return a + b      // return = pošli výsledek zpátky volajícímu
+}
+
+const vysledek = secti(3, 5)
+console.log(vysledek)    // 8</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Arrow function — zkrácený zápis</h2>
+    <p class="description">
+      Arrow function (šipková funkce) dělá totéž co klasická funkce, ale píše se kratší. Cypress ji používá všude — v <code>.then()</code>, <code>.each()</code>, <code>beforeEach()</code> a dalších.
+    </p>
+
+    <h3 class="h3">Základní tvar</h3>
+    <pre><code>// Klasická funkce
+function pozdrav() {
+  console.log('Ahoj!')
+}
+
+// Totéž jako arrow function
+const pozdrav = () => {
+  console.log('Ahoj!')
+}
+
+pozdrav()    // funguje stejně</code></pre>
+
+    <h3 class="h3">Arrow function s parametrem</h3>
+    <pre><code>// Klasická
+function pozdrav(jmeno) {
+  console.log('Ahoj, ' + jmeno + '!')
+}
+
+// Arrow
+const pozdrav = (jmeno) => {
+  console.log('Ahoj, ' + jmeno + '!')
+}
+
+// Zkrácený zápis — bez závorek při jednom parametru
+const pozdrav = jmeno => {
+  console.log('Ahoj, ' + jmeno + '!')
+}</code></pre>
+
+    <h3 class="h3">Arrow function s return — ultra zkrácený zápis</h3>
+    <pre><code>// Plný zápis
+const secti = (a, b) => {
+  return a + b
+}
+
+// Zkrácený — bez složených závorek a bez return (implicitní return)
+const secti = (a, b) => a + b
+
+console.log(secti(3, 5))    // 8</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Callback funkce — funkce jako argument</h2>
+    <p class="description">
+      Toto je klíčový koncept pro Cypress. <strong>Callback</strong> je funkce, kterou předáš jiné funkci jako argument. Říkáš tím: „Až budeš hotový, zavolej tuto funkci."
+    </p>
+
+    <h3 class="h3">Analogie</h3>
+    <p class="description">
+      Zavoláš pizzerii a řekneš: „Až bude pizza hotová, zavolej mi." Číslo tvého telefonu je callback — pizzerie ho zavolá (spustí), až splní svůj úkol.
+    </p>
+
+    <h3 class="h3">Callback v čistém JavaScriptu</h3>
+    <pre><code>// setTimeout čeká 2 sekundy, pak zavolá callback funkci
+setTimeout(() => {
+  console.log('Uplynuly 2 sekundy!')
+}, 2000)
+//          ↑ toto je callback — arrow function předaná jako argument</code></pre>
+
+    <h3 class="h3">Callback v Cypressu — .then()</h3>
+    <pre><code>cy.get('[data-cy="username"]')
+  .then(($element) => {           // ← toto je callback funkce
+    const text = $element.text()  //   $element je argument — dostaneš ho od Cypressu
+    cy.log(text)
+  })</code></pre>
+
+    <h3 class="h3">Callback v Cypressu — beforeEach()</h3>
+    <pre><code>beforeEach(() => {           // ← callback — Cypress ho zavolá před každým testem
+  cy.visit('/login')
+  cy.get('[data-cy="email"]').type('test@test.cz')
+})</code></pre>
+
+    <h3 class="h3">Rozložení zápisu krok za krokem</h3>
+    <pre><code>cy.get('.price')           // 1. Najdi element s třídou .price
+  .then(                   // 2. Až ho najdeš, zavolej tuto funkci...
+    ($el) => {             // 3. ...s argumentem $el (jQuery element)
+      const text = $el.text()   // 4. Přečti text elementu
+      console.log(text)         // 5. Vypiš ho do konzole
+    }
+  )</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Proč Cypress používá arrow functions</h2>
+    <p class="description">
+      Arrow functions v Cypressu jsou všude z jednoho důvodu: jsou kratší a přehlednější pro zápis callbacků. Navíc správně zacházejí s kontextem (<code>this</code>), což je důležité v Mocha testech.
+    </p>
+    <pre><code>// Bez arrow function — delší, méně přehledné
+cy.get('li').each(function($li) {
+  cy.wrap($li).should('be.visible')
+})
+
+// S arrow function — kratší, přehledné
+cy.get('li').each(($li) => {
+  cy.wrap($li).should('be.visible')
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Přehled tvarů arrow functions v Cypressu</h2>
+    <table>
+      <thead>
+        <tr><th>Zápis</th><th>Kdy použít</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>() => { ... }</code></td>
+          <td>Callback bez parametru (beforeEach, describe, it)</td>
+        </tr>
+        <tr>
+          <td><code>($el) => { ... }</code></td>
+          <td>Callback s jedním parametrem (.then, .each)</td>
+        </tr>
+        <tr>
+          <td><code>(a, b) => { ... }</code></td>
+          <td>Callback s více parametry</td>
+        </tr>
+        <tr>
+          <td><code>($el) => $el.text()</code></td>
+          <td>Zkrácený — vrátí výsledek výrazu přímo</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="h3">Příklady z praxe</h3>
+    <pre><code>describe('Login stránka', () => {          // () => { } — bez parametru
+  beforeEach(() => {                        // () => { } — bez parametru
+    cy.visit('/login')
+  })
+
+  it('přihlásí uživatele', () => {         // () => { } — bez parametru
+    cy.get('[data-cy="email"]')
+      .then(($input) => {                  // ($input) => { } — s parametrem
+        cy.log($input.val())
+      })
+
+    cy.get('li').each(($li) => {           // ($li) => { } — s parametrem
+      cy.wrap($li).should('be.visible')
+    })
+  })
+})</code></pre>
+  </section>
+</section>

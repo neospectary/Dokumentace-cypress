@@ -1,0 +1,194 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Proměnné, objekty a pole</h1>
+    <p class="description">
+      Každý Cypress příkaz pracuje s daty — texty, čísly, seznamy, nastavením. Aby ti kód dával smysl, musíš vědět, jak JavaScript ukládá a organizuje data. Tato stránka pokrývá minimum, které nutně potřebuješ.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Proměnné — const a let</h2>
+    <p class="description">
+      Proměnná je pojmenované místo v paměti, kde si uložíš hodnotu. V moderním JavaScriptu používáš dvě klíčová slova: <code>const</code> a <code>let</code>.
+    </p>
+
+    <h3 class="h3">const — hodnota se nemění</h3>
+    <pre><code>const jmeno = 'Pavel'
+const vek = 30
+const jeAdmin = true
+
+// const nelze přepsat — dostaneš chybu
+jmeno = 'Mario'    // ❌ TypeError: Assignment to constant variable</code></pre>
+
+    <p class="description">
+      Používej <code>const</code> jako výchozí volbu — říkáš tím: „tato hodnota se nezmění." Dělá kód předvídatelným.
+    </p>
+
+    <h3 class="h3">let — hodnota se může změnit</h3>
+    <pre><code>let pocet = 0
+pocet = pocet + 1    // ✅ let lze přepsat
+pocet = 5            // ✅ funguje
+
+let zprava = 'Načítám...'
+zprava = 'Hotovo!'   // ✅ funguje</code></pre>
+
+    <p class="description">
+      Používej <code>let</code> jen když víš, že hodnotu budeš měnit — čítače, stavy, akumulátory.
+    </p>
+
+    <h3 class="h3">var — nepoužívej</h3>
+    <pre><code>// var je starý způsob — má nevyzpytatelné chování
+// V moderním JavaScriptu a Cypressu var neuvidíš (ani nepiš)
+var staraPromenna = 'zastaralo'    // ❌ nepoužívej</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Základní datové typy</h2>
+    <table>
+      <thead>
+        <tr><th>Typ</th><th>Příklad</th><th>Popis</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>String</strong></td><td><code>'text'</code>, <code>"text"</code></td><td>Text v uvozovkách</td></tr>
+        <tr><td><strong>Number</strong></td><td><code>42</code>, <code>3.14</code></td><td>Číslo (celé i desetinné)</td></tr>
+        <tr><td><strong>Boolean</strong></td><td><code>true</code>, <code>false</code></td><td>Pravda nebo nepravda</td></tr>
+        <tr><td><strong>null</strong></td><td><code>null</code></td><td>Prázdná hodnota (záměrně)</td></tr>
+        <tr><td><strong>undefined</strong></td><td><code>undefined</code></td><td>Hodnota nebyla přiřazena</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="h3">Template literals — vkládání proměnné do textu</h3>
+    <pre><code>const jmeno = 'Pavel'
+const vek = 30
+
+// Staré spojování stringů — nepřehledné
+const zprava = 'Jmenuji se ' + jmeno + ' a je mi ' + vek + ' let.'
+
+// Template literal — backtick (`) a ${proměnná}
+const zprava = `Jmenuji se ${jmeno} a je mi ${vek} let.`
+
+// Výsledek: "Jmenuji se Pavel a je mi 30 let."</code></pre>
+
+    <p class="description">
+      Template literals poznáš podle zpětných uvozovek <code>`</code> (backtick). Proměnnou vložíš pomocí <code>${}</code>. V Cypressu je uvidíš například při dynamickém sestavování URL nebo zpráv v logách.
+    </p>
+    <pre><code>const userId = 42
+cy.visit(`/users/${userId}/profile`)     // navštíví /users/42/profile
+cy.log(`Testuju uživatele ID: ${userId}`)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Objekty — {} složené závorky</h2>
+    <p class="description">
+      Objekt je kolekce pojmenovaných hodnot (klíč–hodnota páry). Složené závorky <code>{}</code> vždy znamenají objekt v JavaScriptu.
+    </p>
+
+    <h3 class="h3">Vytvoření objektu</h3>
+    <pre><code>const uzivatel = {
+  jmeno: 'Pavel',
+  vek: 30,
+  jeAdmin: false,
+  email: 'pavel@example.cz',
+}</code></pre>
+
+    <h3 class="h3">Přístup k hodnotám</h3>
+    <pre><code>console.log(uzivatel.jmeno)     // 'Pavel'  — tečková notace
+console.log(uzivatel['vek'])    // 30        — hranatá notace
+console.log(uzivatel.jeAdmin)   // false</code></pre>
+
+    <h3 class="h3">Objekty jako options v Cypress</h3>
+    <p class="description">
+      Cypress příkazy přijímají nastavení jako objekt — proto všude vidíš <code>{ timeout: 10000 }</code> nebo <code>{ log: false }</code>.
+    </p>
+    <pre><code>// Objekt s nastavením předaný jako argument
+cy.get('[data-cy="modal"]', { timeout: 10000 })
+//                           ↑ toto je objekt — klíč: hodnota
+
+cy.visit('/login', { failOnStatusCode: false })
+//                  ↑ toto je objekt
+
+cy.request({
+  method: 'POST',          // ← klíč: hodnota
+  url: '/api/login',       // ← klíč: hodnota
+  body: {                  // ← vnořený objekt
+    email: 'a@b.cz',
+    password: 'heslo123',
+  },
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Pole — [] hranaté závorky</h2>
+    <p class="description">
+      Pole je seřazený seznam hodnot. Hranaté závorky <code>[]</code> vždy znamenají pole. Položky jsou indexovány od 0.
+    </p>
+
+    <h3 class="h3">Vytvoření pole</h3>
+    <pre><code>const ovoce = ['jablko', 'hruška', 'banán']
+const cisla = [1, 2, 3, 4, 5]
+const smisene = ['text', 42, true, null]</code></pre>
+
+    <h3 class="h3">Přístup k položkám</h3>
+    <pre><code>console.log(ovoce[0])    // 'jablko'  — první položka (index 0)
+console.log(ovoce[1])    // 'hruška'  — druhá položka (index 1)
+console.log(ovoce[2])    // 'banán'   — třetí položka (index 2)
+console.log(ovoce.length) // 3         — počet položek</code></pre>
+
+    <h3 class="h3">Pole v Cypressu</h3>
+    <pre><code>// Čekání na více aliasů najednou — pole stringů
+cy.wait(['@getUsers', '@getSettings', '@getNotifications'])
+//       ↑ toto je pole stringů
+
+// cy.env přijímá pole klíčů
+cy.env(['apiUrl', 'apiKey']).then(({ apiUrl, apiKey }) => {
+  cy.visit(apiUrl)
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Destrukturování — zkrácený přístup k hodnotám</h2>
+    <p class="description">
+      Destrukturování ti umožňuje "rozbalit" objekt nebo pole do pojmenovaných proměnných najednou. V Cypressu to uvidíš hlavně při práci s <code>cy.env()</code> nebo <code>cy.then()</code>.
+    </p>
+
+    <h3 class="h3">Destrukturování objektu</h3>
+    <pre><code>const uzivatel = { jmeno: 'Pavel', vek: 30, email: 'p@e.cz' }
+
+// Bez destrukturování — opakuješ "uzivatel."
+const jmeno = uzivatel.jmeno
+const vek = uzivatel.vek
+
+// S destrukturováním — jednořádkový zápis
+const { jmeno, vek } = uzivatel
+
+console.log(jmeno)    // 'Pavel'
+console.log(vek)      // 30</code></pre>
+
+    <h3 class="h3">Destrukturování v Cypress callback</h3>
+    <pre><code>// cy.env vrátí objekt { apiUrl: '...', apiKey: '...' }
+// Destrukturování ho rovnou rozbalíme do pojmenovaných proměnných
+cy.env(['apiUrl', 'apiKey']).then(({ apiUrl, apiKey }) => {
+  //                                 ↑ destrukturování objektu v parametru
+  cy.request({
+    url: `${apiUrl}/users`,
+    headers: { Authorization: `Bearer ${apiKey}` },
+  })
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Shrnutí — přehled závorek</h2>
+    <table>
+      <thead>
+        <tr><th>Závorky</th><th>Znamenají</th><th>Příklad v Cypress</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>()</code></td><td>Volání funkce, parametry</td><td><code>cy.get('.btn')</code></td></tr>
+        <tr><td><code>() => { }</code></td><td>Arrow function</td><td><code>beforeEach(() => { })</code></td></tr>
+        <tr><td><code>{ }</code></td><td>Objekt nebo blok kódu</td><td><code>{ timeout: 5000 }</code></td></tr>
+        <tr><td><code>[ ]</code></td><td>Pole</td><td><code>cy.wait(['@a', '@b'])</code></td></tr>
+        <tr><td><code>`${ }`</code></td><td>Template literal</td><td><code>`/users/${id}`</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+</section>

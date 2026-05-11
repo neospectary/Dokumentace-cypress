@@ -1,0 +1,121 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Atribut data-cy</h1>
+    <p class="description">
+      V každém příkladu v Cypressu narazíš na <code>[data-cy="..."]</code>. Není to náhoda ani magie — je to záměrné rozhodnutí, jak psát testy, které nepřestanou fungovat při každé změně designu nebo HTML struktury.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Co jsou data atributy</h2>
+    <p class="description">
+      HTML umožňuje přidat k libovolnému elementu vlastní atributy s prefixem <code>data-</code>. Prohlížeč je ignoruje (nepřidávají styl, nemají speciální funkci), ale jsou dostupné v JavaScriptu a CSS.
+    </p>
+    <pre><code>&lt;!-- Vlastní data atributy -- prohlížeč je ignoruje, ty je čteš --&gt;
+&lt;button data-cy="submit-btn" data-testid="confirm" data-role="primary"&gt;
+  Odeslat
+&lt;/button&gt;</code></pre>
+
+    <p class="description">
+      <code>data-cy</code> je konvence Cypress komunity. Mohl by se jmenovat <code>data-test</code>, <code>data-testid</code> nebo cokoliv jiného — důležité je, že slouží výhradně pro testy.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Proč ne class nebo ID?</h2>
+
+    <h3 class="h3">Problém s třídami (class)</h3>
+    <pre><code>&lt;!-- Dnes --&gt;
+&lt;button class="btn btn-primary submit-button"&gt;Odeslat&lt;/button&gt;
+
+&lt;!-- Po redesignu --&gt;
+&lt;button class="MuiButton-root MuiButton-contained"&gt;Odeslat&lt;/button&gt;</code></pre>
+
+    <p class="description">
+      Třídy patří CSS stylistovi. Změní je při redesignu nebo přechodu na jinou knihovnu (Material UI, Bootstrap). Tvůj test okamžitě spadne — přitom aplikace funguje správně. Test selhal jen proto, že se změnil styl, ne funkce.
+    </p>
+
+    <h3 class="h3">Problém s ID</h3>
+    <pre><code>&lt;!-- ID musí být unikátní na celé stránce --&gt;
+&lt;!-- V dynamických aplikacích (React, Angular) se ID generují automaticky --&gt;
+&lt;input id="mat-input-0" /&gt;    &lt;!-- Angular Material -- číslo se mění! --&gt;
+&lt;input id="mat-input-1" /&gt;
+&lt;input id="mat-input-2" /&gt;</code></pre>
+
+    <p class="description">
+      Automaticky generovaná ID jsou nestabilní — změní se při přidání nového pole na stránku. Test pak hledá <code>#mat-input-3</code> místo <code>#mat-input-2</code> a selže.
+    </p>
+
+    <h3 class="h3">Problém s textem elementu</h3>
+    <pre><code>cy.contains('Odeslat').click()   // funguje jen v češtině!
+cy.contains('Submit').click()    // anglická lokalizace → test padá</code></pre>
+
+    <p class="description">
+      Pokud aplikace podporuje více jazyků nebo se změní překlad tlačítka, test přestane fungovat.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Řešení — data-cy atribut</h2>
+    <p class="description">
+      <code>data-cy</code> atribut patří výhradně testům. Vývojář ho nepřejmenuje, designer ho nevidí, překlad ho neovlivní. Je to smlouva: „tento atribut tu je jen pro Cypress."
+    </p>
+
+    <h3 class="h3">Přidání do HTML (nebo Angular šablony)</h3>
+    <pre><code>&lt;!-- Statický HTML --&gt;
+&lt;button data-cy="submit-btn"&gt;Odeslat&lt;/button&gt;
+&lt;input data-cy="email-input" type="email" /&gt;
+&lt;div data-cy="error-message"&gt;Nesprávné heslo&lt;/div&gt;
+
+&lt;!-- Angular šablona --&gt;
+&lt;button data-cy="login-btn" (click)="login()"&gt;Přihlásit&lt;/button&gt;
+&lt;mat-error data-cy="email-error"&gt;{{ emailError }}&lt;/mat-error&gt;</code></pre>
+
+    <h3 class="h3">Použití v Cypress testu</h3>
+    <pre><code>cy.get('[data-cy="submit-btn"]').click()
+cy.get('[data-cy="email-input"]').type('test@test.cz')
+cy.get('[data-cy="error-message"]').should('be.visible')</code></pre>
+
+    <h3 class="h3">Zkrácení pomocí vlastního příkazu (volitelné)</h3>
+    <pre><code>// cypress/support/commands.ts
+Cypress.Commands.add('dataCy', (selector) => {
+  return cy.get(`[data-cy="${selector}"]`)
+})
+
+// Použití — kratší zápis
+cy.dataCy('submit-btn').click()
+cy.dataCy('email-input').type('test@test.cz')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Konvence pojmenování</h2>
+    <p class="description">
+      Název by měl popisovat <strong>co element dělá nebo co je</strong>, ne jak vypadá. Používej kebab-case (malá písmena, pomlčky).
+    </p>
+    <table>
+      <thead>
+        <tr><th>❌ Špatně</th><th>✅ Správně</th><th>Proč</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>data-cy="btn1"</code></td><td><code>data-cy="submit-btn"</code></td><td>Popisuje funkci, ne pořadí</td></tr>
+        <tr><td><code>data-cy="redButton"</code></td><td><code>data-cy="delete-btn"</code></td><td>Popisuje akci, ne barvu</td></tr>
+        <tr><td><code>data-cy="input"</code></td><td><code>data-cy="email-input"</code></td><td>Specifikuje, co input je</td></tr>
+        <tr><td><code>data-cy="div3"</code></td><td><code>data-cy="user-card"</code></td><td>Popisuje obsah, ne strukturu</td></tr>
+        <tr><td><code>data-cy="Odeslat"</code></td><td><code>data-cy="contact-form-submit"</code></td><td>Jazyk-neutrální, specifikuje kontext</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Odstraňování data-cy z produkčního buildu</h2>
+    <p class="description">
+      Pokud nechceš, aby se <code>data-cy</code> atributy dostaly do produkce (zbytečně zvětšují HTML), lze je automaticky odstranit při buildu. Pro Angular existuje plugin <code>babel-plugin-jsx-remove-data-test-id</code>, nebo lze napsat vlastní webpack/esbuild transformaci.
+    </p>
+    <pre><code>// Alternativně — podmíněné přidání v Angular
+// Atribut se přidá jen v non-production buildech
+&lt;button [attr.data-cy]="!isProd ? 'submit-btn' : null"&gt;Odeslat&lt;/button&gt;</code></pre>
+    <p class="description">
+      Pro většinu projektů to ale není nutné — <code>data-cy</code> atributy jsou malé, neovlivňují výkon ani SEO.
+    </p>
+  </section>
+</section>

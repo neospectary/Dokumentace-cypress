@@ -1,0 +1,201 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">HTTP základ — requesty a response</h1>
+    <p class="description">
+      Cypress příkazy <code>cy.intercept()</code>, <code>cy.request()</code> a <code>cy.wait()</code> pracují s HTTP komunikací mezi prohlížečem a serverem. Aby ti dávaly smysl, musíš vědět, co je HTTP request, response, metody GET/POST a stavové kódy.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Co je HTTP</h2>
+    <p class="description">
+      HTTP (HyperText Transfer Protocol) je způsob, jakým spolu komunikuje prohlížeč a server. Vždy jde o dvojici: <strong>request</strong> (žádost) a <strong>response</strong> (odpověď).
+    </p>
+
+    <h3 class="h3">Analogie — restaurace</h3>
+    <pre><code>Zákazník (prohlížeč)          Číšník (HTTP)          Kuchyně (server)
+
+1. "Dám si svíčkovou"    →   request (žádost)   →   zpracuje objednávku
+2. "Prosím, svíčková"    ←   response (odpověď) ←   připraví jídlo</code></pre>
+
+    <p class="description">
+      Prohlížeč vždy první pošle request. Server odpovídá response. Tato komunikace probíhá při každém načtení stránky, kliknutí na tlačítko nebo načítání dat.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">HTTP metody — co chci udělat</h2>
+    <p class="description">
+      HTTP metoda říká serveru, jakou akci chce klient provést. Jsou to standardizované „příkazy".
+    </p>
+    <table>
+      <thead>
+        <tr><th>Metoda</th><th>Akce</th><th>Analogie</th><th>Příklad</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>GET</strong></td>
+          <td>Načti data</td>
+          <td>„Ukaž mi menu"</td>
+          <td>Načtení seznamu uživatelů</td>
+        </tr>
+        <tr>
+          <td><strong>POST</strong></td>
+          <td>Vytvoř nový záznam</td>
+          <td>„Objednávám svíčkovou"</td>
+          <td>Registrace, přihlášení, odeslání formuláře</td>
+        </tr>
+        <tr>
+          <td><strong>PUT</strong></td>
+          <td>Celá aktualizace záznamu</td>
+          <td>„Vyměň celou objednávku"</td>
+          <td>Uložení celého profilu uživatele</td>
+        </tr>
+        <tr>
+          <td><strong>PATCH</strong></td>
+          <td>Částečná aktualizace</td>
+          <td>„Změň jen přílohu"</td>
+          <td>Změna jen emailu v profilu</td>
+        </tr>
+        <tr>
+          <td><strong>DELETE</strong></td>
+          <td>Smaž záznam</td>
+          <td>„Zruš objednávku"</td>
+          <td>Smazání uživatele, záznamu</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="h3">Metody v Cypress</h3>
+    <pre><code>// cy.intercept — zachytí request dané metody a URL
+cy.intercept('GET', '/api/users').as('getUsers')
+cy.intercept('POST', '/api/users').as('createUser')
+cy.intercept('DELETE', '/api/users/42').as('deleteUser')
+
+// cy.request — pošle request přímo z testu
+cy.request('GET', '/api/users')
+cy.request('POST', '/api/login', { email: 'a@b.cz', password: 'heslo' })</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">URL a endpoint</h2>
+    <p class="description">
+      URL (adresa) requestu říká, kam žádost míří. V kontextu API se hovoří o <strong>endpointu</strong> — konkrétní adrese, na které server čeká na určitý typ požadavku.
+    </p>
+    <pre><code>https://api.example.com/users
+│       │               │
+│       │               └── endpoint — "users" zdroj
+│       └── doména — kde server běží
+└── protokol — HTTP nebo HTTPS</code></pre>
+
+    <pre><code>// Typické API endpointy
+GET    /api/users           // seznam všech uživatelů
+GET    /api/users/42        // jeden uživatel s ID 42
+POST   /api/users           // vytvoř nového uživatele
+PUT    /api/users/42        // aktualizuj uživatele 42
+DELETE /api/users/42        // smaž uživatele 42</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Stavové kódy — jak to dopadlo</h2>
+    <p class="description">
+      Server v response vždy vrátí číslo — <strong>stavový kód</strong> — který říká, jak požadavek dopadl. Jsou rozděleny do skupin podle první číslice.
+    </p>
+    <table>
+      <thead>
+        <tr><th>Kód</th><th>Název</th><th>Znamená</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>200</strong></td><td>OK</td><td>Vše proběhlo v pořádku, data v odpovědi</td></tr>
+        <tr><td><strong>201</strong></td><td>Created</td><td>Nový záznam byl úspěšně vytvořen</td></tr>
+        <tr><td><strong>204</strong></td><td>No Content</td><td>Úspěch, ale bez dat v odpovědi (např. DELETE)</td></tr>
+        <tr><td><strong>400</strong></td><td>Bad Request</td><td>Špatný formát požadavku, chybí data</td></tr>
+        <tr><td><strong>401</strong></td><td>Unauthorized</td><td>Nejsi přihlášen — pošli token</td></tr>
+        <tr><td><strong>403</strong></td><td>Forbidden</td><td>Přihlášen jsi, ale nemáš oprávnění</td></tr>
+        <tr><td><strong>404</strong></td><td>Not Found</td><td>Záznam nebo stránka neexistuje</td></tr>
+        <tr><td><strong>500</strong></td><td>Internal Server Error</td><td>Chyba na straně serveru</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="h3">Stavové kódy v Cypress</h3>
+    <pre><code>// Ověření stavového kódu po requestu
+cy.request('GET', '/api/users')
+  .its('status')
+  .should('eq', 200)
+
+// Ověření kódu přes wait + intercept
+cy.wait('@getUsers')
+  .its('response.statusCode')
+  .should('eq', 200)
+
+// Cypress ve výchozím nastavení selže při 4xx a 5xx
+// Lze vypnout pomocí failOnStatusCode
+cy.request({
+  url: '/api/users/neexistujici',
+  failOnStatusCode: false,           // neselže automaticky
+}).its('status').should('eq', 404)</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Co je JSON</h2>
+    <p class="description">
+      JSON (JavaScript Object Notation) je formát dat, ve kterém servery nejčastěji posílají odpovědi. Vypadá téměř jako JavaScript objekt — a Cypress s ním pracuje přímo.
+    </p>
+
+    <h3 class="h3">Příklad JSON odpovědi ze serveru</h3>
+    <pre><code>// Server vrátí toto jako odpověď na GET /api/users/42
+{
+  "id": 42,
+  "jmeno": "Pavel",
+  "email": "pavel@example.cz",
+  "jeAdmin": false,
+  "role": ["editor", "viewer"]
+}</code></pre>
+
+    <h3 class="h3">Práce s JSON v Cypress</h3>
+    <pre><code>cy.request('GET', '/api/users/42').then((response) => {
+  // response.body je už automaticky parsovaný JSON objekt
+  expect(response.body.jmeno).to.eq('Pavel')
+  expect(response.body.jeAdmin).to.eq(false)
+  expect(response.body.role).to.include('editor')
+})
+
+// Nebo přes .its()
+cy.request('GET', '/api/users/42')
+  .its('body.jmeno')
+  .should('eq', 'Pavel')</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Request a response v DevTools</h2>
+    <p class="description">
+      V Chrome DevTools (F12) → záložka <strong>Network</strong> vidíš všechny HTTP requesty, které prohlížeč posílá. Každý request má záložky:
+    </p>
+    <ul>
+      <li><strong>Headers</strong> — metadata requestu (metoda, URL, autorizační token)</li>
+      <li><strong>Payload</strong> — tělo requestu (data odesílaná na server)</li>
+      <li><strong>Response</strong> — odpověď serveru (JSON data)</li>
+      <li><strong>Status</strong> — stavový kód (200, 404...)</li>
+    </ul>
+    <p class="description">
+      Tato záložka je neocenitelná při psaní <code>cy.intercept()</code> — přesně odtud zjistíš, jaká URL a metoda se volá, abys je mohl správně zachytit.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Shrnutí — spojení s Cypress příkazy</h2>
+    <table>
+      <thead>
+        <tr><th>HTTP pojem</th><th>Cypress příkaz</th><th>Použití</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Request (žádost)</td><td><code>cy.request()</code></td><td>Pošli HTTP request přímo z testu</td></tr>
+        <tr><td>Zachytit request</td><td><code>cy.intercept()</code></td><td>Sleduj nebo mockuj HTTP komunikaci</td></tr>
+        <tr><td>Počkat na request</td><td><code>cy.wait('@alias')</code></td><td>Počkej, až request dorazí/odejde</td></tr>
+        <tr><td>Stavový kód</td><td><code>.its('response.statusCode')</code></td><td>Ověř, že server vrátil 200</td></tr>
+        <tr><td>Tělo odpovědi</td><td><code>.its('response.body')</code></td><td>Ověř data z API</td></tr>
+        <tr><td>Tělo requestu</td><td><code>.its('request.body')</code></td><td>Ověř, co aplikace poslala</td></tr>
+      </tbody>
+    </table>
+  </section>
+</section>

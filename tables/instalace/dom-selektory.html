@@ -1,0 +1,121 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Co je DOM a CSS selektory</h1>
+    <p class="description">
+      Cypress hledá prvky na stránce pomocí selektorů. Aby dávalo smysl, co píšeš do <code>cy.get()</code>, musíš nejdřív vědět, co je DOM a jak selektory fungují. Bez toho je každý Cypress příkaz jen magická zaklínadla.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Co je DOM</h2>
+    <p class="description">
+      DOM znamená <strong>Document Object Model</strong>. Je to reprezentace HTML stránky jako stromová struktura — každý HTML tag je uzel (node) ve stromě, který má rodiče, sourozence a děti.
+    </p>
+
+    <h3 class="h3">HTML kód stránky</h3>
+    <pre><code>&lt;body&gt;
+  &lt;header&gt;
+    &lt;h1&gt;Moje aplikace&lt;/h1&gt;
+  &lt;/header&gt;
+  &lt;main&gt;
+    &lt;form&gt;
+      &lt;input type="text" placeholder="Jméno" /&gt;
+      &lt;button class="btn-primary"&gt;Odeslat&lt;/button&gt;
+    &lt;/form&gt;
+  &lt;/main&gt;
+&lt;/body&gt;</code></pre>
+
+    <h3 class="h3">Jak prohlížeč vidí stejný kód — DOM strom</h3>
+    <pre><code>body
+├── header
+│   └── h1  →  "Moje aplikace"
+└── main
+    └── form
+        ├── input  (type="text")
+        └── button  →  "Odeslat"  (class="btn-primary")</code></pre>
+
+    <p class="description">
+      Cypress prochází tento strom a hledá elementy, které odpovídají tvému selektoru. Když napíšeš <code>cy.get('button')</code>, Cypress projde celý DOM a najde všechny prvky <code>&lt;button&gt;</code>.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Jak zobrazit DOM v prohlížeči</h2>
+    <p class="description">
+      V Chrome nebo Firefox klikni pravým tlačítkem na libovolný prvek stránky → <strong>Prozkoumat (Inspect)</strong>. Otevře se DevTools s panelem Elements, kde vidíš celý DOM strom. Tohle je tvůj nejlepší přítel při psaní selektorů.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">CSS selektory — jak popsat, co hledáš</h2>
+    <p class="description">
+      Selektor je řetězec, který popisuje, který element chceš najít. Stejné selektory, které znáš z CSS stylů, fungují i v Cypressu.
+    </p>
+
+    <h3 class="h3">Selektor podle tagu</h3>
+    <pre><code>cy.get('button')        // najde všechny &lt;button&gt; elementy
+cy.get('input')         // najde všechny &lt;input&gt; elementy
+cy.get('h1')            // najde všechny &lt;h1&gt; elementy</code></pre>
+
+    <h3 class="h3">Selektor podle třídy (class) — tečka</h3>
+    <pre><code>// HTML: &lt;button class="btn-primary"&gt;Odeslat&lt;/button&gt;
+cy.get('.btn-primary')  // tečka = hledej podle class
+cy.get('.error-message')
+cy.get('.active')</code></pre>
+
+    <h3 class="h3">Selektor podle ID — mřížka</h3>
+    <pre><code>// HTML: &lt;input id="email-input" /&gt;
+cy.get('#email-input')  // # = hledej podle id
+cy.get('#submit-btn')
+cy.get('#main-content')</code></pre>
+
+    <h3 class="h3">Selektor podle atributu — hranaté závorky</h3>
+    <pre><code>// HTML: &lt;input type="email" /&gt;
+cy.get('[type="email"]')          // hledej input s type="email"
+cy.get('[placeholder="Jméno"]')   // hledej element s daným placeholder
+cy.get('[disabled]')              // hledej jakýkoli disabled element</code></pre>
+
+    <h3 class="h3">Selektor podle data-cy atributu (doporučeno v Cypress)</h3>
+    <pre><code>// HTML: &lt;button data-cy="submit-btn"&gt;Odeslat&lt;/button&gt;
+cy.get('[data-cy="submit-btn"]')
+cy.get('[data-cy="login-form"]')
+cy.get('[data-cy="error-message"]')</code></pre>
+
+    <h3 class="h3">Kombinované selektory</h3>
+    <pre><code>cy.get('button.btn-primary')       // &lt;button&gt; se třídou btn-primary
+cy.get('input[type="text"]')       // &lt;input&gt; s type="text"
+cy.get('form .error')              // .error uvnitř &lt;form&gt;
+cy.get('.card button')             // &lt;button&gt; kdekoliv uvnitř .card</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Přehled nejčastějších selektorů</h2>
+    <table>
+      <thead>
+        <tr><th>Selektor</th><th>Příklad</th><th>Co najde</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>tag</code></td><td><code>cy.get('button')</code></td><td>Všechny &lt;button&gt;</td></tr>
+        <tr><td><code>.class</code></td><td><code>cy.get('.active')</code></td><td>Elementy s class="active"</td></tr>
+        <tr><td><code>#id</code></td><td><code>cy.get('#username')</code></td><td>Element s id="username"</td></tr>
+        <tr><td><code>[attr]</code></td><td><code>cy.get('[disabled]')</code></td><td>Elementy s atributem disabled</td></tr>
+        <tr><td><code>[attr="val"]</code></td><td><code>cy.get('[type="email"]')</code></td><td>Elementy kde attr=hodnota</td></tr>
+        <tr><td><code>[data-cy="val"]</code></td><td><code>cy.get('[data-cy="btn"]')</code></td><td>Cypress testovací atribut</td></tr>
+        <tr><td><code>A B</code></td><td><code>cy.get('.form input')</code></td><td>input uvnitř .form</td></tr>
+        <tr><td><code>A &gt; B</code></td><td><code>cy.get('ul > li')</code></td><td>li jako přímé dítě ul</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Proč ne vždy class nebo ID?</h2>
+    <p class="description">
+      Třídy a ID se mění — designer přejmenuje třídu, vývojář změní strukturu. Test pak spadne, i když aplikace funguje správně. Proto Cypress doporučuje speciální atribut <code>data-cy</code>, který existuje jen pro testy a nikdo ho nemá důvod měnit.
+    </p>
+    <pre><code>// ❌ Fragilní — změní se při redesignu
+cy.get('.MuiButton-root.MuiButton-contained')
+
+// ✅ Stabilní — existuje jen pro test
+cy.get('[data-cy="submit-button"]')</code></pre>
+  </section>
+</section>

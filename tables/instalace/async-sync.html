@@ -1,0 +1,214 @@
+<section class="space-y-16">
+  <header>
+    <h1 class="h1">Synchronní vs. asynchronní operace</h1>
+    <p class="description">
+      Než začneš psát testy v Cypressu, musíš pochopit jeden klíčový koncept — jak JavaScript (a tedy i Cypress) pracuje s časem a čekáním. Bez tohoto pochopení bude spousta věcí v Cypressu vypadat jako magie. S ním dává všechno smysl.
+    </p>
+  </header>
+
+  <section class="card">
+    <h2 class="h2">Synchronní operace — krok za krokem</h2>
+    <p class="description">
+      <strong>Synchronní</strong> znamená, že se věci dějí jedna po druhé, v pořadí. Každý krok musí dokončit, než začne další.
+    </p>
+
+    <h3 class="h3">Představ si recept na snídani</h3>
+    <pre><code>1. Dej vodu do konvice
+2. Počkej, dokud se voda neuvaří          ← stojíš a čekáš, nic jiného neděláš
+3. Nalej vodu do hrnku
+4. Přidej čaj
+5. Počkej 3 minuty                        ← zase čekáš, nepohneš se
+6. Vyber čajový sáček
+7. Snídeň je hotová</code></pre>
+
+    <p class="description">
+      V synchronním světě stojíš u konvice a civíš na ni. Neděláš nic jiného. Teprve až voda dovaří, jdeš dál.
+    </p>
+    <p class="description">
+      Takto funguje většina běžného kódu — řádek 1, pak řádek 2, pak řádek 3. Počítač čeká na výsledek každého kroku, než přejde na další.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Asynchronní operace — spusť a jdi dál</h2>
+    <p class="description">
+      <strong>Asynchronní</strong> znamená, že spustíš operaci, ale <em>nečekáš</em> na její dokončení — jdeš dělat něco jiného. Až operace skončí, dostaneš signál a vrátíš se k výsledku.
+    </p>
+
+    <h3 class="h3">Stejný recept, ale chytřeji</h3>
+    <pre><code>1. Dej vodu do konvice a zmáčkni tlačítko
+2. → Konvice vaří sama, ty mezitím:
+   - nakrájíš chleba
+   - vytáhneš máslo z lednice
+   - namažeš chleba
+3. Konvice zapípá → vrátíš se, naleješ vodu
+4. Snídeň je hotová — a mnohem rychleji!</code></pre>
+
+    <p class="description">
+      Asynchronní operace jsou typicky věci, které <strong>něco trvají</strong> — načítání dat ze serveru, čtení souboru, čekání na odpověď API. Místo aby počítač stál a čekal, spustí operaci a zatím dělá něco jiného.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Proč na tom záleží v JavaScriptu?</h2>
+    <p class="description">
+      JavaScript běží v prohlížeči a má jedno zásadní omezení: <strong>je jednovláknový</strong>. To znamená, že může v jeden moment dělat jen jednu věc. Pokud by synchronně čekal na odpověď serveru (třeba 2 sekundy), celý prohlížeč by se na tu dobu zasekl — nešlo by klikat, scrollovat, nic.
+    </p>
+    <p class="description">
+      Proto JavaScript používá asynchronní přístup skoro všude, kde jde o čekání. Typické asynchronní operace:
+    </p>
+    <ul>
+      <li>Načítání dat z API (<code>fetch</code>, <code>XMLHttpRequest</code>)</li>
+      <li>Čtení a zápis souborů</li>
+      <li>Čekání na vstup od uživatele</li>
+      <li>Načítání obrázků a skriptů</li>
+      <li>Jakékoliv čekání na časovač (<code>setTimeout</code>)</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Jak JavaScript řeší asynchronitu — Promise a callback</h2>
+    <p class="description">
+      V JavaScriptu existují dva hlavní způsoby, jak pracovat s asynchronními operacemi:
+    </p>
+
+    <h3 class="h3">Callback — "zavolej mě až budeš hotový"</h3>
+    <p class="description">
+      Předáš funkci, která se zavolá ve chvíli, kdy operace skončí. Jako bys příteli řekl: „Až uvaříš kávu, zavolej mi."
+    </p>
+    <pre><code>setTimeout(() => {
+  console.log('Toto se zobrazí za 2 sekundy')
+}, 2000)
+
+console.log('Toto se zobrazí hned')
+
+// Výstup:
+// "Toto se zobrazí hned"
+// (po 2 sekundách)
+// "Toto se zobrazí za 2 sekundy"</code></pre>
+
+    <h3 class="h3">Promise — "slib, že ti dám výsledek"</h3>
+    <p class="description">
+      Promise je objekt, který reprezentuje hodnotu, která teď ještě neexistuje, ale existovat bude. Jako restaurace, která ti dá číslíček — „slibuji, že ti jídlo přinesu".
+    </p>
+    <pre><code>fetch('https://api.example.com/users')     // spustí request, hned vrátí Promise
+  .then(response => response.json())       // až přijde odpověď, zpracuj ji
+  .then(data => console.log(data))         // až je zpracovaná, zobraz data
+  .catch(error => console.log('Chyba!'))   // nebo zachyť chybu</code></pre>
+
+    <h3 class="h3">async/await — modernější zápis Promise</h3>
+    <p class="description">
+      <code>async/await</code> dělá totéž co Promise, ale kód vypadá synchronně — přehledněji. Pod kapotou je to pořád asynchronní operace.
+    </p>
+    <pre><code>async function nactiUzivatele() {
+  const response = await fetch('https://api.example.com/users')  // počkej na odpověď
+  const data = await response.json()                             // počkej na zpracování
+  console.log(data)
+}
+
+nactiUzivatele()</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Jak to řeší Cypress — command queue</h2>
+    <p class="description">
+      A teď k tomu nejdůležitějšímu. Cypress funguje jinak než běžný JavaScript. Když napíšeš cypress test, příkazy se <strong>nevykonají hned</strong> — Cypress si je zapíše do fronty (command queue) a pak je spouští jeden po druhém, každý až po dokončení předchozího.
+    </p>
+
+    <h3 class="h3">Co se stane, když napíšeš tento test</h3>
+    <pre><code>cy.visit('/login')                         // 1. přidá do fronty
+cy.get('[data-cy="email"]').type('a@b.c')  // 2. přidá do fronty
+cy.get('[data-cy="submit"]').click()       // 3. přidá do fronty
+cy.url().should('include', '/dashboard')   // 4. přidá do fronty</code></pre>
+
+    <p class="description">
+      Cypress nejprve projde celý test a sestaví frontu příkazů. Teprve pak začne frontu vykonávat — a každý příkaz čeká na dokončení předchozího. Ty nemusíš psát žádné <code>await</code>, žádné callbacky — Cypress to řídí za tebe.
+    </p>
+
+    <h3 class="h3">Vizuálně — fronta příkazů</h3>
+    <pre><code>Fronta:  [visit] → [get+type] → [get+click] → [url+should]
+                     ↓ až skončí visit
+                               ↓ až skončí type
+                                             ↓ až skončí click
+                                                            ↓ vykoná should</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Nejčastější záludnost — proměnné se neplní hned</h2>
+    <p class="description">
+      Toto mate úplně každého začátečníka. Protože Cypress příkazy jsou asynchronní (vykonají se až „někdy"), nelze jejich výsledek uložit do běžné proměnné a hned ho použít.
+    </p>
+
+    <h3 class="h3">❌ Toto nefunguje — klasická chyba</h3>
+    <pre><code>// Vypadá logicky, ale je špatně!
+const text = cy.get('.title').invoke('text')   // text je teď undefined!
+console.log(text)                              // vypíše undefined, ne skutečný text</code></pre>
+
+    <h3 class="h3">✅ Správně — pracuj s hodnotou uvnitř .then()</h3>
+    <pre><code>cy.get('.title').invoke('text').then((text) => {
+  console.log(text)    // tady text skutečně existuje
+  cy.log(text)
+})</code></pre>
+
+    <h3 class="h3">✅ Nebo použij alias</h3>
+    <pre><code>cy.get('.title').invoke('text').as('nadpis')
+
+cy.get('@nadpis').then((text) => {
+  cy.log(text)
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Proč v Cypressu nepoužíváš async/await</h2>
+    <p class="description">
+      Možná tě napadne: „Když je Cypress asynchronní, proč nepíšu <code>await cy.get()</code>?" Odpověď: protože Cypress <strong>není Promise</strong>. Cypress příkazy vrací speciální objekt (Chainable), ne Promise. Kdybys použil <code>await</code>, rozbil bys command queue a testy by přestaly fungovat správně.
+    </p>
+    <pre><code>// ❌ NIKDY toto v Cypressu nedělej
+it('špatný test', async () => {
+  await cy.visit('/login')                        // rozbije command queue!
+  const email = await cy.get('[data-cy="email"]') // nefunguje správně
+})
+
+// ✅ Správně — bez async/await, Cypress řídí pořadí sám
+it('správný test', () => {
+  cy.visit('/login')
+  cy.get('[data-cy="email"]').type('test@test.cz')
+})</code></pre>
+  </section>
+
+  <section class="card">
+    <h2 class="h2">Shrnutí — co si zapamatovat</h2>
+    <table>
+      <thead>
+        <tr><th>Pojem</th><th>Znamená</th><th>V Cypressu</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Synchronní</strong></td>
+          <td>Krok za krokem, čekám na každý výsledek</td>
+          <td>Tak vypadá zápis testu — přehledný, lineární</td>
+        </tr>
+        <tr>
+          <td><strong>Asynchronní</strong></td>
+          <td>Spustím operaci, pokračuju dál, výsledek přijde později</td>
+          <td>Tak Cypress skutečně funguje pod kapotou</td>
+        </tr>
+        <tr>
+          <td><strong>Command queue</strong></td>
+          <td>Fronta příkazů, která se vykonává postupně</td>
+          <td>Cypress ji řídí za tebe — ty jen píšeš příkazy</td>
+        </tr>
+        <tr>
+          <td><strong>Promise / .then()</strong></td>
+          <td>Způsob přístupu k hodnotě, která přijde "někdy"</td>
+          <td>Používej <code>.then()</code> pro práci s výsledky příkazů</td>
+        </tr>
+        <tr>
+          <td><strong>async/await</strong></td>
+          <td>Modernější zápis práce s Promise</td>
+          <td>❌ Nepoužívej v Cypress testech</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</section>
